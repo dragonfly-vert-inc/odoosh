@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_po_type_form" model="ir.ui.view">
+        <field name="name">purchase.order.type.form</field>
+        <field name="model">purchase.order.type</field>
+        <field name="arch" type="xml">
+            <form string="Purchase Order Type">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="manager"/>
+                        <field name="controller" widget="many2many_tags"/>
+                        <field name="vice_president"/>
+                        <field name="vice_president_finance"/>
+                        <field name="ceo"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_po_type_tree" model="ir.ui.view">
+        <field name="name">purchase.order.type.tree</field>
+        <field name="model">purchase.order.type</field>
+        <field name="arch" type="xml">
+            <tree string="Purchase Order Type">
+                <field name="name"/>
+                <field name="manager"/>
+                <field name="vice_president"/>
+                <field name="vice_president_finance"/>
+                <field name="ceo"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_purchase_order_type" model="ir.actions.act_window">
+        <field name="name">Purchase Order Type</field>
+        <field name="res_model">purchase.order.type</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_po_type_tree"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add a new purchase order type
+            </p>
+        </field>
+    </record>
+
+    <menuitem
+        id="menu_purchase_order_type"
+        action="action_purchase_order_type"
+        parent="purchase.menu_purchase_config"
+        sequence="50"/>
+
+    <record id="purchase_order_form_inherit_po_approval_flow" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit.po.approval.flow</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <field name="date_order" position="before">
+                <field name="po_type_id" options="{'no_create': True}"/>
+                <field name="show_approval_btn" invisible="1"/>
+            </field>
+            <field name="state" position="attributes">
+                <attribute name="statusbar_visible">draft,sent,manager_approval,vp_approval,vp_finance_approval,ceo_approval,purchase</attribute>
+            </field>
+            <button id="bid_confirm" position="attributes">
+                <attribute name="groups">purchase.group_purchase_manager</attribute>
+            </button>
+            <button id="draft_confirm" position="attributes">
+                <attribute name="groups">purchase.group_purchase_manager</attribute>
+            </button>
+            <xpath expr="//header//button[@name='button_approve']" position="attributes">
+                <attribute name='states'></attribute>
+                <attribute name='name'>button_confirm</attribute>
+                <attribute name="attrs">{'invisible': [('show_approval_btn', '=', False)]}</attribute>
+            </xpath>
+            <xpath expr="//button[@name='button_cancel']" position="attributes">
+                <attribute name='states'>draft,sent,purchase,manager_approval,vp_approval,vp_finance_approval,ceo_approval</attribute>
+            </xpath>
+            <xpath expr="//button[@name='button_cancel']" position="after">
+                <button name="button_reject" string="Reject" type="object" attrs="{'invisible': [('show_approval_btn', '=', False)]}"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']//button[@name='action_view_invoice']" position="attributes">
+                <attribute name='attrs'>{'invisible':['|', ('invoice_count', '=', 0), ('state', 'in', ('draft','sent','manager_approval','vp_approval','vp_finance_approval', 'ceo_approval'))]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']//tree//field[@name='product_id']" position="attributes">
+                <attribute name="attrs">{'readonly': [('state', 'in', ('purchase', 'manager_approval','vp_approval','vp_finance_approval', 'ceo_approval','done', 'cancel'))]}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_purchase_order_filter_inherit_po_approval_flow" model="ir.ui.view">
+        <field name="name">purchase.order.filter.inherit.po.approval.flow</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='draft']" position="attributes">
+                <attribute name='domain'>[('state','in',('draft','sent', 'manager_approval','vp_approval','vp_finance_approval', 'ceo_approval'))]</attribute>
+            </xpath>
+            <xpath expr="//filter[@name='to_approve']" position="replace">
+                <filter name="manager_approval" string="Manager Approval" domain="[('state', '=', 'manager_approval')]"/>
+                <filter name="vp_approval" string="Vice President Approval" domain="[('state', '=', 'vp_approval')]"/>
+                <filter name="vp_finance_approval" string="Vice President Finance Approval" domain="[('state', '=', 'vp_finance_approval')]"/>
+                <filter name="ceo_approval" string="CEO Approval" domain="[('state', '=', 'ceo_approval')]"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
