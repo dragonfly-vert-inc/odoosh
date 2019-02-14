@@ -5,7 +5,7 @@
     'summary': 'Dragon Fly MRP Enhancement',
     'sequence': 100,
     'license': 'OEEL-1',
-    'website': 'https://www.odoo.com/page/purchase',
+    'website': 'https://www.odoo.com/page/manufacturing',
     'version': '1.1',
     'author': 'Odoo Inc',
     'description': """
@@ -15,20 +15,23 @@ MRP Enhancement
 * [1938284]
     -  This will add a button ('Documents') on the work order process screen that will create a new tab in the browser with the attachment screen of the product
        that is selected on the related manufacturing order.
-
+* [1935396]
+    - Quality checks with (tokenized) iframe instructions
 
     """,
     'category': 'Custom Development',
-    'depends': ['mrp_workorder', 'mrp_plm'],
+    'depends': ['survey', 'mrp_workorder', 'mrp_plm', 'quality', 'quality_control', 'mrp'],
     'data': [
         # security
         # views
+        'views/quality_views.xml',
         'views/mrp_workorder_view.xml',
+        'views/backend_assets.xml',
         # data
 
     ],
     'demo': [],
-    'qweb': [],
+    'qweb': ['static/src/xml/quality.xml'],
     'installable': True,
     'application': False,
     'auto_install': False,
