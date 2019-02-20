@@ -68,12 +68,12 @@
             <field name="state" position="attributes">
                 <attribute name="statusbar_visible">draft,sent,manager_approval,vp_approval,vp_finance_approval,ceo_approval,purchase</attribute>
             </field>
-            <button id="bid_confirm" position="attributes">
+            <!-- <button id="bid_confirm" position="attributes">
                 <attribute name="groups">purchase.group_purchase_manager</attribute>
             </button>
             <button id="draft_confirm" position="attributes">
                 <attribute name="groups">purchase.group_purchase_manager</attribute>
-            </button>
+            </button> -->
             <xpath expr="//header//button[@name='button_approve']" position="attributes">
                 <attribute name='states'></attribute>
                 <attribute name='name'>button_confirm</attribute>
