@@ -2,6 +2,6 @@
 
 <templates xml:space="preserve">
     <t t-name="WorkorderIframeUrl">
-        <iframe t-att-src="url" style="width:1000px;"></iframe>
+        <iframe t-att-src="url" style="width:500px;height:500px;"></iframe>
     </t>
 </templates>
