@@ -4,6 +4,13 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
+PO_APPROVAL_STATE = [
+    'manager_approval',
+    'vp_approval',
+    'vp_finance_approval',
+    'ceo_approval'
+]
+
 
 class PurchaseOrderType(models.Model):
     _name = "purchase.order.type"
@@ -116,14 +123,19 @@ class PurchaseOrder(models.Model):
         users_by_state = self._get_user_by_approval_state()
         if result and not users_by_state.get(result):
             result = self._get_approval_state(result, approval_amount)
+        state_by_user = self._get_state_by_user()
+        if result and state_by_user.get(self.env.uid) and PO_APPROVAL_STATE.index(state_by_user.get(self.env.uid)) >= PO_APPROVAL_STATE.index(result):
+            result = self._get_approval_state(state_by_user.get(self.env.uid), approval_amount)
         return result
 
     def _is_valid_user_for_approval(self):
         uid = self.env.uid
         users_by_state = self._get_user_by_approval_state()
+        state_by_user = self._get_state_by_user()
         if (self.state in ['draft', 'sent'] or
                 self.user_has_groups('account.group_account_manager') or
-                uid == users_by_state[self.state].id):
+                uid == users_by_state[self.state].id or
+                (state_by_user.get(self.env.uid) and PO_APPROVAL_STATE.index(state_by_user.get(self.env.uid)) > PO_APPROVAL_STATE.index(self.state))):
             return True
         return False
 
@@ -150,6 +162,14 @@ class PurchaseOrder(models.Model):
             'vp_approval': self.po_type_id.vice_president.user_id,
             'vp_finance_approval': self.po_type_id.vice_president_finance.user_id,
             'ceo_approval': self.po_type_id.ceo.user_id,
+        }
+
+    def _get_state_by_user(self):
+        return {
+            self.po_type_id.manager.user_id.id: 'manager_approval',
+            self.po_type_id.vice_president.user_id.id: 'vp_approval',
+            self.po_type_id.vice_president_finance.user_id.id: 'vp_finance_approval',
+            self.po_type_id.ceo.user_id.id: 'ceo_approval',
         }
 
     @api.multi
