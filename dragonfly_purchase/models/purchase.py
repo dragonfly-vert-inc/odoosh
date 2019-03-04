@@ -62,7 +62,7 @@ class PurchaseOrder(models.Model):
         elif self.state == 'vp_approval':
             partners_to_notify |= self.po_type_id.manager.user_id.partner_id
         template = self.env.ref('dragonfly_purchase.mail_template_po_reject')
-        template.send_mail(self.id,  email_values={'recipient_ids': [(4, p.id) for p in partners_to_notify]})
+        template.send_mail(self.id, force_send=True, email_values={'recipient_ids': [(4, p.id) for p in partners_to_notify]})
 
         self.write({'state': 'draft'})
         return True
