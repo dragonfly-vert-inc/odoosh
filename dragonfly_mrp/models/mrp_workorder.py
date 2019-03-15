@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, api, _
+from odoo import models, api, fields, _
 from werkzeug import url_encode
 
 
 class MRPWorkorder(models.Model):
     _inherit = "mrp.workorder"
+
+    public_url = fields.Char(related="current_quality_check_id.public_url")
 
     @api.multi
     def action_open_documents(self):
