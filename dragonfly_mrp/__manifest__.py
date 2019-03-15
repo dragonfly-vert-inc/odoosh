@@ -25,7 +25,6 @@ MRP Enhancement
         # security
         # views
         'views/quality_views.xml',
-        'views/workorder_views.xml',
         'views/mrp_workorder_view.xml',
         'views/backend_assets.xml',
         # data

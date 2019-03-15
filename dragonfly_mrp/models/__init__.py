@@ -3,5 +3,4 @@
 
 from . import survey
 from . import quality
-from . import workorder
 from . import mrp_workorder
