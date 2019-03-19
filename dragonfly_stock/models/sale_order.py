@@ -13,7 +13,6 @@ class SaleOrder(models.Model):
     def _onchange_auto_fill(self):
         if self.is_auto_fill:
             if self.picking_ids:
-                print(self.picking_ids)
                 for pick in self.picking_ids:
                     if pick.is_pick:
                         for line in pick.move_line_ids_without_package:
@@ -31,7 +30,6 @@ class SaleOrder(models.Model):
     def _onchange_sub_location(self):
         if self.is_auto_fill:
             if self.picking_ids:
-                print(self.picking_ids)
                 for pick in self.picking_ids:
                     if pick.is_pick:
                         for line in pick.move_line_ids_without_package:

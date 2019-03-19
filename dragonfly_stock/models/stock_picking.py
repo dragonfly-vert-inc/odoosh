@@ -21,8 +21,9 @@ class StockMoveLine(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         mls = super(StockMoveLine, self).create(vals_list)
-        # Check if the boolean was set. Use write to change the "To" Location
+        # Check if the boolean was set. Use write to change the "To" Location if it is a Pick
         for ml in mls:
             if ml.picking_id.is_auto_fill:
-                ml.write({'location_dest_id': ml.picking_id.sub_location_id.id})
+                if ml.picking_id.is_pick:
+                    ml.write({'location_dest_id': ml.picking_id.sub_location_id.id})
         return mls
