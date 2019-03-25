@@ -43,6 +43,9 @@ PO total amount |    Manager    |   Controller   |     VP     |  VP Finance  |  
         'views/purchase_view.xml',
         'views/res_config_settings_view.xml',
 
+        # reports
+        'report/purchase_report.xml',
+
         # data
         'data/data.xml',
 
