@@ -11,7 +11,7 @@ class SaleOrder(models.Model):
 
     @api.onchange('is_auto_fill')
     def _onchange_auto_fill(self):
-        for pick in self.picking_ids.filtered(lambda pk: pk.is_pick and pick.state not in  ('done', 'cancel')):
+        for pick in self.picking_ids.filtered(lambda pk: pk.is_pick and pk.state not in  ('done', 'cancel')):
             for line in pick.move_line_ids_without_package:
                 if self.is_auto_fill and self.sub_location_id:
                     line.location_dest_id = self.sub_location_id
@@ -21,6 +21,6 @@ class SaleOrder(models.Model):
     @api.onchange('sub_location_id')
     def _onchange_sub_location(self):
         if self.is_auto_fill and self.sub_location_id:
-            for pick in self.picking_ids.filtered(lambda pk: pk.is_pick and pick.state not in  ('done', 'cancel')):
+            for pick in self.picking_ids.filtered(lambda pk: pk.is_pick and pk.state not in  ('done', 'cancel')):
                 for line in pick.move_line_ids_without_package:
                     line.location_dest_id = self.sub_location_id
