@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+# Task ID: 1946175
 {
-    'name': "Dragon Fly - Vert:  Stock Location Modification",
+    'name': "Dragon Fly - Vert:  Stock Modification",
 
     'summary': """
         Auto-fill destination location for Sales Order and Stock Picking""",
