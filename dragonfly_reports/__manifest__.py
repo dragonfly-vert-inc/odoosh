@@ -19,6 +19,8 @@ For all Reports
     'data': [
         # reports
         'report/report.xml',
+        # data
+        'data/data.xml',
     ],
     'demo': [],
     'qweb': [],

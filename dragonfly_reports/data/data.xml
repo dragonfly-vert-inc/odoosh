@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <function model="report.paperformat" name="write">
+        <value model="report.paperformat" eval="ref('base.paperformat_us')"/>
+        <value eval="{'margin_top': 15, 'header_spacing': 15}"/>
+    </function>
+</odoo>
