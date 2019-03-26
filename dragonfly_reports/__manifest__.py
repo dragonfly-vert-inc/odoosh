@@ -18,7 +18,7 @@ For all Reports
     'depends': ['web'],
     'data': [
         # reports
-        'report/purchase_report.xml',
+        'report/report.xml',
     ],
     'demo': [],
     'qweb': [],
