@@ -33,9 +33,9 @@
                 }
                 var firstpage = document.getElementsByClassName('first-page')[0];
                 if (vars['sitepage'] == 1) {
-                    firstpage.style.visibility="visible";
+                    firstpage.style.display="block";
                 }else{
-                    firstpage.style.visibility="hidden";
+                    firstpage.style.display="none";
                 }
             }
                 </script>
@@ -43,21 +43,23 @@
         </xpath>
     </template>
     <template id="report_external_layout_standard_dragonfly" inherit_id="web.external_layout_standard">
-        <xpath expr="//div[hasclass('header')]//div[@name='company_address']" position="replace">
-            <t t-if="o._name == 'purchase.order' ">
-                <div class="col-6 first-page" name="company_address">
-                    <div t-field="company.partner_id"
-                        t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'
-                    />
-                </div>
-            </t>
-            <t t-else="">
+        <xpath expr="//div[hasclass('header')]//div[@name='company_address']/.." position="replace">
+            <!-- <div class="row first-page zero_min_height">
                 <div class="col-6" name="company_address">
                     <div t-field="company.partner_id"
                         t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'
                     />
                 </div>
-            </t>
+            </div> -->
         </xpath>
+        <t t-call="web.address_layout" position="before">
+            <div class="row text-left first-page">
+                <div class="col-6" name="company_address">
+                    <div t-field="company.partner_id"
+                        t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'
+                    />
+                </div>
+            </div>
+        </t>
     </template>
 </odoo>
