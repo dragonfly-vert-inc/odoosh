@@ -183,7 +183,9 @@ class PurchaseOrder(models.Model):
                 self._add_follower_with_message(users=self._get_user_in_cc(approval_amount))
             state = self._get_approval_state(approval_amount=approval_amount)
             if not state:
-                return self.button_approve()
+                if self.user_has_groups('account.group_account_manager'):
+                    return self.button_approve()
+                raise UserError(_('You are not allowed to confirm the order.'))
             self._notify_user_for_next_approval(state)
             self.write({'state': state})
         else:
