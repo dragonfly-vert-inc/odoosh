@@ -31,7 +31,7 @@ class StockMove(models.Model):
             if move_line.location_id._should_be_valued() and\
                 move_line.location_dest_id._should_be_valued() and\
                 move_line.picking_id.switch_off and\
-                    move_line.location_dest_id.custom_stock_valuation_account_id:
+                    (move_line.location_dest_id.custom_stock_valuation_account_id or move_line.location_id.custom_stock_valuation_account_id):
                 return True
         return False
 
@@ -93,9 +93,18 @@ class StockMove(models.Model):
         # CSUTOM CHANGES START
         if self._is_internal():
             journal_id, acc_src, acc_dest, acc_valuation = self._get_accounting_data_for_valuation()
-            if self.picking_code == 'internal' and location_from.custom_stock_valuation_account_id and location_from.custom_stock_valuation_account_id.id != location_to.custom_stock_valuation_account_id.id:
-                self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_inventory_value())._create_account_move_line(location_from.custom_stock_valuation_account_id.id, location_to.custom_stock_valuation_account_id.id, journal_id)
+            if self.picking_code == 'internal' and location_from.custom_stock_valuation_account_id and location_to.custom_stock_valuation_account_id and location_from.custom_stock_valuation_account_id.id != location_to.custom_stock_valuation_account_id.id:
+                self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_inventory_value())._create_account_move_line(
+                    location_from.custom_stock_valuation_account_id.id, location_to.custom_stock_valuation_account_id.id, journal_id)
+            elif self.picking_code == 'internal' and location_from.custom_stock_valuation_account_id and not location_to.custom_stock_valuation_account_id:
+                self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_inventory_value())._create_account_move_line(location_from.custom_stock_valuation_account_id.id, acc_valuation, journal_id)
             else:
                 acc_dest = self.location_dest_id.custom_stock_valuation_account_id.id
                 self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_inventory_value())._create_account_move_line(acc_valuation, acc_dest, journal_id)
         # CUSTOM CHANGES END
+
+    def _action_done(self):
+        res = super(StockMove, self)._action_done()
+        for move in res.filtered(lambda m: m.product_id.valuation == 'real_time' and m._is_internal()):
+            move._account_entry_move()
+        return res
