@@ -35,12 +35,52 @@ class StockMove(models.Model):
                 return True
         return False
 
-    def _get_inventory_value(self):
+    def _get_move_inventory_value(self):
+        quantity = self.env.context.get('forced_quantity', self.product_qty)
         if self.product_id.cost_method in ['standard', 'average']:
-            quantity = self.env.context.get('forced_quantity', self.product_qty)
             correction_value = quantity * self.product_id.standard_price
             return correction_value
+        if self.product_id.cost_method == 'fifo':
+            return self._get_inventory_value_with_fifo(quantity)
         return self.value
+
+    def _get_inventory_value_with_fifo(self, quantity):
+        """
+            This method will calculate and return the inventory value of move using fifo method
+        """
+        self.ensure_one()
+        valued_move_lines = self.move_line_ids.filtered(lambda ml: ml.location_id._should_be_valued() and ml.location_dest_id._should_be_valued() and not ml.owner_id)
+        valued_quantity = 0
+        for valued_move_line in valued_move_lines:
+            valued_quantity += valued_move_line.product_uom_id._compute_quantity(valued_move_line.qty_done, self.product_id.uom_id)
+
+        # Find back incoming stock moves (called candidates here) to value this move.
+        qty_to_take_on_candidates = quantity or valued_quantity
+        candidates = self.product_id._get_fifo_candidates_in_move()
+        new_standard_price = 0
+        tmp_value = 0  # to accumulate the value taken on the candidates
+        for candidate in candidates:
+            new_standard_price = candidate.price_unit
+            if candidate.remaining_qty <= qty_to_take_on_candidates:
+                qty_taken_on_candidate = candidate.remaining_qty
+            else:
+                qty_taken_on_candidate = qty_to_take_on_candidates
+
+            candidate_price_unit = candidate.remaining_value / candidate.remaining_qty
+            value_taken_on_candidate = qty_taken_on_candidate * candidate_price_unit
+
+            qty_to_take_on_candidates -= qty_taken_on_candidate
+            tmp_value += value_taken_on_candidate
+            if qty_to_take_on_candidates == 0:
+                break
+
+        if qty_to_take_on_candidates == 0:
+            return -tmp_value if not quantity else self.value or -tmp_value
+        elif qty_to_take_on_candidates > 0:
+            last_fifo_price = new_standard_price or self.product_id.standard_price
+            negative_stock_value = last_fifo_price * -qty_to_take_on_candidates
+            tmp_value += abs(negative_stock_value)
+            return -tmp_value
 
     def _account_entry_move(self):
         """Inherited in order to generate the intermediate accoutning entries for internal transfer"""
@@ -94,13 +134,13 @@ class StockMove(models.Model):
         if self._is_internal():
             journal_id, acc_src, acc_dest, acc_valuation = self._get_accounting_data_for_valuation()
             if self.picking_code == 'internal' and location_from.custom_stock_valuation_account_id and location_to.custom_stock_valuation_account_id and location_from.custom_stock_valuation_account_id.id != location_to.custom_stock_valuation_account_id.id:
-                self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_inventory_value())._create_account_move_line(
+                self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_move_inventory_value())._create_account_move_line(
                     location_from.custom_stock_valuation_account_id.id, location_to.custom_stock_valuation_account_id.id, journal_id)
             elif self.picking_code == 'internal' and location_from.custom_stock_valuation_account_id and not location_to.custom_stock_valuation_account_id:
-                self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_inventory_value())._create_account_move_line(location_from.custom_stock_valuation_account_id.id, acc_valuation, journal_id)
+                self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_move_inventory_value())._create_account_move_line(location_from.custom_stock_valuation_account_id.id, acc_valuation, journal_id)
             else:
                 acc_dest = self.location_dest_id.custom_stock_valuation_account_id.id
-                self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_inventory_value())._create_account_move_line(acc_valuation, acc_dest, journal_id)
+                self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_move_inventory_value())._create_account_move_line(acc_valuation, acc_dest, journal_id)
         # CUSTOM CHANGES END
 
     def _action_done(self):
