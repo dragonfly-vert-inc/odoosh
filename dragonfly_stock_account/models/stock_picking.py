@@ -75,12 +75,12 @@ class StockMove(models.Model):
                 break
 
         if qty_to_take_on_candidates == 0:
-            return -tmp_value if not quantity else self.value or -tmp_value
+            return self.value or tmp_value
         elif qty_to_take_on_candidates > 0:
             last_fifo_price = new_standard_price or self.product_id.standard_price
             negative_stock_value = last_fifo_price * -qty_to_take_on_candidates
             tmp_value += abs(negative_stock_value)
-            return -tmp_value
+            return tmp_value
 
     def _account_entry_move(self):
         """Inherited in order to generate the intermediate accoutning entries for internal transfer"""
@@ -136,11 +136,10 @@ class StockMove(models.Model):
             if self.picking_code == 'internal' and location_from.custom_stock_valuation_account_id and location_to.custom_stock_valuation_account_id and location_from.custom_stock_valuation_account_id.id != location_to.custom_stock_valuation_account_id.id:
                 self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_move_inventory_value())._create_account_move_line(
                     location_from.custom_stock_valuation_account_id.id, location_to.custom_stock_valuation_account_id.id, journal_id)
-            elif self.picking_code == 'internal' and location_from.custom_stock_valuation_account_id and not location_to.custom_stock_valuation_account_id:
+            if self.picking_code == 'internal' and location_from.custom_stock_valuation_account_id and not location_to.custom_stock_valuation_account_id:
                 self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_move_inventory_value())._create_account_move_line(location_from.custom_stock_valuation_account_id.id, acc_valuation, journal_id)
-            else:
-                acc_dest = self.location_dest_id.custom_stock_valuation_account_id.id
-                self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_move_inventory_value())._create_account_move_line(acc_valuation, acc_dest, journal_id)
+            if self.picking_code == 'internal' and location_to.custom_stock_valuation_account_id and not location_from.custom_stock_valuation_account_id:
+                self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_move_inventory_value())._create_account_move_line(acc_valuation, self.location_dest_id.custom_stock_valuation_account_id.id, journal_id)
         # CUSTOM CHANGES END
 
     def _action_done(self):
@@ -148,3 +147,8 @@ class StockMove(models.Model):
         for move in res.filtered(lambda m: m.product_id.valuation == 'real_time' and m._is_internal()):
             move._account_entry_move()
         return res
+
+    def _prepare_account_move_line(self, qty, cost, credit_account_id, debit_account_id):
+        quantity = self.env.context.get('forced_quantity', self.product_qty)
+        qty = quantity if self._is_in() or self._is_internal() else -1 * quantity
+        return super(StockMove, self)._prepare_account_move_line(qty, cost, credit_account_id, debit_account_id)
