@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import models, fields, api, _
+from odoo import models, fields
 
 
 class Picking(models.Model):
     _inherit = ['stock.picking']
 
-    switch_off = fields.Boolean(string='Switch off',  help="checked will activate the more advance automated inventory valuation, if unchecked standard behaviour is used while inventory valuation")
+    switch_off = fields.Boolean(
+        string='Custom Inventory Valuation',
+        default=True,
+        help="checked will activate the more advance automated inventory valuation, if unchecked standard behaviour is used while inventory valuation")
 
 
 class StockLocation(models.Model):
@@ -92,7 +95,6 @@ class StockMove(models.Model):
         if self.restrict_partner_id:
             # if the move isn't owned by the company, we don't make any valuation
             return False
-
         location_from = self.location_id
         location_to = self.location_dest_id
         company_from = self._is_out() and self.mapped('move_line_ids.location_id.company_id') or False
@@ -114,8 +116,8 @@ class StockMove(models.Model):
                 self.with_context(force_company=company_from.id)._create_account_move_line(acc_valuation, acc_src, journal_id)
             else:
                 # CSUTOM CHANGES START
-                if self.picking_id.switch_off and location_from.custom_stock_valuation_account_id:
-                    acc_valuation = location_from.custom_stock_valuation_account_id.id
+                location_src_id = self.picking_id.sub_location_id or location_from
+                acc_valuation = self.picking_id.switch_off and location_src_id.custom_stock_valuation_account_id.id or acc_valuation
                 # CUSTOM CHANGES END
                 self.with_context(force_company=company_from.id)._create_account_move_line(acc_valuation, acc_dest, journal_id)
 
@@ -132,14 +134,21 @@ class StockMove(models.Model):
             self._get_related_invoices()._anglo_saxon_reconcile_valuation(product=self.product_id)
         # CSUTOM CHANGES START
         if self._is_internal():
+            location_dest_id = self.picking_id.is_pick and self.picking_id.sub_location_id or location_to
             journal_id, acc_src, acc_dest, acc_valuation = self._get_accounting_data_for_valuation()
             if self.picking_code == 'internal' and location_from.custom_stock_valuation_account_id and location_to.custom_stock_valuation_account_id and location_from.custom_stock_valuation_account_id.id != location_to.custom_stock_valuation_account_id.id:
                 self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_move_inventory_value())._create_account_move_line(
                     location_from.custom_stock_valuation_account_id.id, location_to.custom_stock_valuation_account_id.id, journal_id)
-            if self.picking_code == 'internal' and location_from.custom_stock_valuation_account_id and not location_to.custom_stock_valuation_account_id:
-                self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_move_inventory_value())._create_account_move_line(location_from.custom_stock_valuation_account_id.id, acc_valuation, journal_id)
-            if self.picking_code == 'internal' and location_to.custom_stock_valuation_account_id and not location_from.custom_stock_valuation_account_id:
-                self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_move_inventory_value())._create_account_move_line(acc_valuation, self.location_dest_id.custom_stock_valuation_account_id.id, journal_id)
+            elif self.picking_code == 'internal' and self.origin_returned_move_id and self.picking_id.is_pick and self.picking_id.sub_location_id.custom_stock_valuation_account_id and not location_to.custom_stock_valuation_account_id:
+                self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_move_inventory_value(
+                ))._create_account_move_line(self.picking_id.sub_location_id.custom_stock_valuation_account_id.id, acc_valuation, journal_id)
+            elif self.picking_code == 'internal' and location_to.custom_stock_valuation_account_id and not location_from.custom_stock_valuation_account_id:
+                self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_move_inventory_value(
+                ))._create_account_move_line(acc_valuation, self.location_dest_id.custom_stock_valuation_account_id.id, journal_id)
+            elif self.picking_code == 'internal' and self.picking_id.is_pick and not self.origin_returned_move_id and location_dest_id.custom_stock_valuation_account_id and not location_from.custom_stock_valuation_account_id:
+                self.with_context(force_company=self.location_id.company_id.id, force_valuation_amount=self._get_move_inventory_value(
+                ))._create_account_move_line(acc_valuation, location_dest_id.custom_stock_valuation_account_id.id, journal_id)
+
         # CUSTOM CHANGES END
 
     def _action_done(self):
