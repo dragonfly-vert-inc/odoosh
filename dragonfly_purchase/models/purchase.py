@@ -27,7 +27,7 @@ class PurchaseOrderType(models.Model):
 class PurchaseOrder(models.Model):
     _inherit = "purchase.order"
 
-    po_type_id = fields.Many2one('purchase.order.type', string='PO Type')
+    po_type_id = fields.Many2one('purchase.order.type', string='PO Type', track_visibility='onchange')
     state = fields.Selection(selection=[
         ('draft', 'RFQ'),
         ('sent', 'RFQ Sent'),
@@ -39,7 +39,6 @@ class PurchaseOrder(models.Model):
         ('done', 'Locked'),
         ('cancel', 'Cancelled')
     ])
-
     show_approval_btn = fields.Boolean(compute='_compute_show_approval_btn')
 
     @api.multi
