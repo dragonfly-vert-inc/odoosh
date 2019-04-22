@@ -34,7 +34,7 @@ PO total amount |    Manager    |   Controller   |     VP     |  VP Finance  |  
 
     """,
     'category': 'Custom Development',
-    'depends': ['purchase', 'hr'],
+    'depends': ['purchase', 'hr', 'mail'],
     'data': [
         # security
         'security/ir.model.access.csv',
