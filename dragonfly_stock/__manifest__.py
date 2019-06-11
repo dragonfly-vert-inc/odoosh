@@ -32,7 +32,7 @@
     'sequence': 200,
     'license': 'OEEL-1',
     # any module necessary for this one to work correctly
-    'depends': ['stock', 'sale','sale_stock'],
+    'depends': ['stock', 'sale', 'sale_stock'],
 
     # always loaded
     'data': [
