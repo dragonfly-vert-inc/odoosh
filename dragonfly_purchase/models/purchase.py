@@ -164,6 +164,7 @@ class PurchaseOrder(models.Model):
         }
 
     def _get_state_by_user(self):
+        # TODO: swap key, value with _get_user_by_approval_state
         return {
             self.po_type_id.manager.user_id.id: 'manager_approval',
             self.po_type_id.vice_president.user_id.id: 'vp_approval',
@@ -182,7 +183,7 @@ class PurchaseOrder(models.Model):
                 self._add_follower_with_message(users=self._get_user_in_cc(approval_amount))
             state = self._get_approval_state(approval_amount=approval_amount)
             if not state:
-                if self.user_has_groups('account.group_account_manager'):
+                if self.user_has_groups('account.group_account_manager') or self.po_type_id and self.env.uid in self._get_state_by_user().keys():
                     return self.button_approve()
                 raise UserError(_('You are not allowed to confirm the order.'))
             self._notify_user_for_next_approval(state)
