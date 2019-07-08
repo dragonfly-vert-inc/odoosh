@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
-    'name': 'Syray WO Documents',
-    'summary': 'Syray WO Documents Enhancement',
+    'name': 'Syncoria WO Documents',
+    'summary': 'Syncoria WO Documents Enhancement',
     'website': 'http://www.ergo-ventures.com',
     'version': '1.0',
     'author': 'Ergo Ventures Ltd.',
@@ -21,7 +21,6 @@ WO Documents
         # security
         # views
         'views/mrp_workorder_document_view.xml',
-        'views/syray_attachment_preview_template.xml',
         'views/syray_attachment_wizard_view.xml',
         'views/mrp_document_syray.xml',
         'views/backend_assets.xml',
