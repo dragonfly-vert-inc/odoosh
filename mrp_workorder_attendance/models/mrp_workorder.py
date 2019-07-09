@@ -35,17 +35,28 @@ class MRPWorkorder(models.Model):
         }
 
     def write(self, vals):
-        workers_before_write = self.employee_ids
-        res = super(MRPWorkorder, self).write(vals)
-        workers_after_write = self.employee_ids
-        added_workers = workers_after_write - workers_before_write
-        deleted_workers = workers_before_write - workers_after_write
-        if added_workers:
-            added_workers.workorder_to_checkin(self.id)
-        if deleted_workers:
-            deleted_workers.workorder_to_checkout(self.id)
-        return res
-    
+        if 'employee_ids' in vals and len(self) == 1:
+            workers_before_write = self.employee_ids
+            res = super(MRPWorkorder, self).write(vals)
+            workers_after_write = self.employee_ids
+            added_workers = workers_after_write - workers_before_write
+            deleted_workers = workers_before_write - workers_after_write
+            if added_workers:
+                added_workers.workorder_to_checkin(self.id)
+            if deleted_workers:
+                deleted_workers.workorder_to_checkout(self.id)
+            return res
+        else:
+            return super(MRPWorkorder, self).write(vals)
+
+    def button_start(self):
+        user_id = self.env.user
+        employee_id = self.env['hr.employee'].search([('user_id','=',user_id.id)], limit=1)
+        if not employee_id:
+            employee_id = self.env['hr.employee'].sudo().create({'name': user_id.name, 'user_id': user_id.id})
+        self.write({'employee_ids': [(6, False, employee_id.ids)]})
+        return super(MRPWorkorder, self).button_start()
+
 
     def do_finish(self):
         for wo in self:

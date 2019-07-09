@@ -11,8 +11,10 @@
             <field name="active" eval="True" />
             <field name="arch" type="xml">
                 <xpath expr="//div[hasclass('o_workorder_actions')]" position="inside">
-                    <field name="employee_ids" widget="many2many_tags" readonly="1" class="workcenter_workers" />
-                    <button name="open_employee_popup" string="Add/Edit" type="object" class="oe_highlight"/>
+                    <div class="workcenter_workers" >
+                        <field name="employee_ids" widget="many2many_tags" readonly="1" />
+                    </div>
+                    <button name="open_employee_popup" type="object" class="oe_highlight" icon="fa-user"/>
                 </xpath>
             </field>
         </record>
