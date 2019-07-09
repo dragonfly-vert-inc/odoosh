@@ -28,7 +28,6 @@ WO Documents
 
     ],
     'demo': [],
-    'qweb': ['static/src/xml/syray_attachment_preview_qweb.xml'],
     'installable': True,
     'application': False,
     'auto_install': False,
