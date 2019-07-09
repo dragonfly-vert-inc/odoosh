@@ -15,7 +15,7 @@
                 <field name="create_uid"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div class="oe_kanban_global_area o_kanban_attachment oe_kanban_global_click oe_link_new">
+                        <div class="oe_kanban_global_area o_kanban_attachment oe_kanban_global_click oe_syray_kanban_button">
                             <button name="open_attachment" type="object" string="open attachment">
                                 <div class="o_kanban_image">
                                     <div class="o_kanban_image_wrapper">
