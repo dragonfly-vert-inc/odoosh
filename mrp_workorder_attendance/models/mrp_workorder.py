@@ -20,6 +20,8 @@ class MRPWorkorder(models.Model):
 
     employee_popup_id = fields.Many2one(comodel_name='workorder.add.employee', ondelete='set null')
 
+    worker_times = fields.One2many(comodel_name='hr.attendance', inverse_name='wo_id', readonly=True)
+
     @api.multi
     def open_employee_popup(self):
         if not self.employee_popup_id:
@@ -51,12 +53,11 @@ class MRPWorkorder(models.Model):
 
     def button_start(self):
         user_id = self.env.user
-        employee_id = self.env['hr.employee'].search([('user_id','=',user_id.id)], limit=1)
+        employee_id = self.env['hr.employee'].search([('user_id', '=', user_id.id)], limit=1)
         if not employee_id:
             employee_id = self.env['hr.employee'].sudo().create({'name': user_id.name, 'user_id': user_id.id})
         self.write({'employee_ids': [(6, False, employee_id.ids)]})
         return super(MRPWorkorder, self).button_start()
-
 
     def do_finish(self):
         for wo in self:
