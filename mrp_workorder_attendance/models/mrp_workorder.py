@@ -54,7 +54,7 @@ class MRPWorkorder(models.Model):
         employee_id = self.env['hr.employee'].search([('user_id','=',user_id.id)], limit=1)
         if not employee_id:
             employee_id = self.env['hr.employee'].sudo().create({'name': user_id.name, 'user_id': user_id.id})
-        self.write({'employee_ids': [(6, False, employee_id.ids)]})
+        self.write({'employee_ids': [(4, employee_id.id, False)]})
         return super(MRPWorkorder, self).button_start()
 
 
