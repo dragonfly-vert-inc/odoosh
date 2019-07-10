@@ -51,7 +51,8 @@
         'security/ir.model.access.csv',
         'views/mrp_workorder_views.xml',
         'views/add_employee_view.xml',
-        'views/hr_attendance_views.xml'
+        'views/hr_attendance_views.xml',
+        'views/res_config.xml'
     ],
     'installable': True
 }

@@ -60,6 +60,8 @@ class MRPWorkorder(models.Model):
         return super(MRPWorkorder, self).button_start()
 
     def do_finish(self):
+        threshold = self.env.user.company_id.manufacturing_worked_hour_threshold
         for wo in self:
             wo.employee_ids.workorder_to_checkout(self.id)
+            wo.worker_times.filtered(lambda att: att.worked_hours <= threshold).unlink()
         return super(MRPWorkorder, self).do_finish()
