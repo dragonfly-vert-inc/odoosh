@@ -9,6 +9,14 @@
             <xpath expr="//form//div[hasclass('workorder_actions')]//div[hasclass('o_workorder_actions')]" position="inside">
                 <button name="action_open_documents_syray" type="object" class="btn-secondary" string="View Docs" icon="fa-book o_workorder_btn_icon_small"/>
             </xpath>
+            <xpath expr="//form//div[hasclass('o_workorder_bar_content')]//div[hasclass('o_workorder_field')]//field[@name='lot_id']" position="attributes">
+                <attribute name="options">{'no_create_edit': True, 'no_create':True, 'no_open':True}</attribute>
+                <attribute name="domain">[('product_id', '=', component_id),('id','in',reserved_lot_ids)]</attribute>
+            </xpath>
+            <xpath expr="//field[1]" position="after">
+                <field name="production_id" invisible="1"/>
+                <field name="reserved_lot_ids" invisible="1"/>
+            </xpath>
             <field class="o_workorder_note" name="note" position="after">
                 <field name="public_url" class="o_workorder_iframe_url" widget="WorkorderIframeUrl"/>
             </field>

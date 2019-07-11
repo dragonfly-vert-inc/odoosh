@@ -16,7 +16,7 @@ WO Documents
 
     """,
     'category': 'Custom Development',
-    'depends': ['dragonfly_mrp'],
+    'depends': ['dragonfly_mrp','stock'],
     'data': [
         # security
         # views
