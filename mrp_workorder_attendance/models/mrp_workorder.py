@@ -65,3 +65,11 @@ class MRPWorkorder(models.Model):
             wo.employee_ids.workorder_to_checkout(self.id)
             wo.worker_times.filtered(lambda att: att.worked_hours <= threshold).unlink()
         return super(MRPWorkorder, self).do_finish()
+    
+
+    @api.multi
+    def action_cancel(self):
+        for wo in self:
+            if wo.worker_times:
+                wo.worker_times.unlink()
+        return super(MRPWorkorder, self).action_cancel()
