@@ -52,7 +52,9 @@
         'views/mrp_workorder_views.xml',
         'views/add_employee_view.xml',
         'views/hr_attendance_views.xml',
-        'views/res_config.xml'
+        'views/res_config.xml',
+        'views/work_center.xml',
+        'views/mrp_account.xml'
     ],
     'installable': True
 }

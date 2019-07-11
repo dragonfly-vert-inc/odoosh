@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <template id="mrp_cost_structure_worker_lines" inherit_id="mrp_account.mrp_cost_structure">
+            <xpath expr="//t[@t-foreach='lines']" position="after">
+
+                <t t-set="currency" t-value="currency_id" />
+
+                <t t-foreach="workorders" t-as="workorder">
+
+                    <t t-if="workorder.worker_times">
+
+                        <h3>
+                            <t t-esc="workorder.name" />
+                        </h3>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <span>Worker</span>
+                                    </th>
+                                    <th class="text-right">
+                                        <span>Working Time</span>
+                                    </th>
+                                    <th class="text-right">
+                                        <span>Cost/hour</span>
+                                    </th>
+                                    <th class="text-right">
+                                        <span>Total Cost</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="totalcost" t-value="0" />
+                                <tr t-foreach="workorder.worker_times" t-as="row">
+                                    <td>
+                                        <span t-esc="row.employee_id.name"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span>
+                                            <t t-esc="row.worked_hours" t-options='{"widget": "float_time"}'/> hours</span>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-esc="workorder.workcenter_id.cost_hour_employee" t-options='{"widget": "monetary", "display_currency": currency}' />
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-esc="row.worked_hours * workorder.workcenter_id.cost_hour_employee" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                    </td>
+                                    <t t-set="totalcost" t-value="totalcost + row.worked_hours * workorder.workcenter_id.cost_hour_employee"/>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-right">
+                                        <strong>Worker Cost in Workorder</strong>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-esc="totalcost" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+                </t>
+            </xpath>
+        </template>
+    </data>
+</odoo>

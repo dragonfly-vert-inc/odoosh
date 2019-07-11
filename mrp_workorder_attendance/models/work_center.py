@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 ###############################################################################
 #    License, author and contributors information in:                         #
@@ -8,9 +9,10 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 
 
-class HrAttendance(models.Model):
-    _inherit = 'hr.attendance'
 
-    wo_id = fields.Many2one(string=u'Work Order', comodel_name='mrp.workorder', ondelete='set null')
+class WorkCenter(models.Model):
+    _inherit = 'mrp.workcenter'
 
-    wc_id = fields.Many2one(string=u'Work Center', related='wo_id.workcenter_id', store=True)
+    cost_hour_employee = fields.Float(string='Cost per hour per employee', help='Specify cost of work center per hour per employee.', default=0.0)
+ 
+

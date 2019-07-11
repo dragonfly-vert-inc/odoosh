@@ -4,3 +4,5 @@ from . import hr_attendance
 from . import hr_employee
 from . import res_company
 from . import res_config_settings
+from . import work_center
+from . import mrp_account
