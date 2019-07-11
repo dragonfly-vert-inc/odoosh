@@ -54,7 +54,8 @@
         'views/hr_attendance_views.xml',
         'views/res_config.xml',
         'views/work_center.xml',
-        'views/mrp_account.xml'
+        'views/mrp_account.xml',
+        'views/mrp_production.xml'
     ],
     'installable': True
 }
