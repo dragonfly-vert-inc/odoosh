@@ -52,7 +52,6 @@ class MRPWorkorder(models.Model):
             return super(MRPWorkorder, self).write(vals)
 
     def button_start(self):
-        breakpoint()
         user_id = self.env.user
         employee_id = self.env['hr.employee'].search([('user_id', '=', user_id.id)], limit=1)
         if not employee_id:
