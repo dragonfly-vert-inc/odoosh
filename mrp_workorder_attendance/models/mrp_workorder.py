@@ -6,8 +6,8 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
-
-
+from itertools import groupby
+from collections import defaultdict
 class MRPWorkorder(models.Model):
     _inherit = 'mrp.workorder'
 
@@ -43,7 +43,7 @@ class MRPWorkorder(models.Model):
             workers_after_write = self.employee_ids
             added_workers = workers_after_write - workers_before_write
             deleted_workers = workers_before_write - workers_after_write
-            if added_workers:
+            if added_workers and self.is_user_working:
                 added_workers.workorder_to_checkin(self.id)
             if deleted_workers:
                 deleted_workers.workorder_to_checkout(self.id)
@@ -82,3 +82,10 @@ class MRPWorkorder(models.Model):
             if wo.worker_times:
                 wo.worker_times.unlink()
         return super(MRPWorkorder, self).action_cancel()
+    
+    @api.model
+    def get_worker_time_grouped(self):
+        grouped_hours = defaultdict(float)
+        for att in self.worker_times:
+            grouped_hours[att.employee_id] += att.worked_hours
+        return grouped_hours

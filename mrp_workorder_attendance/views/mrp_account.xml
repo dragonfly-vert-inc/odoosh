@@ -33,21 +33,21 @@
                             </thead>
                             <tbody>
                                 <t t-set="totalcost" t-value="0" />
-                                <tr t-foreach="workorder.worker_times" t-as="row">
+                                <tr t-foreach="workorder.get_worker_time_grouped().items()" t-as="row">
                                     <td>
-                                        <span t-esc="row.employee_id.name"/>
+                                        <span t-esc="row[0].name"/>
                                     </td>
                                     <td class="text-right">
                                         <span>
-                                            <t t-esc="row.worked_hours" t-options='{"widget": "float_time"}'/> hours</span>
+                                            <t t-esc="row[1]" t-options='{"widget": "float_time"}'/> HH:MM</span>
                                     </td>
                                     <td class="text-right">
                                         <span t-esc="workorder.workcenter_id.cost_hour_employee" t-options='{"widget": "monetary", "display_currency": currency}' />
                                     </td>
                                     <td class="text-right">
-                                        <span t-esc="row.worked_hours * workorder.workcenter_id.cost_hour_employee" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        <span t-esc="row[1] * workorder.workcenter_id.cost_hour_employee" t-options='{"widget": "monetary", "display_currency": currency}'/>
                                     </td>
-                                    <t t-set="totalcost" t-value="totalcost + row.worked_hours * workorder.workcenter_id.cost_hour_employee"/>
+                                    <t t-set="totalcost" t-value="totalcost + row[1] * workorder.workcenter_id.cost_hour_employee"/>
                                 </tr>
                                 <tr>
                                     <td colspan="3" class="text-right">
