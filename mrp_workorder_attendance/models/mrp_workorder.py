@@ -57,7 +57,16 @@ class MRPWorkorder(models.Model):
         if not employee_id:
             employee_id = self.env['hr.employee'].sudo().create({'name': user_id.name, 'user_id': user_id.id})
         self.write({'employee_ids': [(4, employee_id.id, False)]})
+        workers_checkedout = self.employee_ids - self.worker_times.filtered(lambda ha: ha.check_out == False).mapped('employee_id')
+        if workers_checkedout:
+            workers_checkedout.workorder_to_checkin(self.id)
         return super(MRPWorkorder, self).button_start()
+
+    def button_pending(self):
+        if self.employee_ids:
+            self.employee_ids.workorder_to_checkout(self.id)
+        return super(MRPWorkorder, self).button_pending()
+
 
     def do_finish(self):
         threshold = self.env.user.company_id.manufacturing_worked_hour_threshold
