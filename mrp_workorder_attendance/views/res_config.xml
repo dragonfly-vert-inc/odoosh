@@ -24,7 +24,7 @@
                                 <div class="content-group">
                                     <div class="mt16">
                                             Workcenter Workers Time Threshhold
-                                        <field name="worked_hour_threshold" class="oe_inline" widget="float_time" />
+                                        <field name="worked_hour_threshold" class="oe_inline" widget="float_time" />HH:MM
                                     </div>
                                 </div>
                             </div>
