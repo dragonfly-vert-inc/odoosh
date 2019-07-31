@@ -9,12 +9,6 @@ class MRPWorkorder(models.Model):
     _inherit = "mrp.workorder"
 
     public_url = fields.Char(related="current_quality_check_id.public_url")
-    reserved_lot_ids = fields.Many2many('stock.production.lot', compute='_compute_reserved_lots' )
-
-    @api.depends('production_id')
-    def _compute_reserved_lots(self):
-        for wo in self:
-            wo.update({'reserved_lot_ids':[(6,0,wo.production_id.move_raw_ids.mapped('active_move_line_ids').mapped('lot_id').ids)]})
 
     @api.multi
     def action_open_documents_syray(self):
