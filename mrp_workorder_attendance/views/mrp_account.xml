@@ -2,13 +2,12 @@
 <odoo>
     <data noupdate="0">
 
-    <template id="mrp_cost_structure_worker_lines">
+    <template id="mrp_account.mrp_cost_structure">
         <t t-call="web.basic_layout">
             <div class="page">
                 <t t-if="not lines">
                     <span class="text-center"><h1>Some of the Manufacturing Order(s) selected are not done yet</h1></span>
                 </t>
-                <t t-set="total_opcost" t-value="0.0"/>
                 <t t-foreach="lines" t-as="line">
                     <t t-set="currency" t-value="line['currency']"/>
                     <t t-set="opcost" t-value="0.0"/>
@@ -191,10 +190,10 @@
         </t>
     </template>
     
-    <record id="mrp_account.action_cost_struct_mrp_production" model="ir.actions.report">
+    <!-- <record id="mrp_account.action_cost_struct_mrp_production" model="ir.actions.report">
         <field name="report_name">mrp_workorder_attendance.mrp_cost_structure_worker_lines</field>
     </record>
-    
+     -->
 
         <!-- <template id="mrp_cost_structure_worker_lines" inherit_id="mrp_account.mrp_cost_structure">
             <xpath expr="//t[@t-foreach='lines']" position="after">
