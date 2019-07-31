@@ -12,6 +12,11 @@
             <field name="arch" type="xml">
                 <form edit="true" create="false" delete="false">
                     <field name="_barcode_scanned" widget="barcode_handler" invisible="1"/>
+                    <div style="text-align: center;">
+                        <img src="/mrp_workorder_attendance/static/src/img/barcode.png" />
+                        <p>To include worker to this WO, scan the barcode now or enter in the table below.</p>
+                        <p>To remove workers simply remove the worker from the table below and save.</p>
+                    </div>
                     <field name="employee_ids">
                         <tree>
                             <field name="name" />
