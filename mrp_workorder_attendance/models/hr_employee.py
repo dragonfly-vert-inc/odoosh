@@ -30,7 +30,8 @@ class HrEmployee(models.Model):
                 }
                 self.env['hr.attendance'].create(vals)
             else:
-                raise UserError("%s (%s) already checked in." %(employee.name, employee.barcode))
+                attendance = self.env['hr.attendance'].search([('employee_id','=',employee.id),('check_out','=', False)], limit=1)
+                raise UserError("%s (%s) is working in %s, %s." %(employee.name, employee.barcode, attendance.wo_id.name, attendance.wo_id.production_id.name))
     @api.multi
     def workorder_to_checkout(self, wo_id):
         action_date = fields.Datetime.now()
