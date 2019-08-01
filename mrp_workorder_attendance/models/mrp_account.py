@@ -18,7 +18,7 @@ class MrpCostStructure(models.AbstractModel):
         productions = self.env['mrp.production']\
             .browse(docids)\
             .filtered(lambda p: p.state != 'cancel')
-        if all([production.state == 'done' for production in productions]):
-            res['workorders'] = productions.mapped('workorder_ids')
-            res['currency_id'] = self.env.user.company_id.currency_id
+        for line in res['lines']:
+            product = line['product']
+            line['workorders'] = productions.filtered(lambda m: m.product_id == product).mapped('workorder_ids')
         return res
