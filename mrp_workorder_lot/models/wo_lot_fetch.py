@@ -31,7 +31,7 @@ class MRPLotFetch(models.Model):
         elif self.test_type == 'register_consumed_materials':
             # Form validation
             if self.component_tracking != 'none' and not self.lot_id:
-                raise UserError('You must select a serial number from the dropdown. If the serial number on the picking order is not present or is different from the actual one, please add or change it on the picking order first.')
+                raise UserError('LOT Number is incorrect. Please input again. If you see the error message again, please see Inventory/Warehouse Personnel.')
             if self.component_tracking == 'none' and self.qty_done <= 0:
                 raise UserError(_('Please enter a positive quantity.'))
 
