@@ -10,11 +10,15 @@
             <field name="priority" eval="16" />
             <field name="active" eval="True" />
             <field name="arch" type="xml">
-                <xpath expr="//div[hasclass('o_workorder_actions')]" position="inside">
-                    <div class="workcenter_workers">
-                        <field name="employee_ids" widget="many2many_tags" readonly="1" />
+                <xpath expr="//div[hasclass('workorder_actions')][1]" position="after">
+                    <div class="workorder_actions">
+                        <div class="o_workorder_bar_content o_workorder_actions" name="wo_custom_bar">
+                            <div class="workcenter_workers">
+                                <field name="employee_ids" widget="many2many_tags" readonly="1" />
+                            </div>
+                            <button name="open_employee_popup" type="object" class="oe_highlight" icon="fa-user"/>
+                        </div>
                     </div>
-                    <button name="open_employee_popup" type="object" class="oe_highlight" icon="fa-user"/>
                 </xpath>
             </field>
         </record>
