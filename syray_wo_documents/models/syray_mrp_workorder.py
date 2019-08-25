@@ -23,12 +23,9 @@ class MRPWorkorder(models.Model):
             'res_model': 'mrp.document',
             'view_mode': 'kanban',
             'target' : 'new',
-            'domain' : [
-            '|',
-            '&', ('res_model', '=', 'product.product'), ('res_id', '=', self.product_id.id),
-            '&', ('res_model', '=', 'product.template'), ('res_id', '=', self.product_id.product_tmpl_id.id)],
+            'domain' : [("res_model","=", "product.product" ),("res_id","=",self.product_id.id)],
             'views': [[kanban_view.id, "kanban"]],
-            # 'context': self.env.context
+            'context': self.env.context
         }
 
     @api.model
