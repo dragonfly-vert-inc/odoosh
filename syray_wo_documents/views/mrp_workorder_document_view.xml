@@ -4,9 +4,9 @@
     <record id="mrp_workorder_view_form_tablet_inherit_syray_mrp" model="ir.ui.view">
         <field name="name">mrp.workorder.form.inherit.syray.mrp</field>
         <field name="model">mrp.workorder</field>
-        <field name="inherit_id" ref="mrp_workorder.mrp_workorder_view_form_tablet"/>
+        <field name="inherit_id" ref="mrp_workorder_attendance.mrp_workorder_employees"/>
         <field name="arch" type="xml">
-            <xpath expr="//form//div[hasclass('workorder_actions')]//div[hasclass('o_workorder_actions')]" position="inside">
+            <xpath expr="//div[@name='wo_custom_bar']/button[last()]" position="after">
                 <button name="action_open_documents_syray" type="object" class="btn-secondary" string="View Docs" icon="fa-book o_workorder_btn_icon_small"/>
             </xpath>
         </field>
