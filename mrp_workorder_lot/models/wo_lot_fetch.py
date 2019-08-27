@@ -15,11 +15,11 @@ class MRPLotFetch(models.Model):
     _inherit = "mrp.workorder"
     reserved_lot_ids = fields.Many2many('stock.production.lot', compute='_compute_reserved_lots')
 
-    @api.depends('production_id','active_move_line_ids')
+    @api.depends('move_raw_ids','active_move_line_ids')
     def _compute_reserved_lots(self):
         reserved_lots = defaultdict(float)
         for wo in self:
-            for raw_move in wo.production_id.move_raw_ids.filtered(lambda move: move.product_id == wo.component_id).mapped('active_move_line_ids'):
+            for raw_move in wo.move_raw_ids.filtered(lambda move: move.product_id == wo.component_id).mapped('active_move_line_ids'):
                 reserved_lots[raw_move.lot_id.id] += raw_move.product_qty
             for move_line in wo.active_move_line_ids.filtered(lambda move: move.product_id == wo.component_id):
                 if move_line.lot_id:
@@ -30,7 +30,7 @@ class MRPLotFetch(models.Model):
     @api.onchange('lot_id')
     def get_lot_qty(self):
         if self.lot_id:
-            reserved_qty = sum(self.production_id.move_raw_ids.mapped('active_move_line_ids').filtered(lambda line: line.lot_id == self.lot_id).mapped('product_qty'))
+            reserved_qty = sum(self.move_raw_ids.mapped('active_move_line_ids').filtered(lambda line: line.lot_id == self.lot_id).mapped('product_qty'))
             used_qty = sum(self.active_move_line_ids.filtered(lambda line: line.lot_id == self.lot_id).mapped('qty_done'))
             self.qty_done = reserved_qty - used_qty
 
