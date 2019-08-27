@@ -27,16 +27,12 @@ class MRPLotFetch(models.Model):
             available_lots = [lot_id for lot_id,reserved_qty in reserved_lots.items() if not float_is_zero(reserved_qty, precision_digits=4)]
             wo.update({'reserved_lot_ids': [(6, 0, available_lots)]})
 
-# class StockMoveLine(models.Model):
-#     _inherit = 'stock.move.line'
-
-    
-#     @api.onchange('lot_id')
-#     def _onchange_lot_id(self):
-#         if self.workorder_id and self.lot_id:
-#             reserved_qty = sum(self.workorder_id.production_id.move_raw_ids.mapped('active_move_line_ids').filtered(lambda line: line.lot_id == self.lot_id).mapped('product_qty'))
-#             used_qty = sum(self.workorder_id.active_move_line_ids.filtered(lambda line: line.lot_id == self.lot_id).mapped('qty_done'))
-#             self.qty_done = reserved_qty - used_qty
+    @api.onchange('lot_id')
+    def get_lot_qty(self):
+        if self.lot_id:
+            reserved_qty = sum(self.production_id.move_raw_ids.mapped('active_move_line_ids').filtered(lambda line: line.lot_id == self.lot_id).mapped('product_qty'))
+            used_qty = sum(self.active_move_line_ids.filtered(lambda line: line.lot_id == self.lot_id).mapped('qty_done'))
+            self.qty_done = reserved_qty - used_qty
 
     def _next(self, state='pass'):
         """ This function:
