@@ -3,7 +3,7 @@
 
 from odoo import api, models, fields
 from odoo.exceptions import UserError
-from odoo.tools import float_is_zero
+from odoo.tools import float_compare
 from odoo import exceptions
 from datetime import datetime
 from collections import defaultdict
@@ -24,7 +24,7 @@ class MRPLotFetch(models.Model):
             for move_line in wo.active_move_line_ids.filtered(lambda move: move.product_id == wo.component_id):
                 if move_line.lot_id:
                     reserved_lots[move_line.lot_id.id] -= move_line.qty_done
-            available_lots = [lot_id for lot_id,reserved_qty in reserved_lots.items() if not float_is_zero(reserved_qty, precision_digits=4)]
+            available_lots = [lot_id for lot_id,reserved_qty in reserved_lots.items() if float_compare(reserved_qty, 0, precision_digits=4) == 1]
             wo.update({'reserved_lot_ids': [(6, 0, available_lots)]})
 
     @api.onchange('lot_id')
