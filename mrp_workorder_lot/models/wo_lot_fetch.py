@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models,fields
+from odoo import api, models, fields
 from odoo.exceptions import UserError
+from odoo.tools import float_is_zero
 from odoo import exceptions
 from datetime import datetime
+from collections import defaultdict
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -13,11 +15,28 @@ class MRPLotFetch(models.Model):
     _inherit = "mrp.workorder"
     reserved_lot_ids = fields.Many2many('stock.production.lot', compute='_compute_reserved_lots')
 
-    @api.depends('production_id')
+    @api.depends('production_id','active_move_line_ids')
     def _compute_reserved_lots(self):
+        reserved_lots = defaultdict(float)
         for wo in self:
-            wo.update({'reserved_lot_ids': [(6, 0, wo.production_id.move_raw_ids.mapped('active_move_line_ids').mapped('lot_id').ids)]})
+            for raw_move in wo.production_id.move_raw_ids.filtered(lambda move: move.product_id == wo.component_id).mapped('active_move_line_ids'):
+                reserved_lots[raw_move.lot_id.id] += raw_move.product_qty
+            for move_line in wo.active_move_line_ids.filtered(lambda move: move.product_id == wo.component_id):
+                if move_line.lot_id:
+                    reserved_lots[move_line.lot_id.id] -= move_line.qty_done
+            available_lots = [lot_id for lot_id,reserved_qty in reserved_lots.items() if not float_is_zero(reserved_qty, precision_digits=4)]
+            wo.update({'reserved_lot_ids': [(6, 0, available_lots)]})
 
+# class StockMoveLine(models.Model):
+#     _inherit = 'stock.move.line'
+
+    
+#     @api.onchange('lot_id')
+#     def _onchange_lot_id(self):
+#         if self.workorder_id and self.lot_id:
+#             reserved_qty = sum(self.workorder_id.production_id.move_raw_ids.mapped('active_move_line_ids').filtered(lambda line: line.lot_id == self.lot_id).mapped('product_qty'))
+#             used_qty = sum(self.workorder_id.active_move_line_ids.filtered(lambda line: line.lot_id == self.lot_id).mapped('qty_done'))
+#             self.qty_done = reserved_qty - used_qty
 
     def _next(self, state='pass'):
         """ This function:
