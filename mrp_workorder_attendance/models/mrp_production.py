@@ -22,7 +22,6 @@ class MRPProduction(models.Model):
                 timeline.unlink()
         documents = {}
         for production in self:
-            production.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))._do_unreserve()
             for move_raw_id in production.move_raw_ids.filtered(lambda m: m.state not in ('done', 'cancel')):
                 iterate_key = self._get_document_iterate_key(move_raw_id)
                 if iterate_key:
@@ -35,6 +34,7 @@ class MRPProduction(models.Model):
             production.workorder_ids.filtered(lambda x: x.state not in ('cancel','done')).action_cancel()
             finish_moves = production.move_finished_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
             raw_moves = production.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
+            (finish_moves | raw_moves)._do_unreserve()
             (finish_moves | raw_moves)._action_cancel()
             picking_ids = production.picking_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
             picking_ids.action_cancel()
