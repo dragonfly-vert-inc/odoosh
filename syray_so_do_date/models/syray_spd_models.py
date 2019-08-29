@@ -3,6 +3,7 @@
 from odoo import models, fields, api
 
 class SPDModel(models.Model):
-    _inherit = 'stock.picking'
+    _inherit = 'stock.move'
 
-    sp_delivery_date = fields.Datetime('Delivery Date')
+
+    date_expected = fields.Datetime(related='sale_line_id.sol_delivery_date');
