@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Form view for "model" -->
+        <record id="procurement_linking_form" model="ir.ui.view">
+            <field name="name">procurement_linking_form</field>
+            <field name="model">purchase.raw.link</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <form >
+                    <sheet>
+                        <group>
+                            <field name="raw_consumption_id" readonly="1" force_save="1" />
+                            <field name="purchase_line_id" domain="[('free_quantity','&gt;', 0),('product_id','=',context.get('product_id'))]" 
+                            options="{'no_create_edit': True}"
+                            />
+                        </group>
+                        <group>
+                            <field name="quantity" readonly="1" force_save="1" />
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="link_manual_procurement" string="Link" type="object" class="oe_highlight"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <record id="procurement_linking_wizard_action" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Link Procurement</field>
+            <field name="res_model">purchase.raw.link</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+    </data>
+</odoo>
