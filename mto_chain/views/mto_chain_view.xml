@@ -30,8 +30,11 @@
                     <header>
                     </header>
                     <sheet>
-                        <div>
-                        </div>
+                        <group>
+                            <field name="record_ref" />
+                            <field name="res_model" />
+                            <field name="parent_id" />
+                        </group>
                     </sheet>
                 </form>
             </field>
@@ -48,7 +51,6 @@
                             <t t-set="node" t-value="node_id" />
                         </t>
                     </div>
-
                 </div>
             </div>
         </template>
@@ -103,13 +105,9 @@
             </xpath>
         </template>
 
-        <!-- Main menu for "model"
-        <record id="menu_model" model="ir.ui.menu">
-            <field name="name">Human readable name</field>
-            <field name="sequence" eval="10" />
-            <field name="action" ref="action_model_act_window" />
-            <field name="parent_id" ref="base.menu_custom" />
-        </record> -->
-
+        <record id="action_mto_client" model="ir.actions.client">
+            <field name="name">MTO Chain</field>
+            <field name="tag">mto_chain_action</field>
+        </record>
     </data>
 </odoo>
