@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data noupdate="0">
-        <record id="action_mto_client" model="ir.actions.client">
-            <field name="name">MTO Chain</field>
-            <field name="tag">mto_chain_action</field>
-            <!-- <field name="context" eval="{'model': 'stock.traceability.report'}" /> -->
-        </record>
         <record id="view_order_form_line_mto" model="ir.ui.view">
             <field name="name">view_order_form_line_mto</field>
             <field name="model">sale.order</field>

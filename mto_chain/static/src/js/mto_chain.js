@@ -42,7 +42,8 @@ odoo.define('mto_chain.mto_chain_action', function (require) {
                     "core": {
                         "themes": {
                             "stripes": true,
-                            "variant": "large"
+                            "variant": "large",
+                            "icons": false
                         }
                     },
                     "plugins": ["wholerow"]
