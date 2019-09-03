@@ -16,8 +16,6 @@ class MTOChain(models.Model):
     _rec_name = 'record_ref'
     _order = 'res_model ASC, res_id ASC'
 
-    _parent_store = True
-
     @api.model
     def _get_models(self):
         mixin = self.env.ref('mto_chain.model_mto_chain_mixin')
@@ -29,9 +27,21 @@ class MTOChain(models.Model):
                                   compute='_get_ref',
                                   store=True)
 
-    parent_id = fields.Many2one('mto.chain', string='Parent', index=True)
-    child_ids = fields.One2many('mto.chain', 'parent_id', string='Childs')
-    parent_path = fields.Char(index=True)
+    parent_ids = fields.Many2many(
+        string=u'Parents',
+        comodel_name='mto.chain',
+        relation='mto_parent_child_rel',
+        column1='parent_id',
+        column2='child_id',
+    )
+
+    child_ids = fields.Many2many(
+        string=u'Childs',
+        comodel_name='mto.chain',
+        relation='mto_parent_child_rel',
+        column2='parent_id',
+        column1='child_id',
+    )
 
     @api.depends('res_model', 'res_id')
     def _get_ref(self):
@@ -113,10 +123,12 @@ class StockMove(models.Model):
 
     free_quantity = fields.Float(compute='_get_free_quantity')
 
-    @api.depends('product_uom_qty','reserved_availability','purchase_line_ids')
+    @api.depends('product_uom_qty', 'reserved_availability', 'purchase_line_ids')
     def _get_free_quantity(self):
         for sm in self:
-            sm.free_quantity = sm.product_uom_qty - sm.reserved_availability - sum(sm.purchase_line_ids.mapped('quantity'))
+            sm.free_quantity = sm.product_uom_qty - sm.reserved_availability - \
+                sum(sm.purchase_line_ids.mapped('quantity'))
+
 
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
@@ -129,18 +141,16 @@ class PurchaseOrderLine(models.Model):
 
     free_quantity = fields.Float(compute='_get_free_quantity')
 
-    @api.depends('product_qty','raw_consumption_ids')
+    @api.depends('product_qty', 'raw_consumption_ids')
     def _get_free_quantity(self):
         for pl in self:
-            pl.free_quantity = pl.product_qty - sum(pl.raw_consumption_ids.mapped('quantity'))
+            pl.free_quantity = pl.product_qty - \
+                sum(pl.raw_consumption_ids.mapped('quantity'))
 
-    
     @api.multi
     @api.depends('product_id', 'order_id')
     def name_get(self):
-        return [(pl.id, "%s / %s"%(pl.product_id.name, pl.order_id.name)) for pl in self]
-    
-    
+        return [(pl.id, "%s / %s" % (pl.product_id.name, pl.order_id.name)) for pl in self]
 
 
 class PurchaseRawLink(models.Model):
@@ -162,16 +172,17 @@ class PurchaseRawLink(models.Model):
     )
 
     quantity = fields.Float(
-        required=True, 
-        readonly=True 
+        required=True,
+        readonly=True
     )
 
-    
-    @api.onchange('raw_consumption_id','purchase_line_id')
+    @api.onchange('raw_consumption_id', 'purchase_line_id')
     def _onchange_raw_purchase(self):
-        self.quantity = min(self.raw_consumption_id.free_quantity,self.purchase_line_id.free_quantity)
-    
+        self.quantity = min(self.raw_consumption_id.free_quantity,
+                            self.purchase_line_id.free_quantity)
 
     @api.multi
     def link_manual_procurement(self):
-        self.purchase_line_id.order_id.node_id.parent_id = self.raw_consumption_id.raw_material_production_id.node_id
+        child_node = self.purchase_line_id.order_id.node_id
+        parent_node = self.raw_consumption_id.raw_material_production_id.node_id
+        child_node.write({'parent_ids': [(4, parent_node.id, False)]})
