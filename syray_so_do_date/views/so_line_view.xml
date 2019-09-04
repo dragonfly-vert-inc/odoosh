@@ -7,8 +7,9 @@
          <field name="inherit_id" ref="sale.view_order_form"/>
          <field name="arch" type="xml">
              <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='name']" position="after">
-                 <field name="sol_delivery_date" force_save="1" options="{'datepicker':{'minDate': 'now'}}"
+                 <field name="date_expected" force_save="1" options="{'datepicker':{'minDate': 'now'}}"
                  attrs="{'readonly': [('state', 'in', ('done', 'cancel'))],'required': True,}"/>
+                 <field name="sale_delay" invisible="1"/>
              </xpath>
              <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='product_uom']" position="after">
                  <field name="sol_priority" force_save="1"
@@ -31,7 +32,10 @@
          <field name="inherit_id" ref="stock.view_picking_form"/>
          <field name="arch" type="xml">
              <xpath expr="/form/sheet/notebook/page/field[@name='move_ids_without_package']/tree/field[@name='product_uom']" position="after">
-                 <field name="date_expected" string="Delivery Date"/>
+                 <field name="date_expected" string="Delivery Date"
+                 attrs="{'invisible' : [('date_expected', '==','')]}"/>
+                 <field name="sale_delay"/>
+                 <field name="date_expected_sol"/>
              </xpath>
          </field>
     </record>
