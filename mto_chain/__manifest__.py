@@ -12,8 +12,8 @@
     'depends': ['mrp','stock','sale','purchase'],
     'data': [
         'security/ir.model.access.csv',
-        'views/sale_order.xml',
         'views/mto_chain_view.xml',
+        'views/sale_order.xml',
         'views/procurement_linking_wizard.xml',
         'views/mrp_production.xml',
     ],
