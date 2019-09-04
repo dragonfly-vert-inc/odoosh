@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "SO-Line Date and Priority",
+    'name': "Syncoria SO-Line Date and Priority",
 
     'summary': """
         * New date field, priority and Action button column in sales order line""",
