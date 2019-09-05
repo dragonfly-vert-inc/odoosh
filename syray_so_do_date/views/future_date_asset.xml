@@ -6,6 +6,7 @@
         <xpath expr="." position="inside">
             <script type="text/javascript"
                 src="/syray_so_do_date/static/src/js/datepicker.js"></script>
+            <link rel="stylesheet" href="/syray_so_do_date/static/src/scss/datebold.scss"></link>
         </xpath>
     </template>
 

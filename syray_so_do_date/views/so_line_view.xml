@@ -7,20 +7,20 @@
          <field name="inherit_id" ref="sale.view_order_form"/>
          <field name="arch" type="xml">
              <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='name']" position="after">
-                 <field name="date_expected" force_save="1" options="{'datepicker':{'minDate': 'now'}}"
-                 attrs="{'readonly': [('state', 'in', ('done', 'cancel'))],'required': True,}"/>
+                 <field name="date_expected" string="Delivery Date" force_save="1" options="{'datepicker':{'minDate': 'now'}}"
+                 attrs="{'readonly': [('state', 'in', ('done', 'cancel'))],}"/>
                  <field name="sale_delay" invisible="1"/>
              </xpath>
              <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='product_uom']" position="after">
                  <field name="sol_priority" force_save="1"
-                 attrs="{'readonly': [('state', 'in', ('done', 'cancel'))],'required': True,}"/>
+                 attrs="{'readonly': [('state', 'in', ('done', 'cancel'))],}"/>
              </xpath>
 <!--             <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='product_uom_qty']" position="attributes">-->
 <!--                 <attribute name="readonly">[('state', 'in', ('done', 'cancel'))]</attribute>-->
 <!--                 <attribute name="force_save">1</attribute>-->
 <!--             </xpath>-->
              <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='price_subtotal']" position="after">
-                 <button name="view_mto" string="View MTO"/>
+<!--                 <button name="view_mto" string="View MTO"/>-->
                  <button name="update_mto" string="Update" class="oe_highlight"/>
              </xpath>
          </field>
@@ -32,10 +32,10 @@
          <field name="inherit_id" ref="stock.view_picking_form"/>
          <field name="arch" type="xml">
              <xpath expr="/form/sheet/notebook/page/field[@name='move_ids_without_package']/tree/field[@name='product_uom']" position="after">
-                 <field name="date_expected" string="Delivery Date"
-                 attrs="{'invisible' : [('date_expected', '==','')]}"/>
-                 <field name="sale_delay"/>
-                 <field name="date_expected_sol"/>
+                 <field name="date_expected_custom" string="Delivery Date"
+                 attrs="{'invisible' : [('date_expected_custom', '==','')]}"/>
+<!--                 <field name="sale_delay" invisible="1"/>-->
+<!--                 <field name="date_expected_sol" invisible="1"/>-->
              </xpath>
          </field>
     </record>
