@@ -12,6 +12,12 @@
                         <field name="security_stock" class="oe_inline"/>%
                     </div>
                 </xpath>
+                
+                <xpath expr="//page[@name='inventory']/group[last()]" position="after">
+                    <group>
+                        <field name="reorder_lead_days" />
+                    </group>
+                </xpath>                
             </field>
         </record>
     </data>
