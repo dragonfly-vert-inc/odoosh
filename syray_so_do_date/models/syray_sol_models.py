@@ -52,7 +52,7 @@ class SOLModel(models.Model):
             return {'warning': warning_mess}
 
         elif self.state == 'sale' and self.product_id.type in ['product',
-                                                             'consu'] and self.product_uom_qty > product_uom_qty_origin and self.product_uom_qty != 0:
+                                                             'consu'] and self.product_uom_qty > product_uom_qty_origin and self.product_uom_qty != 0 and product_uom_qty_origin != 0:
             warning_mess = {
                 'title': _('Ordered quantity increased!'),
                 'message': 'Please add a new line if you want to increase the quantity.',
@@ -68,6 +68,11 @@ class SOLModel(models.Model):
             }
             self.product_uom_qty = product_uom_qty_origin
             return {'warning': warning_mess}
+
+        elif self.state == 'sale' and self.product_id.type in ['product',
+                                                             'consu'] and self.product_uom_qty > product_uom_qty_origin and product_uom_qty_origin == 0:
+            return {}
+
         return {}
     #
     # @api.multi
