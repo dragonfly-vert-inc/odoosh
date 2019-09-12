@@ -2,3 +2,4 @@
 
 from . import procurement_group
 from . import product
+from . import orderpoint

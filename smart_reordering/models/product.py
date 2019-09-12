@@ -13,7 +13,10 @@ class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
     security_stock  = fields.Float(string=u'Security Stock Percentage', help="Demand = Original Demand * (1+(Security Stock Percentage/100))", default=0)
-
+    
+    reorder_lead_days = fields.Integer(
+        'Reorder Lead Time', default=1,
+        help="Number of days after the orderpoint is triggered to receive the products or to order to the vendor")
 
 class Product(models.Model):
     _inherit = 'product.product'
