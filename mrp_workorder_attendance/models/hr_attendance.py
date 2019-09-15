@@ -14,3 +14,8 @@ class HrAttendance(models.Model):
     wo_id = fields.Many2one(string=u'Work Order', comodel_name='mrp.workorder', ondelete='set null')
 
     wc_id = fields.Many2one(string=u'Work Center', related='wo_id.workcenter_id', store=True)
+
+    @api.multi
+    def save(self):
+        return {'type': 'ir.actions.act_window_close'}
+        
