@@ -20,7 +20,18 @@ class MRPWorkorder(models.Model):
 
     employee_popup_id = fields.Many2one(comodel_name='workorder.add.employee', ondelete='set null')
 
-    worker_times = fields.One2many(comodel_name='hr.attendance', inverse_name='wo_id', readonly=False)
+    worker_times = fields.One2many(comodel_name='hr.attendance', inverse_name='wo_id', readonly=True)
+
+    @api.multi
+    def add_manual_worktime(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'hr.attendance',
+            'context': {'default_wo_id': self.id},
+            'view_id': self.env.ref('mrp_workorder_attendance.worker_manual_entry').id,
+            'target': 'new'
+        }
 
     @api.multi
     def open_employee_popup(self):
