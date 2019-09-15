@@ -1,14 +1,12 @@
-.o_sale_order [data-field="confirmation_date"]
-{
-
-font-weight: bold;
-
+div.o_group table{
+  .o_group .o_field_date {
+    font-weight: bold !important;
+    color: #0a0a0a !important;
+  }
 }
 
-sheet group [data-field="scheduled_date"] [data-field="date_done"]
-{
-
-font-weight: bold;
-
-}
+.o_form_view .o_group.o_inner_group > tbody > tr > td span.o_field_date {
+    font-weight: bold !important;
+    color: #0a0a0a !important;
+  }
 
