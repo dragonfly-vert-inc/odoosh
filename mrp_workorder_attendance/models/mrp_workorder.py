@@ -20,7 +20,7 @@ class MRPWorkorder(models.Model):
 
     employee_popup_id = fields.Many2one(comodel_name='workorder.add.employee', ondelete='set null')
 
-    worker_times = fields.One2many(comodel_name='hr.attendance', inverse_name='wo_id', readonly=True)
+    worker_times = fields.One2many(comodel_name='hr.attendance', inverse_name='wo_id', readonly=False)
 
     @api.multi
     def open_employee_popup(self):
