@@ -79,4 +79,6 @@ class Product(models.Model):
             res[product_id]['virtual_available'] = float_round(
                 qty_available + res[product_id]['incoming_qty'] - res[product_id]['outgoing_qty'],
                 precision_rounding=rounding)
+            res[product_id]['responsible_moves'] = Move.search(domain_move_out_todo).filtered(lambda m: not m.responsible_purchases).ids
         return res
+    
