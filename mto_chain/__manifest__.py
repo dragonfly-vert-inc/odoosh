@@ -16,6 +16,7 @@
         'views/sale_order.xml',
         'views/procurement_linking_wizard.xml',
         'views/mrp_production.xml',
+        'views/stock_move.xml'
     ],
     'demo': [],
     'installable': True,

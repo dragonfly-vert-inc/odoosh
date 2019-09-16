@@ -3,3 +3,4 @@
 
 from . import mto_chain
 from . import stock_move
+from . import stock_rule

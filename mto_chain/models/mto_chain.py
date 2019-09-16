@@ -23,7 +23,7 @@ class MTOChain(models.Model):
 
     res_model = fields.Char()
     res_id = fields.Integer()
-    record_ref = fields.Reference(selection='_get_models',
+    record_ref = fields.Reference(selection=[('purchase.order', 'Purchase Order'),('mrp.production','Manufacturing Order'),('sale.order.line'),('Sale Order Line')],
                                   compute='_get_ref',
                                   store=True)
 
@@ -71,6 +71,15 @@ class MTOChain(models.Model):
                 'mto_chain.mto_cascade_view').render(rcontext)
         return result
 
+    @api.model
+    def _get_parent(self):
+        self.ensure_one()
+        node = self
+        while (node.parent_ids):
+            node = node.parent_ids
+            if len(node) > 1:
+                node = False
+        return node
 
 class MTOChainMixin(models.AbstractModel):
     _name = 'mto.chain.mixin'
