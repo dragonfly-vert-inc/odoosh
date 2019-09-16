@@ -12,7 +12,6 @@
                         <field name="security_stock" class="oe_inline"/>%
                     </div>
                 </xpath>
-                
                 <xpath expr="//page[@name='inventory']/group[last()]" position="after">
                     <group>
                         <field name="reorder_lead_days" />
@@ -20,5 +19,20 @@
                 </xpath>                
             </field>
         </record>
+        
+        <record id="product_view_relative_demand" model="ir.ui.view">
+            <field name="name">product_view_relative_demand</field>
+            <field name="model">product.product</field>
+            <field name="type">tree</field>
+            <field name="mode">extension</field>
+            <field name="inherit_id" ref="product.product_product_tree_view" />
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[last()]" position="after">
+                    <field name="relative_demand" />                    
+                </xpath>
+            </field>
+        </record>        
     </data>
 </odoo>
