@@ -46,7 +46,7 @@
                                 </tree>
                             </field>
                         </group>
-                        <button name="add_manual_worktime" string="Manual entry" type="object" class="oe_link pull_right"/>
+                        <button name="add_manual_worktime" string="Manual entry" type="object" class="oe_link" attrs="{'invisible': [('production_state','in',('done','cancel'))]}"/>
                     </page>
                 </xpath>
             </field>
