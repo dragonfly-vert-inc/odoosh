@@ -21,7 +21,7 @@
 <!--             </xpath>-->
              <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='price_subtotal']" position="after">
 <!--                 <button name="view_mto" string="View MTO"/>-->
-                 <button name="update_mto" string="Update" class="oe_highlight" attrs="{'readonly': True}"/>
+                 <button special = "cancel" name="update_mto" string="Update" class="oe_highlight" attrs="{'readonly': True}"/>
              </xpath>
          </field>
     </record>
