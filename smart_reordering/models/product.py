@@ -8,6 +8,8 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import float_round
+from dateutil.relativedelta import relativedelta
+from odoo.addons import decimal_precision as dp
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
@@ -21,6 +23,8 @@ class ProductTemplate(models.Model):
 class Product(models.Model):
     _inherit = 'product.product'
     
+    relative_demand = fields.Float(compute='_compute_relative_demand', digits=dp.get_precision('Product Unit of Measure'),)
+
     def _compute_quantities_dict(self, lot_id, owner_id, package_id, from_date=False, to_date=False):
         domain_quant_loc, domain_move_in_loc, domain_move_out_loc = self._get_domain_locations()
         domain_quant = [('product_id', 'in', self.ids)] + domain_quant_loc
@@ -81,4 +85,10 @@ class Product(models.Model):
                 precision_rounding=rounding)
             res[product_id]['responsible_moves'] = Move.search(domain_move_out_todo).filtered(lambda m: not m.responsible_purchases).ids
         return res
-    
+          
+    @api.depends('stock_move_ids.product_qty', 'stock_move_ids.state')
+    def _compute_relative_demand(self):
+        for product in self:
+            to_date = fields.Datetime.now() + relativedelta(days=+product.reorder_lead_days)
+            res = product._compute_quantities_dict(self._context.get('lot_id'), self._context.get('owner_id'), self._context.get('package_id'), self._context.get('from_date'), to_date)
+            product.relative_demand = res[product.id]['outgoing_qty']
