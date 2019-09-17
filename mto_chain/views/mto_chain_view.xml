@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="view_mto_chain_tree" model="ir.ui.view">
+            <field name="name">view_mto_chain_tree</field>
+            <field name="model">mto.chain</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <tree string="MTO Chain" create="false" delete="false" edit="false">
+                    <field name="record_ref" widget="many2one_list" />
+                    <field name="res_model" />
+                    <field name="parent_ids" widget="many2many_tags" />
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form view for "model" -->
+        <record id="view_mto_chain_form" model="ir.ui.view">
+            <field name="name">view_mto_chain_form</field>
+            <field name="model">mto.chain</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <form string="MTO Chain" create="false" delete="false" edit="false">
+                    <header>
+                    </header>
+                    <sheet>
+                        <group>
+                            <field name="record_ref" />
+                            <field name="res_model" />
+                            <field name="parent_ids" widget="many2many_tags" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <template id="mto_cascade_view">
+            <div class="container o_stock_reports_page o_stock_reports_no_print">
+                <span t-if="node_id" class="o_report_heading text-left">
+                    <h1>MTO Cascade View</h1>
+                </span>
+                <div class="mto_chain_report">
+                    <div id="mto_tree">
+                        <t t-call="mto_chain.mto_recursive_node">
+                            <t t-set="node" t-value="node_id" />
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template id="mto_recursive_node">
+            <ul>
+                <li t-att-res-model="node.res_model" t-att-res-id="node.res_id" t-attf-data-jstree='{"icon": "/mto_chain/static/src/img/#{node.res_model}.png"}'>
+                    <t t-esc="node.record_ref.name" />
+                    <t t-foreach="node.child_ids" t-as="child" t-if="node.child_ids">
+                        <t t-call="mto_chain.mto_recursive_node">
+                            <t t-set="node" t-value="child" />
+                        </t>
+                    </t>
+                </li>
+            </ul>
+        </template>
+
+
+        <!-- Search view for "model" -->
+        <record id="mto_chain_search" model="ir.ui.view">
+            <field name="name">mto_chain_search</field>
+            <field name="model">mto.chain</field>
+            <field name="type">search</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <search string="MTO Chain">
+                    <field name="record_ref" />
+                </search>
+            </field>
+        </record>
+
+        <!-- Main window action for "model" -->
+        <record id="action_mto_chain" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">MTO Chain</field>
+            <field name="res_model">mto.chain</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+            <field name="search_view_id" ref="mto_chain_search" />
+        </record>
+
+        <template id="mto_chain_assets" name="mto chain assets" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <link rel="stylesheet" href="/mto_chain/static/lib/js/jstree/dist/themes/default/style.min.css" />
+                <script type="text/javascript" src="/mto_chain/static/lib/js/jstree/dist/jstree.min.js"></script>
+                <script type="text/javascript" src="/mto_chain/static/src/js/mto_chain.js"></script>
+            </xpath>
+        </template>
+
+        <record id="action_mto_client" model="ir.actions.client">
+            <field name="name">MTO Chain</field>
+            <field name="tag">mto_chain_action</field>
+        </record>
+    </data>
+</odoo>
