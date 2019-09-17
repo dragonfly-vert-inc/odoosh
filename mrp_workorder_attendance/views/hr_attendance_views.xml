@@ -36,6 +36,30 @@
             </field>
         </record>
 
+        <record id="worker_manual_entry" model="ir.ui.view">
+            <field name="name">worker_manual_entry</field>
+            <field name="model">hr.attendance</field>
+            <field name="type">form</field>
+            <field name="priority" eval="160" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <form string="Worker Time">
+                    <sheet>
+                        <group>
+                            <field name="employee_id"/>
+                            <field name="check_in"/>
+                            <field name="check_out" required="1" />
+                            <field name="wo_id" readonly="1" />
+                            <field name="wc_id" readonly="1" />
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button string="Add" name="save" type="object" class="btn-primary"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
         <!-- primary|extension Inherited .:Search:. view for "model" -->
         <record id="hr_attendance_view_filter_workworder" model="ir.ui.view">
             <field name="name">hr_attendance_view_filter_workworder</field>
