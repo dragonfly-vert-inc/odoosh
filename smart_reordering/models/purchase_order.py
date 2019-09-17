@@ -23,7 +23,12 @@ class PurchaseOrder(models.Model):
     def return_responsible_action(self):
         action = self.env.ref('stock.stock_move_action').read()[0]
         action.update({
-            'domain': [('id','in',self.responsible_moves.ids)],
+            'domain': [('id', 'in', self.responsible_moves.ids)],
             'context': {}
         })
         return action
+
+    @api.multi
+    def button_cancel(self):
+        self.write({'responsible_moves': [(6, False, [])]})
+        super(PurchaseOrder, self).button_cancel()
