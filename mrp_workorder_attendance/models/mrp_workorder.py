@@ -28,7 +28,7 @@ class MRPWorkorder(models.Model):
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'hr.attendance',
-            'context': {'default_wo_id': self.id},
+            'context': {'default_wo_id': self.id, 'default_check_in': False},
             'view_id': self.env.ref('mrp_workorder_attendance.worker_manual_entry').id,
             'target': 'new'
         }
