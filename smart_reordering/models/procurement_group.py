@@ -21,6 +21,6 @@ class ProcurementGroup(models.Model):
     @api.model
     def _procurement_from_orderpoint_get_groups(self, orderpoint_ids):
         OrderPoint = self.env['stock.warehouse.orderpoint'].browse(orderpoint_ids)
-        lead_days = OrderPoint.lead_days
+        lead_days = OrderPoint.product_id.reorder_lead_days
         to_date = fields.Datetime.now() + relativedelta(days=+lead_days)
         return [{'to_date': to_date, 'procurement_values': dict()}]
