@@ -14,11 +14,32 @@ from odoo.addons import decimal_precision as dp
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    security_stock  = fields.Float(string=u'Security Stock Percentage', help="Demand = Original Demand * (1+(Security Stock Percentage/100))", default=0)
-    
-    reorder_lead_days = fields.Integer(
-        'Reorder Lead Time', default=1,
-        help="Number of days after the orderpoint is triggered to receive the products or to order to the vendor")
+    security_stock = fields.Float(string=u'Security Stock Percentage',
+                                  help="Demand = Original Demand * (1+(Security Stock Percentage/100))", default=0)
+
+    selected_vendor_id = fields.Many2one(
+        string=u'Selected Vendor',
+        comodel_name='product.supplierinfo',
+        compute="_get_selected_vendor",
+        inverse="_set_selected_vendor",
+    )
+
+    reorder_lead_days = fields.Integer(compute='_get_selected_vendor')
+
+    @api.depends('seller_ids','seller_ids.delay')
+    def _get_selected_vendor(self):
+        for product in self:
+            if product.seller_ids:
+                product.selected_vendor_id = product.seller_ids[0]
+                product.reorder_lead_days = product.seller_ids[0].delay
+
+
+    def _set_selected_vendor(self):
+        if self.selected_vendor_id:
+            self.selected_vendor_id.sequence = 1
+            for position, vendor in enumerate(self.seller_ids - self.selected_vendor_id):
+                vendor.sequence = position+2
+
 
 class Product(models.Model):
     _inherit = 'product.product'
