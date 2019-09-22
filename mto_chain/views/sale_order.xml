@@ -11,7 +11,8 @@
             <field name="active" eval="True" />
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='order_line']/tree/field[last()]" position="after">
-                    <button name="%(action_mto_client)d" string="MTO Chain" type="action" icon="fa-sitemap" />
+                    <field name="node_id" invisible="1" />
+                    <button name="%(action_mto_client)d" string="MTO Chain" type="action" icon="fa-sitemap" attrs="{'invisible': [('node_id','=',False)]}" />
                 </xpath>
             </field>
         </record>
