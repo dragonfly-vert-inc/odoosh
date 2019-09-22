@@ -21,7 +21,14 @@ class StockMove(models.Model):
     @api.depends('raw_material_production_id')
     def _compute_mto_parent(self):
         for move in self:
-            if move.raw_material_production_id.node_id:
-                raw_mto_parent = move.raw_material_production_id.node_id._get_parent()
-                if raw_mto_parent.res_model == 'sale.order.line':
-                    move.raw_mto_parent = raw_mto_parent.record_ref
+            origin_move = move
+            while move:
+                production = move.raw_material_production_id
+                if not production:
+                    move = move.move_dest_ids[0] if move.move_dest_ids else False
+                else:
+                    if production.node_id:
+                        raw_mto_parent = production.node_id._get_parent()
+                        if raw_mto_parent.res_model == 'sale.order.line':
+                            origin_move.raw_mto_parent = raw_mto_parent.record_ref
+                    break
