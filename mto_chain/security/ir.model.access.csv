@@ -1,3 +1,4 @@
 "id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
 "mto_all","mto_all","model_mto_chain","",1,1,1,1
 "mto_wizard_all","mto_wizard_all","model_purchase_raw_link","",1,1,1,1
+"mto_priority_all","mto_priority_all","model_mto_priority","",1,1,1,1
