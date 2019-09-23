@@ -9,14 +9,15 @@
     'description': """
     """,
     'category': 'Custom Development',
-    'depends': ['mrp','stock','sale','purchase'],
+    'depends': ['mrp','stock','sale','purchase','web_tree_dynamic_colored_field'],
     'data': [
         'security/ir.model.access.csv',
         'views/mto_chain_view.xml',
         'views/sale_order.xml',
         'views/procurement_linking_wizard.xml',
         'views/mrp_production.xml',
-        'views/stock_move.xml'
+        'views/stock_move.xml',
+        'views/mto_priority.xml'
     ],
     'demo': [],
     'installable': True,
