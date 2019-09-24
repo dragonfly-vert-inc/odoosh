@@ -12,7 +12,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='order_line']/tree/field[last()]" position="after">
                     <field name="node_id" invisible="1" />
-                    <field name="priority_id" widget="selection" required="1" />
+                    <field name="priority_id" widget="selection" required="1" string="Priority" />
                     <button name="%(action_mto_client)d" string="MTO Chain" type="action" icon="fa-sitemap" attrs="{'invisible': [('node_id','=',False)]}" />
                 </xpath>
             </field>

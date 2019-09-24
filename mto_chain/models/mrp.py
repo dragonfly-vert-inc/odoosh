@@ -13,4 +13,6 @@ from odoo.exceptions import UserError, ValidationError
 class MrpWorkorder(models.Model):
     _inherit = 'mrp.workorder'
 
-    color = fields.Char(related='production_id.color')
+    priority_id = fields.Many2one(
+        comodel_name='mto.priority', ondelete='set null', related="production_id.priority_id", store=True)
+    color = fields.Char(related='priority_id.color')
