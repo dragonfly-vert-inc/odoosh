@@ -9,7 +9,7 @@
             <field name="priority" eval="16" />
             <field name="active" eval="True" />
             <field name="arch" type="xml">
-                <tree string="Priority">
+                <tree string="Priority" colors="color_field: color" >
                     <field name="sequence" widget="handle" />
                     <field name="name" />
                     <field name="color" />

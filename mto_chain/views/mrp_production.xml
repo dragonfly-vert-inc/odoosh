@@ -33,6 +33,11 @@
                 <xpath expr="/tree" position="attributes">
                     <attribute name="colors">color_field: color</attribute>
                 </xpath>
+                
+                <xpath expr="//field[last()]" position="after">
+                    <field name="priority_id" />
+                </xpath>
+                
             </field>
         </record>
         <record id="workcenter_line_kanban_priority" model="ir.ui.view">
@@ -51,5 +56,40 @@
                 </xpath>
             </field>
         </record>
+        <record id="production_filter_priority" model="ir.ui.view">
+            <field name="name">production_filter_priority</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.view_mrp_production_filter" />
+            <field name="type">search</field>
+            <field name="mode">extension</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[last()]" position="after">
+                    <field name="priority_id" string="Priority" />
+                </xpath>
+                <xpath expr="//group[1]" position="inside">
+                    <filter string="Priority" name="group_priority" domain="[]" context="{'group_by':'priority_id'}"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="workorder_priority" model="ir.ui.view">
+                <field name="name">workorder_priority</field>
+                <field name="model">mrp.workorder</field>
+                <field name="inherit_id" ref="mrp.view_mrp_production_workorder_form_view_filter" />
+                <field name="type">search</field>
+                <field name="mode">extension</field>
+                <field name="priority" eval="16" />
+                <field name="active" eval="True" />
+                <field name="arch" type="xml">
+                    <xpath expr="//field[last()]" position="after">
+                        <field name="priority_id" string="Priority" />
+                    </xpath>
+                    <xpath expr="//group[1]" position="inside">
+                        <filter string="Priority" name="group_priority" domain="[]" context="{'group_by':'priority_id'}"/>
+                    </xpath>
+                </field>
+            </record>
+            
     </data>
 </odoo>

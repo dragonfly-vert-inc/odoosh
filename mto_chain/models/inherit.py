@@ -17,7 +17,7 @@ class SaleOrderLine(models.Model):
     @api.model
     def default_get(self, fields):
         res = super(SaleOrderLine, self).default_get(fields)
-        res['priority_id'] = self.env['mto.priority'].search([],order='sequence DESC', limit=1).id
+        res['priority_id'] = self.env['mto.priority'].search([], limit=1).id
         return res
 
 class PurchaseOrder(models.Model):
