@@ -22,10 +22,7 @@ class MTOChain(models.Model):
                                   compute='_get_ref',
                                   store=True)
 
-    priority_id = fields.Many2one(
-        comodel_name='mto.priority', ondelete='restrict', 
-        default=lambda self: self.priority_id.search([],limit=1)
-        )
+    priority_id = fields.Many2one(comodel_name='mto.priority', ondelete='restrict')
 
     parent_ids = fields.Many2many(
         string=u'Parents',
@@ -88,8 +85,8 @@ class MTOChainMixin(models.AbstractModel):
         comodel_name='mto.chain',
         ondelete='set null')
 
-    priority_id = fields.Many2one(
-        comodel_name='mto.priority', ondelete='set null', related="node_id.priority_id", readonly=False)
+    priority_id = fields.Many2one(string='MTO Priority',
+        comodel_name='mto.priority', ondelete='set null', related="node_id.priority_id", readonly=False, store=True)
     color = fields.Char(related='priority_id.color')
 
     @api.model

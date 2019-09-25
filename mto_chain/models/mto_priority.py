@@ -14,7 +14,7 @@ class MTOPriority(models.Model):
     _description = u'MTO Priority'
 
     _rec_name = 'name'
-    _order = 'sequence ASC'
+    _order = 'sequence'
 
     sequence = fields.Integer(default=10)
     name = fields.Char(required=True)
