@@ -32,7 +32,7 @@ class SaleOrderLine(models.Model):
         if self.move_ids:
             for move in self.move_ids:
                 move.move_date_update(start_date, move.sale_line_id.order_id)
-        return date
+        return start_date
 
 class PurchaseOrder(models.Model):
     _name = 'purchase.order'
@@ -83,3 +83,11 @@ class SaleOrder(models.Model):
             for line in order.order_line:
                 line.node_id.action_date_update()
     
+    @api.multi
+    def action_cancel(self):
+        res = super(SaleOrder, self).action_cancel()
+        self.mapped('order_line').mapped('node_id').write({
+                'parent_ids': [(6, False, [])],
+                'child_ids': [(6, False, [])]
+            })
+        return res

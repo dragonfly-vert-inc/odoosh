@@ -38,7 +38,8 @@ odoo.define('mto_chain.mto_chain_action', function (require) {
             return def.then(function () {
                 self.report_widget.$el.html(self.html);
                 self.report_widget.$el.find('.o_report_heading').html('<h1>MTO Chain</h1>');
-                self.report_widget.$el.find('#mto_tree').jstree({
+                var mto_tree = $('#mto_tree', self.report_widget.$el)
+                mto_tree.jstree({
                     "core": {
                         "themes": {
                             "stripes": true,
@@ -46,9 +47,12 @@ odoo.define('mto_chain.mto_chain_action', function (require) {
                             "icons": false
                         }
                     },
-                    "plugins": ["wholerow"]
+                    "plugins": []
                 });
-                self.report_widget.$el.find('#mto_tree').on("select_node.jstree", function (node, selected, event) {
+                mto_tree.on('ready.jstree', function() {
+                    mto_tree.jstree("open_all");          
+                });
+                mto_tree.on("select_node.jstree", function (node, selected, event) {
                     var node_attr = selected.node.li_attr;
                     return self.do_action({
                         type: 'ir.actions.act_window',
