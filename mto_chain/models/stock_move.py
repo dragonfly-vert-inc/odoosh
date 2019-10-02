@@ -7,6 +7,7 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
+from datetime import datetime, timedelta
 
 
 class StockMove(models.Model):
@@ -40,3 +41,14 @@ class StockMove(models.Model):
             'product_uom', 'restrict_partner_id', 'scrapped', 'origin_returned_move_id',
             'package_level_id','move_orig_ids','move_dest_ids'
         ]
+    
+    def move_date_update(self, date, sale_id):
+        moves = self.filtered(lambda m: m.state not in ('draft','cancel','done') and m.picking_id.sale_id == sale_id)
+        moves.write({
+            'date': date,
+            'date_expected': date
+        })
+        if moves:
+            for move in moves:
+                if move.move_orig_ids:
+                    move.move_orig_ids.move_date_update(date, sale_id)

@@ -77,6 +77,14 @@ class MTOChain(models.Model):
                 node = False
         return node
 
+    @api.model
+    def action_date_update(self, date=False):
+        self.ensure_one()
+        returned_date = self.record_ref.do_date_update(date)
+        if self.child_ids:
+            for child in self.child_ids:
+                child.action_date_update(returned_date)
+
 
 class MTOChainMixin(models.AbstractModel):
     _name = 'mto.chain.mixin'
@@ -88,6 +96,10 @@ class MTOChainMixin(models.AbstractModel):
     priority_id = fields.Many2one(string='MTO Priority',
         comodel_name='mto.priority', ondelete='set null', related="node_id.priority_id", readonly=False, store=True)
     color = fields.Char(related='priority_id.color')
+
+    @api.multi
+    def action_date_update(self):
+        return self.node_id.action_date_update()
 
     @api.model
     def create(self, values):
