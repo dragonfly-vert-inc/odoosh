@@ -57,7 +57,7 @@ odoo.define('mto_chain.mto_chain_action', function (require) {
                         views: [
                             [false, 'form']
                         ],
-                        target: 'new'
+                        target: 'current'
                     });
                 });
             });

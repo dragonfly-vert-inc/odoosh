@@ -15,6 +15,15 @@
                     <field name="free_quantity" attrs="{'invisible': [('need_to_procure','=',False)]}" />
                     <button name="%(procurement_linking_wizard_action)d" string="Link Procurement" type="action" icon="fa-link" attrs="{'invisible': ['|',('free_quantity','&lt;=', 0),('need_to_procure','=',False)] }" context="{'default_raw_consumption_id': id, 'product_id': product_id }" />
                 </xpath>
+                <field name="date_planned_start" position="attributes">
+                    <attribute name="class" add="highlight-date" seperator=" "></attribute>                    
+                </field>
+                <field name="date_planned_finished" position="attributes">
+                    <attribute name="invisible">False</attribute>                    
+                </field>
+                <field name="date_planned_finished" position="attributes">
+                    <attribute name="class" add="highlight-date" seperator=" "></attribute>                    
+                </field>                        
             </field>
         </record>
 
@@ -33,11 +42,9 @@
                 <xpath expr="/tree" position="attributes">
                     <attribute name="colors">color_field: color</attribute>
                 </xpath>
-                
                 <xpath expr="//field[last()]" position="after">
                     <field name="priority_id" />
                 </xpath>
-                
             </field>
         </record>
         <record id="workcenter_line_kanban_priority" model="ir.ui.view">
@@ -74,22 +81,22 @@
             </field>
         </record>
         <record id="workorder_priority" model="ir.ui.view">
-                <field name="name">workorder_priority</field>
-                <field name="model">mrp.workorder</field>
-                <field name="inherit_id" ref="mrp.view_mrp_production_workorder_form_view_filter" />
-                <field name="type">search</field>
-                <field name="mode">extension</field>
-                <field name="priority" eval="16" />
-                <field name="active" eval="True" />
-                <field name="arch" type="xml">
-                    <xpath expr="//field[last()]" position="after">
-                        <field name="priority_id" string="Priority" />
-                    </xpath>
-                    <xpath expr="//group[1]" position="inside">
-                        <filter string="Priority" name="group_priority" domain="[]" context="{'group_by':'priority_id'}"/>
-                    </xpath>
-                </field>
-            </record>
-            
+            <field name="name">workorder_priority</field>
+            <field name="model">mrp.workorder</field>
+            <field name="inherit_id" ref="mrp.view_mrp_production_workorder_form_view_filter" />
+            <field name="type">search</field>
+            <field name="mode">extension</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[last()]" position="after">
+                    <field name="priority_id" string="Priority" />
+                </xpath>
+                <xpath expr="//group[1]" position="inside">
+                    <filter string="Priority" name="group_priority" domain="[]" context="{'group_by':'priority_id'}"/>
+                </xpath>
+            </field>
+        </record>
+
     </data>
 </odoo>
