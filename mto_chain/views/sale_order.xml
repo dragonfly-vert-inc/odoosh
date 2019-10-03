@@ -22,7 +22,7 @@
         <template id="assets_backend" name="web_widget_datepicker_optionsassets" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
                 <script type="text/javascript" src="/mto_chain/static/src/js/datepicker.js"></script>
-                <link rel="stylesheet" href="/mto_chain/static/src/scss/datebold.scss"></link>
+                <link rel="stylesheet" href="/mto_chain/static/src/scss/mto.scss"></link>
             </xpath>
         </template>
     </data>
