@@ -39,7 +39,12 @@ class PurchaseRawLink(models.Model):
 
     @api.multi
     def link_manual_procurement(self):
-        child_node = self.purchase_line_id.order_id.node_id
+        child_node = self.purchase_line_id.node_id
+        if not child_node:
+            child_node = self.env['mto.chain'].create({})
+            self.purchase_line_id.node_id = child_node
+            child_node._set_ref(self.purchase_line_id)
+
         parent_node = self.raw_consumption_id.raw_material_production_id.node_id
         child_node.write({
             'parent_ids': [(4, parent_node.id, False)],

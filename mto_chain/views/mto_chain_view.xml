@@ -58,7 +58,29 @@
         <template id="mto_recursive_node">
             <ul>
                 <li t-att-res-model="node.res_model" t-att-res-id="node.res_id" t-attf-data-jstree='{"icon": "/mto_chain/static/src/img/#{node.res_model}.png"}'>
-                    <t t-esc="node.record_ref.name" />
+                    <div class="mto-node">
+                        <t t-if="node.res_model=='sale.order.line'">
+                            <div class="node-title"><t t-esc="'%s %s'%(node.record_ref.order_id.name,node.record_ref.product_id.name)" /></div>
+                            <div class="node-times">
+                                <span class="node-start-time"><strong>Sale: </strong> <t t-esc="node.record_ref.date_expected - datetime.timedelta(days=node.record_ref.product_id.sale_delay)" t-options="{'widget': 'date'}"/></span>
+                                <span class="node-finish-time"><strong>Delivery: </strong> <t t-esc="node.record_ref.date_expected" t-options="{'widget': 'date'}" /></span>
+                            </div>
+                        </t>
+                        <t t-if="node.res_model=='mrp.production'">
+                            <div class="node-title"><t t-esc="'%s %s'%(node.record_ref.name,node.record_ref.product_id.name)" /></div>
+                            <div class="node-times">
+                                <span class="node-start-time"><strong>Start: </strong> <t t-esc="node.record_ref.date_planned_start" t-options="{'widget': 'date'}" /></span>
+                                <span class="node-finish-time"><strong>Finish: </strong> <t t-esc="node.record_ref.date_planned_finished" t-options="{'widget': 'date'}" /></span>
+                            </div>
+                        </t>
+                        <t t-if="node.res_model=='purchase.order.line'">
+                            <div class="node-title"><t t-esc="'%s %s'%(node.record_ref.order_id.name, node.record_ref.product_id.name)" /></div>
+                            <div class="node-times">
+                                <span class="node-start-time"><strong>Create: </strong> <t t-esc="node.record_ref.create_date" t-options="{'widget': 'date'}" /></span>
+                                <span class="node-finish-time"><strong>Ship: </strong> <t t-esc="node.record_ref.date_planned" t-options="{'widget': 'date'}" /></span>
+                            </div>
+                        </t>
+                    </div>
                     <t t-foreach="node.child_ids" t-as="child" t-if="node.child_ids">
                         <t t-call="mto_chain.mto_recursive_node">
                             <t t-set="node" t-value="child" />
