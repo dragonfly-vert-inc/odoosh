@@ -155,9 +155,9 @@
 <!--            <span t-if="qlines" class="o_report_heading text-left"><h1 t-raw="so_parent_q"></h1></span>-->
             <span><t t-esc="context"/></span>
             <div class="o_discrepancy_reports_table table-responsive">
-                <t t-if="not qlines">
-                    <span class="text-center"><h1>No operation made on this SO line.</h1></span>
-                </t>
+<!--                <t t-if="not qlines">-->
+<!--                    <span class="text-center"><h1>No operation made on this SO line.</h1></span>-->
+<!--                </t>-->
                 <t t-if="qlines">
                     <table width='100%' class="table">
                         <thead>
