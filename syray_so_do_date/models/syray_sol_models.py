@@ -15,9 +15,9 @@ class SOLModel(models.Model):
     #sol_delivery_date = fields.Datetime.from_string('Delivery Date Sol')
     date_expected = fields.Datetime('Delivery Date')
 
-    sol_priority = fields.Selection([
-        ('1', 'Low'), ('2', 'Medium'), ('3', 'High'),
-    ], string='Priority')
+    # sol_priority = fields.Selection([
+    #     ('1', 'Low'), ('2', 'Medium'), ('3', 'High'),
+    # ], string='Priority')
 
     sale_delay = fields.Float(related='product_id.product_tmpl_id.sale_delay');
 
@@ -46,7 +46,7 @@ class SOLModel(models.Model):
             # one; the `write` will raise an `UserError` anyway.
             warning_mess = {
                 'title': _('Ordered quantity decreased!'),
-                'message': 'Decreasing quantity is not allowed',
+                'message': 'Sorry, you cannot decrease the quantity on an SO line. Please cancel the SO line by deleting or by setting the quantity to 0 and create a new SO line with the new quantity',
             }
             self.product_uom_qty = product_uom_qty_origin
             return {'warning': warning_mess}
@@ -55,7 +55,7 @@ class SOLModel(models.Model):
                                                              'consu'] and self.product_uom_qty > product_uom_qty_origin and self.product_uom_qty != 0 and product_uom_qty_origin != 0:
             warning_mess = {
                 'title': _('Ordered quantity increased!'),
-                'message': 'Please add a new line if you want to increase the quantity.',
+                'message': 'You cannot increase the quantity on this SO line. Please create a new SO line for this product to add the additional quantity',
             }
             self.product_uom_qty = product_uom_qty_origin
             return {'warning': warning_mess}
@@ -64,7 +64,7 @@ class SOLModel(models.Model):
                                                              'consu'] and self.product_uom_qty < product_uom_qty_origin and self.product_uom_qty == 0:
             warning_mess = {
                 'title': _('Ordered quantity decreased to 0!'),
-                'message': 'Delete operation will be complete at sprint3',
+                'message': 'Putting the quantity to 0 will cancel the SO line, do you wish to continue?',
             }
             self.product_uom_qty = product_uom_qty_origin
             return {'warning': warning_mess}

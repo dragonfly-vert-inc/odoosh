@@ -24,7 +24,13 @@
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
+        'views/discrepancy_template.xml',
         'views/so_line_view.xml',
+        'views/discrepancy_view.xml',
+    ],
+    'qweb': [
+        'static/src/xml/discrepancy_report_backend.xml',
+        # 'static/src/xml/discrepancy_report_line.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
