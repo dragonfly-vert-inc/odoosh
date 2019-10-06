@@ -283,11 +283,11 @@ class DiscrepancyModel(models.TransientModel):
         if current_date_frmt >= production_data.date_planned_start and purchase_data.product_qty > purchase_data.qty_received:
             discrepancy_message_start = "Purchase order missed parent MO's scheduled start date"
             discrepancy_message_end = ""
+            discrepancy_start_status = True
+            discrepancy_finish_status = True
         else:
             discrepancy_message_start = "No Discrepancy"
             discrepancy_message_end = ""
-            discrepancy_start_status = True
-            discrepancy_finish_status = True
         # _logger.info(ref)
         list_data = {
             "res_model": res_model,
