@@ -7,6 +7,7 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools import float_is_zero
 from datetime import datetime, timedelta
 
 
@@ -48,6 +49,9 @@ class MrpProduction(models.Model):
 
     _inherit = ['mrp.production', 'mto.chain.mixin']
 
+    def _get_start_date(self):
+        return max(self.date_planned_start, datetime.now())
+
     @api.model
     def do_date_update(self, date=False):
         self.ensure_one()
@@ -82,6 +86,7 @@ class SaleOrder(models.Model):
         for order in self:
             for line in order.order_line:
                 line.node_id.action_date_update()
+                line.node_id.action_priority_update()
     
     @api.multi
     def action_cancel(self):

@@ -8,3 +8,4 @@ from . import stock_rule
 from . import inherit
 from . import mrp
 from . import purchase_link
+from . import mto_cancel
