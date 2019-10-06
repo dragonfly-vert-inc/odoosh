@@ -40,7 +40,7 @@ class SOLModel(models.Model):
                                                              'consu'] and self.product_uom_qty < product_uom_qty_origin and self.product_uom_qty == 0:
             warning_mess = {
                 'title': _('Ordered quantity decreased to 0!'),
-                'message': 'Putting the quantity to 0 will cancel the SO line and related MTO chain, If you wish to continue please delete the SO line.',
+                'message': 'Putting the quantity to 0 will cancel the SO line and related MTO chain, If you wish to continue please cancel MTO.',
             }
             self.product_uom_qty = product_uom_qty_origin
             return {'warning': warning_mess}

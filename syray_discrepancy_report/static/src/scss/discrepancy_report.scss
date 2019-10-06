@@ -19,10 +19,14 @@
         position: absolute;
     }
 }
+.white-bg {
+        background: #ffffff !important;
+    }
 .o_discrepancy_report_page {
     @include media-breakpoint-down(md) {
         overflow-x:scroll;
     }
+
     background-color: $o-view-background-color;
     &.o_discrepancy_report_no_print {
         padding-bottom: 125px;

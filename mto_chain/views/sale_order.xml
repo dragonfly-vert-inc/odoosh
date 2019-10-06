@@ -12,7 +12,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='order_line']/tree/field[last()]" position="after">
                     <field name="node_id" invisible="1" />
-                    <field name="date_expected" class="highlight-date" string="Delivery Date" attrs="{'required': True, 'readonly': [('state', 'in', ('done', 'cancel'))]}" options="{'datepicker':{'minDate': 'now'}}"/>
+                    <field name="date_expected" class="highlight-date" string="Delivery Date" attrs="{'required': True, 'readonly': [('state', 'in', ('done', 'cancel'))]}" />
                     <field name="priority_id" string="Priority" options="{'no_create_edit': True, 'no_open': True}" />
                     <button name="%(action_mto_client)d" string="MTO Chain" type="action" icon="fa-sitemap" attrs="{'invisible': ['|',('node_id','=',False),('parent.state','not in',('sale'))]}" />
                     <button name="action_update" string="Update" type="object" icon="fa-check-circle" attrs="{'invisible': ['|',('node_id','=',False),('parent.state','not in',('sale'))]}" />
