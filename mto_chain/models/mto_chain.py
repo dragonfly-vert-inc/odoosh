@@ -85,6 +85,24 @@ class MTOChain(models.Model):
             for child in self.child_ids:
                 child.action_date_update(returned_date)
 
+    @api.model
+    def action_priority_update(self):
+        self.ensure_one()
+        if self.child_ids:
+            self.child_ids.write({
+                'priority_id': self.priority_id.id
+            })
+            for child in self.child_ids:
+                child.action_date_update()
+
+    @api.model
+    def action_cancel_mto(self):
+        self.ensure_one()
+        if self.res_model == 'mrp.production' and self.record_ref.state not in ('done', 'cancel'):
+            self.record_ref.force_action_cancel()
+        if self.child_ids:
+            for child in self.child_ids:
+                child.action_cancel_mto()
 
 class MTOChainMixin(models.AbstractModel):
     _name = 'mto.chain.mixin'
@@ -98,13 +116,17 @@ class MTOChainMixin(models.AbstractModel):
     color = fields.Char(related='priority_id.color')
 
     @api.multi
-    def action_date_update(self):
-        return self.node_id.action_date_update()
+    def action_update(self):
+        self.node_id.action_date_update()
+        self.node_id.action_priority_update()
 
     @api.model
     def create(self, values):
         node_id = self.node_id.create({}).id
         values.update({'node_id': node_id})
+        if not values.get('priority_id', False):
+            priority_id = self.env['mto.priority'].search([], order='sequence DESC', limit=1).id
+            values.update({'priority_id': priority_id})
         result = super(MTOChainMixin, self).create(values)
         result.node_id._set_ref(result)
         return result

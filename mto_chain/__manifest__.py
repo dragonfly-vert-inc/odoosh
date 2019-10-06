@@ -13,11 +13,12 @@
     'data': [
         'security/ir.model.access.csv',
         'views/mto_chain_view.xml',
+        'views/cancel_mto.xml',
         'views/sale_order.xml',
         'views/procurement_linking_wizard.xml',
         'views/mrp_production.xml',
         'views/stock_move.xml',
-        'views/mto_priority.xml'
+        'views/mto_priority.xml',
     ],
     'demo': [],
     'installable': True,
