@@ -405,7 +405,7 @@ class DiscrepancyModel(models.TransientModel):
             discrepancy_status = True
         if work_order.state == "cancel":
             discrepancy_message = "Canceled"
-            discrepancy_message = "Canceled"
+            discrepancy_message = ""
 
         name = production_data.name + " - " + work_order.name
         ref = self._get_reference('mrp.workorder', work_order.id, name)
