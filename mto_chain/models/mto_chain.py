@@ -96,7 +96,7 @@ class MTOChain(models.Model):
                 'priority_id': self.priority_id.id
             })
             for child in self.child_ids:
-                child.action_date_update()
+                child.action_priority_update()
 
     @api.model
     def action_cancel_mto(self):
