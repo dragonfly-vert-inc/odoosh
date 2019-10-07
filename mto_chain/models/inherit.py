@@ -25,15 +25,27 @@ class SaleOrderLine(models.Model):
         return res
 
     @api.model
-    def do_date_update(self, date=False):
+    def do_date_update(self, start_date=False, end_date=False):
         self.ensure_one()
-        if not date:
-            date = self.date_expected
-        start_date = date - timedelta(days=self.product_id.sale_delay)
-        if self.move_ids:
-            for move in self.move_ids:
-                move.move_date_update(start_date, move.sale_line_id.order_id)
-        return start_date
+        if end_date:
+            start_date = end_date - timedelta(days=self.product_id.sale_delay)
+            return_date = False, start_date
+        elif start_date:
+            end_date = start_date + timedelta(days=self.product_id.sale_delay)
+            return_date = end_date, False
+        elif not any((end_date,start_date)):
+            start_date = self.date_expected - timedelta(days=self.product_id.sale_delay)
+            end_date = self.date_expected
+            return_date = end_date, start_date
+        
+        if self.state not in ('done', 'cancel'):
+            self.write({
+                'date_expected': end_date
+            })
+            if self.move_ids:
+                for move in self.move_ids:
+                    move.move_date_update(start_date, move.sale_line_id.order_id)
+        return return_date
 
 class PurchaseOrder(models.Model):
     _name = 'purchase.order.line'
@@ -53,28 +65,37 @@ class MrpProduction(models.Model):
         return max(self.date_planned_start, datetime.now())
 
     @api.model
-    def do_date_update(self, date=False):
+    def do_date_update(self, start_date=False, end_date=False):
         self.ensure_one()
-        if not date:
-            date = self.date_planned_finished
-        start_date = date - timedelta(days=self.product_id.produce_delay)
-        self.write({
-            'date_planned_start': start_date,
-            'date_planned_finished': date
-        })
-        self.picking_ids.mapped('move_lines').write({
-            'date': start_date,
-            'date_expected': start_date
-        })
-        self.move_finished_ids.write({
-            'date': date,
-            'date_expected': date
-        })
-        self.move_raw_ids.write({
-            'date': start_date,
-            'date_expected': start_date
-        })
-        return start_date
+        if end_date:
+            start_date = end_date - timedelta(days=self.product_id.produce_delay)
+            return_date = False, start_date
+        elif start_date:
+            end_date = start_date + timedelta(days=self.product_id.produce_delay)
+            return_date = end_date, False
+        elif not any((end_date,start_date)):
+            start_date = self.date_planned_start
+            end_date = self.date_planned_finished
+            return_date = end_date, start_date
+        
+        if self.state not in ('done', 'cancel'):
+            self.write({
+                'date_planned_start': start_date,
+                'date_planned_finished': end_date
+            })
+            self.picking_ids.mapped('move_lines').write({
+                'date': start_date,
+                'date_expected': start_date
+            })
+            self.move_finished_ids.write({
+                'date': end_date,
+                'date_expected': end_date
+            })
+            self.move_raw_ids.write({
+                'date': start_date,
+                'date_expected': start_date
+            })
+        return return_date
 
 
 class SaleOrder(models.Model):
