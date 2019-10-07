@@ -54,29 +54,13 @@ class SOLModel(models.Model):
 
     @api.onchange('date_expected')
     def _onchange_product_expt_date(self):
-        current_date = datetime.now()
-        current_date_str = datetime.strftime(current_date, "%Y-%m-%d %H:%M:%S")
-        current_date_frmt = datetime.strptime(current_date_str, "%Y-%m-%d %H:%M:%S")
-
-        if self._origin:
-            date_expected_origin = self._origin.read(["date_expected"])[0]["date_expected"]
-        else:
-            date_expected_origin = ""
-
-        if self.date_expected:
-            current_date_frmt_date = datetime.strptime(current_date_str, "%Y-%m-%d %H:%M:%S").date()
-            date_expected_test_str = datetime.strftime(self.date_expected, "%Y-%m-%d %H:%M:%S")
-            date_expected_test_date = datetime.strptime(date_expected_test_str, "%Y-%m-%d %H:%M:%S").date()
-            if (self.state != 'done' or self.state != 'cancel') and current_date_frmt_date > date_expected_test_date:
-                # Do not display this warning if the new quantity is below the delivered
-                # one; the `write` will raise an `UserError` anyway.
-                warning_mess = {
+        if self.date_expected and self.date_expected < datetime.now():
+            self.date_expected = self._origin.read(["date_expected"])[0]["date_expected"] if self._origin else False
+            return {
+                'warning': {
                     'title': _('Error!'),
                     'message': 'Sorry, you cannot set previous date as Delivery Date',
-                }
-                self.date_expected = date_expected_origin
-                return {'warning': warning_mess}
-
-        return {}
+                },
+            }
 
 
