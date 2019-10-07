@@ -78,12 +78,15 @@ class MTOChain(models.Model):
         return node
 
     @api.model
-    def action_date_update(self, date=False):
+    def action_date_update(self, start_date=False, end_date=False):
         self.ensure_one()
-        returned_date = self.record_ref.do_date_update(date)
-        if self.child_ids:
+        start_date, end_date = self.record_ref.do_date_update(start_date, end_date)
+        if end_date and self.child_ids:
             for child in self.child_ids:
-                child.action_date_update(returned_date)
+                child.action_date_update(end_date=end_date)
+        if start_date and self.parent_ids:
+            for parent in self.parent_ids:
+                parent.action_date_update(start_date=start_date)
 
     @api.model
     def action_priority_update(self):
@@ -117,8 +120,9 @@ class MTOChainMixin(models.AbstractModel):
 
     @api.multi
     def action_update(self):
-        self.node_id.action_date_update()
-        self.node_id.action_priority_update()
+        for record in self:
+            record.node_id.action_date_update()
+            record.node_id.action_priority_update()
 
     @api.model
     def create(self, values):
