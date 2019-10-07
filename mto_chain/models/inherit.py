@@ -53,7 +53,7 @@ class PurchaseOrder(models.Model):
     _inherit = ['purchase.order.line', 'mto.chain.mixin']
 
     @api.model
-    def do_date_update(self, date=False):
+    def do_date_update(self, start_date=False, end_date=False):
         pass
 
 class MrpProduction(models.Model):
