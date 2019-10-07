@@ -64,7 +64,10 @@ class SOLModel(models.Model):
             date_expected_origin = current_date_frmt
 
         if self.date_expected:
-            if (self.state != 'done' or self.state != 'cancel') and current_date_frmt > self.date_expected:
+            current_date_frmt_date = datetime.strptime(current_date_str, "%Y-%m-%d %H:%M:%S").date()
+            date_expected_test_str = datetime.strftime(self.date_expected, "%Y-%m-%d %H:%M:%S")
+            date_expected_test_date = datetime.strptime(date_expected_test_str, "%Y-%m-%d %H:%M:%S").date()
+            if (self.state != 'done' or self.state != 'cancel') and current_date_frmt_date > date_expected_test_date:
                 # Do not display this warning if the new quantity is below the delivered
                 # one; the `write` will raise an `UserError` anyway.
                 warning_mess = {
