@@ -3,6 +3,7 @@
 from odoo import models, fields, api, _
 from datetime import timedelta
 from dateutil import relativedelta
+from datetime import datetime
 
 class SOLModel(models.Model):
     _inherit = 'sale.order.line'
@@ -48,6 +49,30 @@ class SOLModel(models.Model):
         elif self.state == 'sale' and self.product_id.type in ['product',
                                                              'consu'] and self.product_uom_qty > product_uom_qty_origin and product_uom_qty_origin == 0:
             return {}
+
+        return {}
+
+    @api.onchange('date_expected')
+    def _onchange_product_expt_date(self):
+        current_date = datetime.now()
+        current_date_str = datetime.strftime(current_date, "%Y-%m-%d %H:%M:%S")
+        current_date_frmt = datetime.strptime(current_date_str, "%Y-%m-%d %H:%M:%S")
+
+        if self._origin:
+            date_expected_origin = self._origin.read(["date_expected"])[0]["date_expected"]
+        else:
+            date_expected_origin = current_date_frmt
+
+        if self.date_expected:
+            if (self.state != 'done' or self.state != 'cancel') and current_date_frmt > self.date_expected:
+                # Do not display this warning if the new quantity is below the delivered
+                # one; the `write` will raise an `UserError` anyway.
+                warning_mess = {
+                    'title': _('Error!'),
+                    'message': 'Sorry, you cannot set previous date as Delivery Date',
+                }
+                self.date_expected = date_expected_origin
+                return {'warning': warning_mess}
 
         return {}
 
