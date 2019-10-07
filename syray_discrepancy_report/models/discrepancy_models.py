@@ -203,7 +203,7 @@ class DiscrepancyModel(models.TransientModel):
         if production_data.state == "cancel":
             discrepancy_message_start = "Canceled"
             discrepancy_message_end = ""
-        if work_order.state == "done":
+        if production_data.state == "done":
             discrepancy_message_start = "Done"
             discrepancy_message_end = ""
 
