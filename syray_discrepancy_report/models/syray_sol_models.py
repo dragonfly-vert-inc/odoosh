@@ -61,7 +61,7 @@ class SOLModel(models.Model):
         if self._origin:
             date_expected_origin = self._origin.read(["date_expected"])[0]["date_expected"]
         else:
-            date_expected_origin = current_date_frmt
+            date_expected_origin = ""
 
         if self.date_expected:
             current_date_frmt_date = datetime.strptime(current_date_str, "%Y-%m-%d %H:%M:%S").date()
