@@ -202,7 +202,10 @@ class DiscrepancyModel(models.TransientModel):
             discrepancy_finish_status = True
         if production_data.state == "cancel":
             discrepancy_message_start = "Canceled"
-            discrepancy_message_end = "Canceled"
+            discrepancy_message_end = ""
+        if work_order.state == "done":
+            discrepancy_message_start = "Done"
+            discrepancy_message_end = ""
 
         name = production_data.name
         ref = self._get_reference(res_model, res_id, name)
@@ -244,7 +247,7 @@ class DiscrepancyModel(models.TransientModel):
             discrepancy_message_end = ""
         else:
             discrepancy_message_start = "Purchase order is still pending."
-            discrepancy_message_end = "Purchase order is still pending."
+            discrepancy_message_end = ""
             discrepancy_start_status = True
             discrepancy_finish_status = True
         # _logger.info(ref)
@@ -326,7 +329,10 @@ class DiscrepancyModel(models.TransientModel):
             discrepancy_finish_status = True
         if work_order.state == "cancel":
             discrepancy_message_start = "Canceled"
-            discrepancy_message_end = "Canceled"
+            discrepancy_message_end = ""
+        if work_order.state == "done":
+            discrepancy_message_start = "Done"
+            discrepancy_message_end = ""
 
         name = production_data.name + " - " + work_order.name
         ref = self._get_reference('mrp.workorder', work_order.id, name)
