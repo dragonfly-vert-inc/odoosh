@@ -54,7 +54,7 @@ class PurchaseOrder(models.Model):
 
     @api.model
     def do_date_update(self, start_date=False, end_date=False):
-        pass
+        return False, False
 
 class MrpProduction(models.Model):
     _name = 'mrp.production'

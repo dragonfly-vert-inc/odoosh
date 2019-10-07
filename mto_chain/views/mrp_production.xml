@@ -106,7 +106,7 @@
             <field name="sequence" eval="5" />
             <field name="context" eval="{}" />
             <field name="state">code</field>
-            <field name="code">record.action_update()</field>
+            <field name="code">records.action_update()</field>
         </record>
     </data>
 </odoo>
