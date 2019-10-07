@@ -78,7 +78,7 @@ class MrpProduction(models.Model):
             end_date = self.date_planned_finished
             return_date = end_date, start_date
         
-        if self.state not in ('done', 'cancel'):
+        if self.state not in ('done', 'cancel', 'progress'):
             self.write({
                 'date_planned_start': start_date,
                 'date_planned_finished': end_date
