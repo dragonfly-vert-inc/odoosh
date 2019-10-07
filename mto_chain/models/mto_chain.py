@@ -120,8 +120,9 @@ class MTOChainMixin(models.AbstractModel):
 
     @api.multi
     def action_update(self):
-        self.node_id.action_date_update()
-        self.node_id.action_priority_update()
+        for record in self:
+            record.node_id.action_date_update()
+            record.node_id.action_priority_update()
 
     @api.model
     def create(self, values):

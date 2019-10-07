@@ -16,14 +16,14 @@
                     <button name="%(procurement_linking_wizard_action)d" string="Link Procurement" type="action" icon="fa-link" attrs="{'invisible': ['|',('free_quantity','&lt;=', 0),('need_to_procure','=',False)] }" context="{'default_raw_consumption_id': id, 'product_id': product_id }" />
                 </xpath>
                 <field name="date_planned_start" position="attributes">
-                    <attribute name="class" add="highlight-date" seperator=" "></attribute>                    
+                    <attribute name="class" add="highlight-date" seperator=" "></attribute>
                 </field>
                 <field name="date_planned_finished" position="attributes">
-                    <attribute name="invisible">False</attribute>                    
+                    <attribute name="invisible">False</attribute>
                 </field>
                 <field name="date_planned_finished" position="attributes">
-                    <attribute name="class" add="highlight-date" seperator=" "></attribute>                    
-                </field>                        
+                    <attribute name="class" add="highlight-date" seperator=" "></attribute>
+                </field>
             </field>
         </record>
 
@@ -98,7 +98,6 @@
             </field>
         </record>
 
-        
         <record id="update_mto_mrp" model="ir.actions.server">
             <field name="type">ir.actions.server</field>
             <field name="name">Update MTO</field>
@@ -107,10 +106,7 @@
             <field name="sequence" eval="5" />
             <field name="context" eval="{}" />
             <field name="state">code</field>
-            <field name="code">
-                for mrp in records:
-                    mrp.action_update()
-            </field>
+            <field name="code">records.action_update()</field>
         </record>
     </data>
 </odoo>
