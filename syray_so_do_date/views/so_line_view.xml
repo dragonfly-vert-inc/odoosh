@@ -11,17 +11,17 @@
                  attrs="{'required': True, 'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
                  <field name="sale_delay" invisible="1"/>
              </xpath>
-             <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='product_uom']" position="after">
-                 <field name="sol_priority" force_save="1"
-                 attrs="{'required': True,'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-             </xpath>
+<!--             <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='product_uom']" position="after">-->
+<!--                 <field name="sol_priority" force_save="1"-->
+<!--                 attrs="{'required': True,'readonly': [('state', 'in', ('done', 'cancel'))]}"/>-->
+<!--             </xpath>-->
 <!--             <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='product_uom_qty']" position="attributes">-->
 <!--                 <attribute name="readonly">[('state', 'in', ('done', 'cancel'))]</attribute>-->
 <!--                 <attribute name="force_save">1</attribute>-->
 <!--             </xpath>-->
-             <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='price_subtotal']" position="after">
+             <xpath expr="//field[@name='order_line']/tree/field[last()]" position="after">
 <!--                 <button name="view_mto" string="View MTO"/>-->
-                 <button special = "cancel" name="update_mto" string="Update" class="oe_highlight" attrs="{'readonly': True}"/>
+                 <button special = "cancel" name="update_mto" string="Update" class="oe_highlight" attrs="{'invisible': [('node_id','=',False)], 'readonly': True}"/>
              </xpath>
          </field>
     </record>

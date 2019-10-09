@@ -3,33 +3,10 @@
 from odoo import models, fields, api, _
 from datetime import timedelta
 from dateutil import relativedelta
-
-class SPDModel(models.Model):
-    _inherit = 'stock.move'
-
-    date_expected_custom = fields.Datetime("Delivery Date")
+from datetime import datetime
 
 class SOLModel(models.Model):
     _inherit = 'sale.order.line'
-
-    #sol_delivery_date = fields.Datetime.from_string('Delivery Date Sol')
-    date_expected = fields.Datetime('Delivery Date')
-
-    # sol_priority = fields.Selection([
-    #     ('1', 'Low'), ('2', 'Medium'), ('3', 'High'),
-    # ], string='Priority')
-
-    sale_delay = fields.Float(related='product_id.product_tmpl_id.sale_delay');
-
-    @api.multi
-    def _prepare_procurement_values(self, group_id=False):
-        res = super(SOLModel, self)._prepare_procurement_values(group_id)
-        date_expected_do = fields.Datetime.from_string(self.date_expected) - timedelta(days=int(self.sale_delay))
-        res.update({'date_expected_custom': date_expected_do})
-        return res
-
-    def update_mto(self):
-        return ''
 
     @api.onchange('product_uom_qty')
     def _onchange_product_uom_qty(self):
@@ -64,7 +41,7 @@ class SOLModel(models.Model):
                                                              'consu'] and self.product_uom_qty < product_uom_qty_origin and self.product_uom_qty == 0:
             warning_mess = {
                 'title': _('Ordered quantity decreased to 0!'),
-                'message': 'Putting the quantity to 0 will cancel the SO line, do you wish to continue?',
+                'message': 'Putting the quantity to 0 will cancel the SO line and related MTO chain, If you wish to continue please cancel MTO.',
             }
             self.product_uom_qty = product_uom_qty_origin
             return {'warning': warning_mess}
@@ -74,24 +51,16 @@ class SOLModel(models.Model):
             return {}
 
         return {}
-    #
-    # @api.multi
-    # def _prepare_move_line_vals(self, quantity=None, reserved_quant=None):
-    #     res = super(SOLModel, self)._prepare_move_line_vals(quantity, reserved_quant)
-    #     date_expected_do = fields.Datetime.from_string(self.date_expected) - timedelta(days=int(self.sale_delay))
-    #     res.update({'date_expected': date_expected_do})
-    #     return res
 
-
-class StockRuleInherit(models.Model):
-        _inherit = 'stock.rule'
-
-        def _get_stock_move_values(self, product_id, product_qty, product_uom, location_id, name, origin, values, group_id):
-            res = super(StockRuleInherit, self)._get_stock_move_values(product_id, product_qty, product_uom, location_id,
-                                                                       name, origin, values, group_id)
-            res['date_expected_custom'] = values.get('date_expected_custom', False)
-
-            return res
-
+    @api.onchange('date_expected')
+    def _onchange_product_expt_date(self):
+        if self.date_expected and self.date_expected.date() < datetime.now().date():
+            self.date_expected = self._origin.read(["date_expected"])[0]["date_expected"] if self._origin else False
+            return {
+                'warning': {
+                    'title': _('Error!'),
+                    'message': 'Sorry, you cannot set previous date as Delivery Date',
+                },
+            }
 
 
