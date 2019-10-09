@@ -30,8 +30,8 @@ class DiscrepancyModel(models.TransientModel):
         context = dict(self.env.context)
         active_id = context.get('active_id', False)
         active_model = context.get('model', False)
-        _logger.info(active_id)
-        _logger.info(active_model)
+        # _logger.info(active_id)
+        # _logger.info(active_model)
         if active_id and active_model:
             rcontext['so_parent_date'] = "Date Discrepancy Report " + self.get_so_information()
             rcontext['so_parent_q'] = "Quantity Discrepancy Report " + self.get_so_information()
@@ -50,7 +50,7 @@ class DiscrepancyModel(models.TransientModel):
         active_id = context.get('active_id', False)
         active_model = context.get('model', False)
         so_data = self.env[active_model].browse(active_id)
-        _logger.info(so_data)
+        # _logger.info(so_data)
         name = so_data.name
         if active_model == "sale.order.line":
             name = "(" + so_data.order_id.name + ") - " + name
@@ -63,13 +63,13 @@ class DiscrepancyModel(models.TransientModel):
         active_id = context.get('active_id', False)
         active_model = context.get('model', False)
         node_id = self.env[active_model].browse(active_id).node_id
-        _logger.info(node_id)
+        # _logger.info(node_id)
         nodes = node_id.child_ids;
         for node in nodes:
             node_id = node.id
-            _logger.info(node_id)
+            # _logger.info(node_id)
             res_model = node.res_model
-            _logger.info(res_model)
+            # _logger.info(res_model)
             if res_model == "mrp.production" and sector == "date":
                 discrepancy_list_data = self._recursive_node(node, discrepancy_list_data)
             elif res_model == "mrp.production" and sector == "quantity":
@@ -85,7 +85,7 @@ class DiscrepancyModel(models.TransientModel):
     @api.model
     def _list_to_date_lines(self, discrepancy_list_data):
         lines = []
-        _logger.info("in _list_to_lines")
+        # _logger.info("in _list_to_lines")
         for data in discrepancy_list_data:
             lines.append({
                 'id': autoIncrement(),
@@ -110,13 +110,13 @@ class DiscrepancyModel(models.TransientModel):
                 'unfoldable': True
             })
 
-        _logger.info("return _list_to_lines")
+        # _logger.info("return _list_to_lines")
         return lines
 
     @api.model
     def _list_to_quantity_lines(self, discrepancy_list_data):
         lines = []
-        _logger.info("in _list_to_lines")
+        # _logger.info("in _list_to_lines")
         for data in discrepancy_list_data:
             lines.append({
                 'id': autoIncrement(),
@@ -140,34 +140,34 @@ class DiscrepancyModel(models.TransientModel):
                 'unfoldable': True
             })
 
-        _logger.info("return _list_to_lines")
+        # _logger.info("return _list_to_lines")
         return lines
 
     @api.model
     def _recursive_node(self, parent_node, discrepancy_list_data):
-        _logger.info("into recursive node")
+        # _logger.info("into recursive node")
         current_date = datetime.now()
         current_date_str = datetime.strftime(current_date, "%Y-%m-%d %H:%M:%S")
         current_date_frmt = datetime.strptime(current_date_str, "%Y-%m-%d %H:%M:%S")
-        _logger.info(current_date_frmt)
+        # _logger.info(current_date_frmt)
         mo_line = self._get_production_data(parent_node, current_date_frmt)
         discrepancy_list_data.append(mo_line)
         res_id = parent_node.res_id
-        _logger.info(res_id)
+        # _logger.info(res_id)
         work_order_data = self.env['mrp.workorder'].search([('production_id', '=', res_id)])
-        _logger.info("work_order_data")
-        _logger.info(work_order_data)
+        # _logger.info("work_order_data")
+        # _logger.info(work_order_data)
         if work_order_data:
             for work_order in work_order_data:
                 wo_line = self._get_wo_data(parent_node, work_order, current_date_frmt)
                 discrepancy_list_data.append(wo_line)
         nodes = parent_node.child_ids;
-        _logger.info("check second node")
-        _logger.info(nodes)
+        # _logger.info("check second node")
+        # _logger.info(nodes)
         if nodes:
             for node in nodes:
                 node_id = node.id
-                _logger.info(node_id)
+                # _logger.info(node_id)
                 res_model = node.res_model
                 if res_model == "mrp.production":
                     discrepancy_list_data = self._recursive_node(node, discrepancy_list_data)
@@ -181,10 +181,15 @@ class DiscrepancyModel(models.TransientModel):
 
     @api.model
     def _get_production_data(self, node, current_date_frmt):
+        context = dict(self.env.context)
+        active_id = context.get('active_id', False)
+        active_model = context.get('model', False)
+        sale_order_line_qty = self.env[active_model].browse(active_id).product_uom_qty
         list_data = {}
         res_model = node.res_model
-        _logger.info(res_model)
+        # _logger.info(res_model)
         res_id = node.res_id
+        _logger.info("production_id")
         _logger.info(res_id)
         production_data = self.env[res_model].search([('id', '=', res_id)])
         discrepancy_message_start = "Scheduled start time not reached"
@@ -195,6 +200,9 @@ class DiscrepancyModel(models.TransientModel):
             discrepancy_message_start = production_data.name + " Missed scheduled start time of " + str(
                 production_data.date_planned_start) + " date"
             discrepancy_start_status = True
+        elif current_date_frmt >= production_data.date_planned_start and production_data.state == "progress":
+            discrepancy_message_start = production_data.name + " production started at " + str(
+                production_data.date_start) + " date"
         if current_date_frmt >= production_data.date_planned_finished and (
                 production_data.state != "done" and production_data.state != "cancel"):
             discrepancy_message_end = production_data.name + " Missed scheduled finish time of " + str(
@@ -206,6 +214,9 @@ class DiscrepancyModel(models.TransientModel):
         if production_data.state == "done":
             discrepancy_message_start = "Done"
             discrepancy_message_end = ""
+            if sale_order_line_qty == 0:
+                discrepancy_start_status = True
+
 
         name = production_data.name
         ref = self._get_reference(res_model, res_id, name)
@@ -226,9 +237,9 @@ class DiscrepancyModel(models.TransientModel):
     @api.model
     def _get_purchase_data(self, node, current_date_frmt, parent_node):
         res_model = node.res_model
-        _logger.info(res_model)
+        # _logger.info(res_model)
         res_id = node.res_id
-        _logger.info(res_id)
+        # _logger.info(res_id)
 
         production_data = self.env[parent_node.res_model].search([('id', '=', parent_node.res_id)])
         purchase_data = self.env[res_model].search([('id', '=', res_id)])
@@ -267,9 +278,9 @@ class DiscrepancyModel(models.TransientModel):
     @api.model
     def _get_purchase_line_data(self, node, current_date_frmt, parent_node):
         res_model = node.res_model
-        _logger.info(res_model)
+        # _logger.info(res_model)
         res_id = node.res_id
-        _logger.info(res_id)
+        # _logger.info(res_id)
 
         production_data = self.env[parent_node.res_model].search([('id', '=', parent_node.res_id)])
         purchase_data = self.env[res_model].search([('id', '=', res_id)])
@@ -307,11 +318,16 @@ class DiscrepancyModel(models.TransientModel):
 
     @api.model
     def _get_wo_data(self, node, work_order, current_date_frmt):
+        context = dict(self.env.context)
+        active_id = context.get('active_id', False)
+        active_model = context.get('model', False)
+        sale_order_line_qty = self.env[active_model].browse(active_id).product_uom_qty
         list_data = {}
         res_model = node.res_model
-        _logger.info(res_model)
+        # _logger.info(res_model)
         res_id = node.res_id
-        _logger.info(res_id)
+        # _logger.info("sale_order_line_qty")
+        # _logger.info(sale_order_line_qty)
         production_data = self.env[res_model].search([('id', '=', res_id)])
         discrepancy_message_start = "Scheduled start time not reached"
         discrepancy_message_end = "Scheduled finish time not reached"
@@ -333,6 +349,8 @@ class DiscrepancyModel(models.TransientModel):
         if work_order.state == "done":
             discrepancy_message_start = "Done"
             discrepancy_message_end = ""
+            if sale_order_line_qty == 0:
+                discrepancy_start_status = True
 
         name = production_data.name + " - " + work_order.name
         ref = self._get_reference('mrp.workorder', work_order.id, name)
@@ -351,31 +369,31 @@ class DiscrepancyModel(models.TransientModel):
 
     @api.model
     def _quantity_recursive_node(self, parent_node, discrepancy_list_data):
-        _logger.info("into recursive node")
+        # _logger.info("into recursive node")
         current_date = datetime.now()
         current_date_str = datetime.strftime(current_date, "%Y-%m-%d %H:%M:%S")
         current_date_frmt = datetime.strptime(current_date_str, "%Y-%m-%d %H:%M:%S")
-        _logger.info(current_date_frmt)
+        # _logger.info(current_date_frmt)
         # mo_line = self._get_production_data(parent_node, current_date_frmt)
         # discrepancy_list_data.append(mo_line)
         res_id = parent_node.res_id
-        _logger.info(res_id)
+        # _logger.info(res_id)
         work_order_data = self.env['mrp.workorder'].search([('production_id', '=', res_id)])
-        _logger.info("work_order_data")
-        _logger.info(work_order_data)
+        # _logger.info("work_order_data")
+        # _logger.info(work_order_data)
         if work_order_data:
             for work_order in work_order_data:
                 wo_line = self._get_wo_quantity_data(parent_node, work_order, current_date_frmt)
                 discrepancy_list_data.append(wo_line)
         nodes = parent_node.child_ids;
-        _logger.info("check second node")
-        _logger.info(nodes)
+        # _logger.info("check second node")
+        # _logger.info(nodes)
         if nodes:
             for node in nodes:
                 node_id = node.id
-                _logger.info(node_id)
+                # _logger.info(node_id)
                 res_model = node.res_model
-                _logger.info(res_model)
+                # _logger.info(res_model)
                 if res_model == "mrp.production":
                     discrepancy_list_data = self._quantity_recursive_node(node, discrepancy_list_data)
                 if res_model == "purchase.order":
@@ -390,9 +408,9 @@ class DiscrepancyModel(models.TransientModel):
     def _get_wo_quantity_data(self, node, work_order, current_date_frmt):
         list_data = {}
         res_model = node.res_model
-        _logger.info(res_model)
+        # _logger.info(res_model)
         res_id = node.res_id
-        _logger.info(res_id)
+        # _logger.info(res_id)
         production_data = self.env[res_model].search([('id', '=', res_id)])
         discrepancy_message = "No discrepancy"
         discrepancy_status = False
@@ -424,9 +442,9 @@ class DiscrepancyModel(models.TransientModel):
     def _get_purchase_quantity_data(self, node, current_date_frmt, parent_node):
         pq_list = []
         res_model = node.res_model
-        _logger.info(res_model)
+        # _logger.info(res_model)
         res_id = node.res_id
-        _logger.info(res_id)
+        # _logger.info(res_id)
         bom_plist = []
 
         production_data = self.env[parent_node.res_model].search([('id', '=', parent_node.res_id)])
@@ -477,9 +495,9 @@ class DiscrepancyModel(models.TransientModel):
     def _get_purchase_line_quantity_data(self, node, current_date_frmt, parent_node):
 
         res_model = node.res_model
-        _logger.info(res_model)
+        # _logger.info(res_model)
         res_id = node.res_id
-        _logger.info(res_id)
+        # _logger.info(res_id)
 
         production_data = self.env[parent_node.res_model].search([('id', '=', parent_node.res_id)])
         purchase_data = self.env[res_model].search([('id', '=', res_id)])
@@ -510,7 +528,7 @@ class DiscrepancyModel(models.TransientModel):
             "discrepancy_status": discrepancy_status,
             "reference_id": ref
         }
-        _logger.info(list_data)
+        # _logger.info(list_data)
         return list_data
 
     @api.model
