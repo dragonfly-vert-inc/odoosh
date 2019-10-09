@@ -17,38 +17,37 @@ class SOLModel(models.Model):
         else:
             product_uom_qty_origin = 0
 
-        if self.state == 'sale' and self.product_id.type in ['product',
-                                                             'consu'] and self.product_uom_qty < product_uom_qty_origin and self.product_uom_qty != 0:
+        if self.state == 'sale' and self.product_id.type in ['product','consu'] and self.product_uom_qty != product_uom_qty_origin:
             # Do not display this warning if the new quantity is below the delivered
             # one; the `write` will raise an `UserError` anyway.
             warning_mess = {
-                'title': _('Ordered quantity decreased!'),
-                'message': 'Sorry, you cannot decrease the quantity on an SO line. Please cancel the SO line by deleting or by setting the quantity to 0 and create a new SO line with the new quantity',
+                'title': _('Ordered quantity changed!'),
+                'message': "Sorry, you cannot change the quantity on a confirmed SO. \n\n To decrease quantity: Cancel the SO line using the 'X' icon on the right, and create a new line with the new quantity. \n\n To increase quantity: Add a new SO line with the additional quantity.",
             }
             self.product_uom_qty = product_uom_qty_origin
             return {'warning': warning_mess}
 
-        elif self.state == 'sale' and self.product_id.type in ['product',
-                                                             'consu'] and self.product_uom_qty > product_uom_qty_origin and self.product_uom_qty != 0 and product_uom_qty_origin != 0:
-            warning_mess = {
-                'title': _('Ordered quantity increased!'),
-                'message': 'You cannot increase the quantity on this SO line. Please create a new SO line for this product to add the additional quantity',
-            }
-            self.product_uom_qty = product_uom_qty_origin
-            return {'warning': warning_mess}
-
-        elif self.state == 'sale' and self.product_id.type in ['product',
-                                                             'consu'] and self.product_uom_qty < product_uom_qty_origin and self.product_uom_qty == 0:
-            warning_mess = {
-                'title': _('Ordered quantity decreased to 0!'),
-                'message': 'Putting the quantity to 0 will cancel the SO line and related MTO chain, If you wish to continue please cancel MTO.',
-            }
-            self.product_uom_qty = product_uom_qty_origin
-            return {'warning': warning_mess}
-
-        elif self.state == 'sale' and self.product_id.type in ['product',
-                                                             'consu'] and self.product_uom_qty > product_uom_qty_origin and product_uom_qty_origin == 0:
-            return {}
+        # elif self.state == 'sale' and self.product_id.type in ['product',
+        #                                                      'consu'] and self.product_uom_qty > product_uom_qty_origin and self.product_uom_qty != 0 and product_uom_qty_origin != 0:
+        #     warning_mess = {
+        #         'title': _('Ordered quantity increased!'),
+        #         'message': 'You cannot increase the quantity on this SO line. Please create a new SO line for this product to add the additional quantity',
+        #     }
+        #     self.product_uom_qty = product_uom_qty_origin
+        #     return {'warning': warning_mess}
+        #
+        # elif self.state == 'sale' and self.product_id.type in ['product',
+        #                                                      'consu'] and self.product_uom_qty < product_uom_qty_origin and self.product_uom_qty == 0:
+        #     warning_mess = {
+        #         'title': _('Ordered quantity decreased to 0!'),
+        #         'message': 'Putting the quantity to 0 will cancel the SO line and related MTO chain, If you wish to continue please cancel MTO.',
+        #     }
+        #     self.product_uom_qty = product_uom_qty_origin
+        #     return {'warning': warning_mess}
+        #
+        # elif self.state == 'sale' and self.product_id.type in ['product',
+        #                                                      'consu'] and self.product_uom_qty > product_uom_qty_origin and product_uom_qty_origin == 0:
+        #     return {}
 
         return {}
 
