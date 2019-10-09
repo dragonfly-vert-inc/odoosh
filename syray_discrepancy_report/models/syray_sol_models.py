@@ -53,7 +53,7 @@ class SOLModel(models.Model):
 
     @api.onchange('date_expected')
     def _onchange_product_expt_date(self):
-        if self.date_expected and self.date_expected < datetime.now():
+        if self.date_expected and self.date_expected.date() < datetime.now().date():
             self.date_expected = self._origin.read(["date_expected"])[0]["date_expected"] if self._origin else False
             return {
                 'warning': {
