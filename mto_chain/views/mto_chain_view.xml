@@ -43,7 +43,7 @@
         <template id="mto_cascade_view">
             <div class="container o_stock_reports_page o_stock_reports_no_print">
                 <span t-if="node_id" class="o_report_heading text-left">
-                    <h1>MTO Cascade View</h1>
+                    <h1>MTO Chain</h1>
                 </span>
                 <div class="mto_chain_report">
                     <div id="mto_tree">
@@ -128,7 +128,7 @@
         </template>
 
         <record id="action_mto_client" model="ir.actions.client">
-            <field name="name">MTO Chain</field>
+            <field name="name">MTO Chain And Discrepancy Report</field>
             <field name="tag">mto_chain_action</field>
         </record>
     </data>

@@ -122,7 +122,7 @@
 
     <template id="report_discrepancy_view">
         <div class="container o_discrepancy_reports_page o_discrepancy_reports_no_print white-bg">
-            <span t-if="lines" class="o_report_heading text-left">Discrepancy Report</span>
+            <span t-if="lines" class="o_report_heading text-left"><h1>Discrepancy Report</h1></span>
             <span><t t-esc="context"/></span>
             <div class="o_discrepancy_reports_table table-responsive">
                 <t t-if="not lines">
