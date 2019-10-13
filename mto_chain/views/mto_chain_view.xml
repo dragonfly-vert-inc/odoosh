@@ -62,7 +62,7 @@
                         <t t-if="node.res_model=='sale.order.line'">
                             <div class="node-title"><t t-esc="'%s %s'%(node.record_ref.order_id.name,node.record_ref.product_id.name)" /></div>
                             <div class="node-times">
-                                <span class="node-start-time"><strong>Sale: </strong> <t t-esc="node.record_ref.date_expected - datetime.timedelta(days=node.record_ref.product_id.sale_delay)" t-options="{'widget': 'date'}"/></span>
+                                <span class="node-start-time"><strong>Ready by: </strong> <t t-esc="node.record_ref.date_expected - datetime.timedelta(days=node.record_ref.product_id.sale_delay)" t-options="{'widget': 'date'}"/></span>
                                 <span class="node-finish-time"><strong>Delivery: </strong> <t t-esc="node.record_ref.date_expected" t-options="{'widget': 'date'}" /></span>
                             </div>
                         </t>
