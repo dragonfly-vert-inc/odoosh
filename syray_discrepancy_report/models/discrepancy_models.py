@@ -338,10 +338,18 @@ class DiscrepancyModel(models.TransientModel):
             discrepancy_message_start = work_order.name + " Missed scheduled start time of " + str(
                 work_order.date_planned_start) + " date"
             discrepancy_start_status = True
+        elif work_order.date_planned_start > production_data.date_planned_start and (
+                (work_order.state == "ready" or work_order.state == "pending") and work_order.state != "cancel"):
+            discrepancy_message_start = work_order.name + " will not start on time due to Work Center unavailability."
+            discrepancy_start_status = True
         if current_date_frmt >= work_order.date_planned_finished and (
                 work_order.state != "done" and work_order.state != "cancel"):
             discrepancy_message_end = work_order.name + " Missed scheduled finish time of " + str(
                 work_order.date_planned_finished) + " date"
+            discrepancy_finish_status = True
+        elif work_order.date_planned_finished > production_data.date_planned_finished and (
+                work_order.state != "done" and work_order.state != "cancel"):
+            discrepancy_message_end = work_order.name + " will not finish on time due to Work Center unavailability."
             discrepancy_finish_status = True
         if work_order.state == "cancel":
             discrepancy_message_start = "Canceled"
