@@ -27,7 +27,7 @@ class StockRule(models.Model):
                     origin_record = False
                 if origin_record:
                     origin_record.node_id.write({
-                            'child_ids': [(6,False,production_id.node_id.ids)],
+                            'child_ids': [(4, production_id.node_id.id, False)],
                         })
                     break
                 else:
