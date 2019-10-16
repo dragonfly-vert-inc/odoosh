@@ -42,7 +42,7 @@ odoo.define('mto_chain.mto_chain_action', function (require) {
                 mto_tree.jstree({
                     "core": {
                         "themes": {
-                            "stripes": true,
+                            "stripes": false,
                             "variant": "large",
                             "icons": false
                         }
