@@ -6,8 +6,11 @@
          <field name="model">sale.order</field>
          <field name="inherit_id" ref="sale.view_order_form"/>
          <field name="arch" type="xml">
+             <xpath expr="//form/sheet/div[@name='button_box']/button[last()]" position="after">
+                 <button name="%(action_discrepancy_report)d" icon="fa-table" class="oe_stat_button" string="Discrepancy Report" type="action"/>
+              </xpath>
              <xpath expr="//field[@name='order_line']/tree/field[last()]" position="after">
-                 <button name="%(action_discrepancy_report)d" icon="fa-table" string="Discrepancy Report" type="action" attrs="{'invisible': True}"/>
+                 <button name="%(action_discrepancy_report)d" icon="fa-table" string="Discrepancy Report" type="action" attrs="{'invisible': [('node_id','=',False)]}"/>
 <!--                    <button name="action_open_discrepancy_report" string="Discrepancy Report" type="action" icon="fa-table" attrs="{'invisible': [('node_id','=',False)]}" />-->
               </xpath>
          </field>

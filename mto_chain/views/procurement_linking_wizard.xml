@@ -26,12 +26,43 @@
                 </form>
             </field>
         </record>
+        <record id="mo_linking_multiple" model="ir.ui.view">
+            <field name="name">mo_linking_multiple</field>
+            <field name="model">purchase.raw.link</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <form >
+                    <sheet>
+                        <group>
+                            <field name="purchase_line_id" invisible="1" force_save="1" />
+                            <field name="raw_consumption_ids" domain="[('product_id','=',context.get('product_id')),('raw_material_production_id','!=',False),('free_quantity','&gt;=',0)]" options="{'no_create_edit': True}" widget="many2many_tags" context="{'mo_link': True, }" />
+                            <field name="quantity" readonly="1" force_save="1" />
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="link_manual_mo" string="Link" type="object" class="oe_highlight" />
+                    </footer>
+                </form>
+            </field>
+        </record>
         <record id="procurement_linking_wizard_action" model="ir.actions.act_window">
             <field name="type">ir.actions.act_window</field>
             <field name="name">Link Procurement</field>
             <field name="res_model">purchase.raw.link</field>
             <field name="view_mode">form</field>
             <field name="target">new</field>
+            <field name="view_id" ref="procurement_linking_form" />
+        </record>
+        <record id="mo_linking_multiple_wizard_action" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Link MO</field>
+            <field name="res_model">purchase.raw.link</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="mo_linking_multiple" />
         </record>
     </data>
 </odoo>
