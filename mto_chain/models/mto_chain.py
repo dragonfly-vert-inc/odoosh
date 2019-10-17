@@ -68,11 +68,11 @@ class MTOChain(models.Model):
             result['html'] = self.env.ref(
                 'mto_chain.mto_cascade_view').render(rcontext)
 
-            rcontext['so_parent_date'] = "Date Discrepancy Report " +self.env['mto.discrepancy.report'].get_so_information()
-            rcontext['so_parent_q'] = "Quantity Discrepancy Report " + self.env['mto.discrepancy.report'].get_so_information()
-            rcontext['lines'] = self.env['mto.discrepancy.report'].get_so_line_discrepancy_report("date")
+            rcontext['so_parent_date'] = "Date Discrepancy Report " +self.env['mto.discrepancy.report'].get_so_information(active_id)
+            rcontext['so_parent_q'] = "Quantity Discrepancy Report " + self.env['mto.discrepancy.report'].get_so_information(active_id)
+            rcontext['lines'] = self.env['mto.discrepancy.report'].get_so_line_discrepancy_report("date",active_id)
             rcontext['lines'] = sorted(rcontext['lines'], key=lambda i: (i['discrepancy_start_status'], i['discrepancy_finish_status']),reverse=True)
-            rcontext['qlines'] = self.env['mto.discrepancy.report'].get_so_line_discrepancy_report("quantity")
+            rcontext['qlines'] = self.env['mto.discrepancy.report'].get_so_line_discrepancy_report("quantity",active_id)
             rcontext['qlines'] = sorted(rcontext['qlines'], key=lambda i: i['discrepancy_status'],reverse=True)
             # _logger.info(rcontext['lines'])
             result['date_html'] = self.env.ref('syray_discrepancy_report.report_discrepancy_view').render(rcontext)
