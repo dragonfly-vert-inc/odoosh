@@ -176,7 +176,8 @@ class DiscrepancyModel(models.TransientModel):
         current_date_frmt = datetime.strptime(current_date_str, "%Y-%m-%d %H:%M:%S")
         # _logger.info(current_date_frmt)
         mo_line = self._get_production_data(parent_node, current_date_frmt, so_line_id)
-        discrepancy_list_data.append(mo_line)
+        if bool(mo_line):
+            discrepancy_list_data.append(mo_line)
         res_id = parent_node.res_id
         # _logger.info(res_id)
         work_order_data = self.env['mrp.workorder'].search([('production_id', '=', res_id)])
@@ -185,7 +186,8 @@ class DiscrepancyModel(models.TransientModel):
         if work_order_data:
             for work_order in work_order_data:
                 wo_line = self._get_wo_data(parent_node, work_order, current_date_frmt, so_line_id)
-                discrepancy_list_data.append(wo_line)
+                if bool(wo_line):
+                    discrepancy_list_data.append(wo_line)
         nodes = parent_node.child_ids;
         # _logger.info("check second node")
         # _logger.info(nodes)
@@ -201,7 +203,8 @@ class DiscrepancyModel(models.TransientModel):
                     discrepancy_list_data.append(po_line)
                 if res_model == "purchase.order.line":
                     po_line = self._get_purchase_line_data(node, current_date_frmt, parent_node, so_line_id)
-                    discrepancy_list_data.append(po_line)
+                    if bool(po_line):
+                        discrepancy_list_data.append(po_line)
         return discrepancy_list_data
 
     @api.model
@@ -289,7 +292,10 @@ class DiscrepancyModel(models.TransientModel):
             "reference_id": ref
         }
         _logger.info(list_data)
-        return list_data
+        if discrepancy_start_status or discrepancy_finish_status:
+            return list_data
+        else:
+            return {}
 
     @api.model
     def _get_purchase_data(self, node, current_date_frmt, parent_node,so_line_id):
@@ -376,7 +382,11 @@ class DiscrepancyModel(models.TransientModel):
             "discrepancy_finish_status": discrepancy_finish_status,
             "reference_id": ref
         }
-        return list_data
+        if discrepancy_start_status or discrepancy_finish_status:
+            return list_data
+        else:
+            return {}
+        # return list_data
 
     @api.model
     def _get_wo_data(self, node, work_order, current_date_frmt,so_line_id):
@@ -435,7 +445,11 @@ class DiscrepancyModel(models.TransientModel):
             "discrepancy_finish_status": discrepancy_finish_status,
             "reference_id": ref
         }
-        return list_data
+        if discrepancy_start_status or discrepancy_finish_status:
+            return list_data
+        else:
+            return {}
+        # return list_data
 
     @api.model
     def _quantity_recursive_node(self, parent_node, discrepancy_list_data, so_line_id):
@@ -454,7 +468,8 @@ class DiscrepancyModel(models.TransientModel):
         if work_order_data:
             for work_order in work_order_data:
                 wo_line = self._get_wo_quantity_data(parent_node, work_order, current_date_frmt, so_line_id)
-                discrepancy_list_data.append(wo_line)
+                if bool(wo_line):
+                    discrepancy_list_data.append(wo_line)
         nodes = parent_node.child_ids;
         # _logger.info("check second node")
         # _logger.info(nodes)
@@ -471,7 +486,8 @@ class DiscrepancyModel(models.TransientModel):
                     discrepancy_list_data.extend(po_line)
                 if res_model == "purchase.order.line":
                     po_line = self._get_purchase_line_quantity_data(node, current_date_frmt, parent_node, so_line_id)
-                    discrepancy_list_data.append(po_line)
+                    if bool(po_line):
+                        discrepancy_list_data.append(po_line)
         return discrepancy_list_data
 
     @api.model
@@ -506,7 +522,10 @@ class DiscrepancyModel(models.TransientModel):
             "discrepancy_status": discrepancy_status,
             "reference_id": ref
         }
-        return list_data
+        if discrepancy_status:
+            return list_data
+        else:
+            return {}
 
     @api.model
     def _get_purchase_quantity_data(self, node, current_date_frmt, parent_node,so_line_id):
@@ -599,7 +618,11 @@ class DiscrepancyModel(models.TransientModel):
             "reference_id": ref
         }
         # _logger.info(list_data)
-        return list_data
+        if discrepancy_status:
+            return list_data
+        else:
+            return {}
+        # return list_data
 
     @api.model
     def _get_reference(self, res_model, res_id, name):
