@@ -243,7 +243,7 @@ class DiscrepancyModel(models.TransientModel):
                 discrepancy_start_status = True
             if production_data.date_planned_finished.date() < production_data.date_planned_finished_wo.date():
                 discrepancy_message_end = production_data.name + " will fail to finish work-order in time due to Work Center unavailability"
-                discrepancy_start_status = True
+                discrepancy_finish_status = True
             elif current_date_frmt >= production_data.date_planned_finished_wo:
                 discrepancy_message_end = production_data.name + " Missed work-order's scheduled finish time of " + str(
                     production_data.date_planned_finished_wo) + " date"
