@@ -19,6 +19,7 @@
         'views/mrp_production.xml',
         'views/stock_move.xml',
         'views/mto_priority.xml',
+        'views/purchase_order.xml'
     ],
     'demo': [],
     'installable': True,

@@ -9,7 +9,7 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 
 
-class PurchaseRawLink(models.TransientModel):
+class PurchaseRawLink(models.Model):
     _name = 'purchase.raw.link'
     _description = u'Procurement Raw Material Consumption Linking'
 
