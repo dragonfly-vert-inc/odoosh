@@ -11,7 +11,7 @@
             <field name="active" eval="True" />
             <field name="arch" type="xml">
                 <xpath expr="//button[@name='action_apply']" position="after">
-                    <button string="Upgrade MO" name="button_upgrade_mo" type="object" class="oe_highlight" attrs="{'invisible': ['|',('type', 'not in', ('bom')),]}"/>
+                    <button string="Upgrade MO" name="button_upgrade_mo" type="object" class="oe_highlight" attrs="{'invisible': ['|',('type', 'not in', ('bom')),('state', 'not in', ('done'))]}"/>
                 </xpath>
             </field>
         </record>
