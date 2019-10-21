@@ -185,9 +185,9 @@
 <!--            <span t-if="lines" class="o_report_heading text-left"><h1>Discrepancy Report</h1></span>-->
             <span><t t-esc="context"/></span>
             <div class="o_discrepancy_reports_table table-responsive">
-                <t t-if="not lines">
-                    <span class="text-center"><h1>No Discrepancy for this PO line.</h1></span>
-                </t>
+<!--                <t t-if="not lines">-->
+<!--                    <span class="text-center"><h1>No Discrepancy for this PO line.</h1></span>-->
+<!--                </t>-->
                 <t t-if="lines">
                     <table width='100%' class="table">
                         <thead>
