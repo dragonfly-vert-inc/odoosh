@@ -31,4 +31,5 @@ class MrpEco(models.Model):
                     production.state = 'confirmed'
                 production.bom_id = self.new_bom_id
                 production._generate_moves()
-        return True
+            if pending_orders:
+                return dict(self.env.ref('mrp.mrp_production_action').read()[0], domain=[('id','in',pending_orders.ids)])
