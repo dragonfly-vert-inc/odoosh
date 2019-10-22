@@ -290,26 +290,30 @@ class DiscrepancyModel(models.TransientModel):
                     production_data.date_planned_finished) + " date"
                 discrepancy_finish_status = True
         elif production_data.state == "planned":
-            if production_data.date_planned_start.date() < production_data.date_planned_start_wo.date():
+            if production_data.date_planned_start_wo and production_data.date_planned_start.date() < production_data.date_planned_start_wo.date():
                 discrepancy_message_start = production_data.name + " will fail to start work-order in time due to Work Center unavailability"
                 discrepancy_start_status = True
-            elif current_date_frmt >= production_data.date_planned_start_wo:
+            elif production_data.date_planned_start_wo and current_date_frmt >= production_data.date_planned_start_wo:
                 discrepancy_message_start = production_data.name + " Missed work-order's scheduled start time of " + str(
                     production_data.date_planned_start_wo) + " date"
                 discrepancy_start_status = True
-            if production_data.date_planned_finished.date() < production_data.date_planned_finished_wo.date():
+            if production_data.date_planned_finished_wo and production_data.date_planned_finished.date() < production_data.date_planned_finished_wo.date():
                 discrepancy_message_end = production_data.name + " will fail to finish work-order in time due to Work Center unavailability"
                 discrepancy_finish_status = True
-            elif current_date_frmt >= production_data.date_planned_finished_wo:
+            elif production_data.date_planned_finished_wo and current_date_frmt >= production_data.date_planned_finished_wo:
                 discrepancy_message_end = production_data.name + " Missed work-order's scheduled finish time of " + str(
                     production_data.date_planned_finished_wo) + " date"
                 discrepancy_finish_status = True
         if production_data.state == "progress":
-            if current_date_frmt >= production_data.date_planned_start_wo:
+            if production_data.date_planned_start_wo and current_date_frmt >= production_data.date_planned_start_wo:
                 discrepancy_message_start = production_data.name + " production started at " + str(
                     production_data.date_start) + " date"
-            if current_date_frmt >= production_data.date_planned_finished_wo:
+            if production_data.date_planned_finished_wo and current_date_frmt >= production_data.date_planned_finished_wo:
                 discrepancy_message_end = production_data.name + " Missed work-order's scheduled finish time of " + str(
+                    production_data.date_planned_finished) + " date"
+                discrepancy_finish_status = True
+            elif not production_data.date_planned_finished_wo and current_date_frmt >= production_data.date_planned_finished:
+                discrepancy_message_end = production_data.name + " Missed scheduled finish time of " + str(
                     production_data.date_planned_finished) + " date"
                 discrepancy_finish_status = True
         # if current_date_frmt >= production_data.date_planned_start and ((production_data.state == "planned" or production_data.state == "confirmed") and production_data.state != "cancel"):
@@ -464,7 +468,7 @@ class DiscrepancyModel(models.TransientModel):
         discrepancy_message_end = "Scheduled finish time not reached"
         discrepancy_start_status = False
         discrepancy_finish_status = False
-        if current_date_frmt >= work_order.date_planned_start and (
+        if work_order.date_planned_start and current_date_frmt >= work_order.date_planned_start and (
                 (work_order.state == "ready" or work_order.state == "pending") and work_order.state != "cancel"):
             discrepancy_message_start = work_order.name + " Missed scheduled start time of " + str(
                 work_order.date_planned_start) + " date"
@@ -473,12 +477,12 @@ class DiscrepancyModel(models.TransientModel):
         #         (work_order.state == "ready" or work_order.state == "pending") and work_order.state != "cancel"):
         #     discrepancy_message_start = work_order.name + " will not start on time due to Work Center unavailability."
         #     discrepancy_start_status = True
-        if current_date_frmt >= work_order.date_planned_finished and (
+        if work_order.date_planned_finished and current_date_frmt >= work_order.date_planned_finished and (
                 work_order.state != "done" and work_order.state != "cancel"):
             discrepancy_message_end = work_order.name + " Missed scheduled finish time of " + str(
                 work_order.date_planned_finished) + " date"
             discrepancy_finish_status = True
-        elif work_order.date_planned_finished > production_data.date_planned_finished and (
+        elif work_order.date_planned_finished and work_order.date_planned_finished > production_data.date_planned_finished and (
                 work_order.state != "done" and work_order.state != "cancel"):
             discrepancy_message_end = work_order.name + " will not finish on time due to Work Center unavailability."
             discrepancy_finish_status = True
@@ -560,10 +564,10 @@ class DiscrepancyModel(models.TransientModel):
         discrepancy_message = "No discrepancy"
         discrepancy_status = False
         product_name = work_order.product_id.name
-        if current_date_frmt >= work_order.date_planned_finished and work_order.state != "cancel" and work_order.qty_produced < work_order.qty_producing:
+        if work_order.date_planned_finished and current_date_frmt >= work_order.date_planned_finished and work_order.state != "cancel" and work_order.qty_produced < work_order.qty_producing:
             discrepancy_message = work_order.name + " failed to produce required quantity. Current status " + str(work_order.qty_produced) + " / " + str(work_order.qty_producing)
             discrepancy_status = True
-        if current_date_frmt >= work_order.date_planned_finished and work_order.state != "cancel" and work_order.qty_produced > work_order.qty_producing:
+        if work_order.date_planned_finished and current_date_frmt >= work_order.date_planned_finished and work_order.state != "cancel" and work_order.qty_produced > work_order.qty_producing:
             discrepancy_message = work_order.name + " produced extra than required quantity. Current status " + str(work_order.qty_produced) + " / " + str(work_order.qty_producing)
             discrepancy_status = True
         if work_order.state == "cancel":
