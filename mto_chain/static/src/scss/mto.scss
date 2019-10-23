@@ -20,3 +20,21 @@
 .node-start-time {
   margin-right: 30px;
 }
+.mto_button_box {
+  float: right;
+  margin-bottom: 15px;
+  margin-top: 15px;
+}
+#mto_tree {
+  clear: both;
+}
+.button_plan {
+  background: #008784;
+  padding: 7px 12px;
+  margin-left: 10px;
+  display: inline-block;
+  color: #fff;
+}
+.button_plan:hover {
+  background: #007a77;
+}

@@ -14,6 +14,9 @@ odoo.define('mto_chain.mto_chain_action', function (require) {
 
     var mto_chain_action = AbstractAction.extend(ControlPanelMixin, {
         // Stores all the parameters of the action.
+        events: {
+            'click .button_plan': 'planMtoManufactures',
+        },
         init: function (parent, action) {
             this.actionManager = parent;
             this.given_context = session.user_context;
@@ -70,6 +73,7 @@ odoo.define('mto_chain.mto_chain_action', function (require) {
             var self = this;
             return this._super.apply(this, arguments).then(function () {
                 self.set_html();
+                self.update_control_panel();
             });
         },
         get_html: function () {
@@ -84,6 +88,25 @@ odoo.define('mto_chain.mto_chain_action', function (require) {
                     self.html = result.html;
                     return $.when.apply($, defs);
                 });
+        },
+        planMtoManufactures: function (e) {
+            e.preventDefault();
+            this.given_context.default_function = $(e.target).data('function') || '';
+            let self = this
+            this._rpc({
+                route: '/web/action/load',
+                params: {
+                    action_id: 'mto_chain.plan_unplan_wizard_ation',
+                },
+            })
+            .then(function(r) {
+                r.context = self.given_context
+                return self.do_action(r);
+            });
+        },
+        do_show: function() {
+            this._super();
+            this.update_control_panel();
         },
     });
 
