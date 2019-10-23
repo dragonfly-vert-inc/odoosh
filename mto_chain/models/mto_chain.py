@@ -106,6 +106,24 @@ class MTOChain(models.Model):
         if self.child_ids:
             for child in self.child_ids:
                 child.action_cancel_mto()
+    
+
+
+    @api.model
+    def action_mo_plan(self):
+        if self.res_model == 'mrp.production':
+            self.record_ref.button_plan()
+        if self.child_ids:
+            for child in self.child_ids:
+                child.action_mo_plan()
+
+    @api.model
+    def action_mo_unplan(self):
+        if self.res_model == 'mrp.production':
+            self.record_ref.button_unplan()
+        if self.child_ids:
+            for child in self.child_ids:
+                child.action_mo_unplan()
 
 class MTOChainMixin(models.AbstractModel):
     _name = 'mto.chain.mixin'
@@ -135,3 +153,22 @@ class MTOChainMixin(models.AbstractModel):
         result.node_id._set_ref(result)
         return result
 
+
+class PlanUnplanWizard(models.TransientModel):
+    _name = 'plan.unplan.wizard'
+    _description = u'Plan Unplan Wizard'
+
+    
+    function = fields.Char()
+    
+    @api.multi
+    def action_plan(self):
+        context = dict(self.env.context)
+        active_id = context.get('active_id', False)
+        active_model = context.get('model', False)
+        function = context.get('default_function', False)
+        if active_id and active_model:
+            node_id = self.env[active_model].browse(active_id).node_id
+            if node_id and function:
+                getattr(node_id, function)()
+        return True
