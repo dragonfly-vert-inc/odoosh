@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 ###############################################################################
 #    License, author and contributors information in:                         #
@@ -8,14 +9,12 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 
 
-class HrAttendance(models.Model):
-    _inherit = 'hr.attendance'
+class StockMove(models.Model):
+    _inherit = 'stock.move'
 
-    wo_id = fields.Many2one(string=u'Work Order', comodel_name='mrp.workorder', ondelete='set null')
-
-    wc_id = fields.Many2one(string=u'Work Center', related='wo_id.workcenter_id', store=True)
-
-    @api.multi
-    def save(self):
-        return {'type': 'ir.actions.act_window_close'}
-        
+    responsible_purchases = fields.Many2many(
+        comodel_name='purchase.order',
+        relation='rfq_responsible_move_rel',
+        column2='move_id',
+        column1='order_id'
+    )

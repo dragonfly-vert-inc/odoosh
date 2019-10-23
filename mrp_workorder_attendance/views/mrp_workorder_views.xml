@@ -36,6 +36,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//page[2]" position="after">
                     <page string="Worker Times">
+                        <button name="%(hr_attendance.hr_attendance_action)d" string="View Attendences" type="action" class="oe_link oe_right" context="{'search_default_wo_id': [id]}" attrs="{'invisible': [('production_state','in',('done','cancel'))]}" />
                         <group string="Worker times">
                             <field name="worker_times" nolabel="1">
                                 <tree>
@@ -46,11 +47,12 @@
                                 </tree>
                             </field>
                         </group>
+                        <button name="add_manual_worktime" string="Manual entry" type="object" class="oe_link oe_right" attrs="{'invisible': [('production_state','in',('done','cancel'))]}"/>
                     </page>
                 </xpath>
             </field>
         </record>
-
+        
         <template id="mrp_workorder_workers" name="mrp_workorder_workers" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
                 <link rel="stylesheet" type="text/css" href="/mrp_workorder_attendance/static/src/css/mrp_workers.css"/>

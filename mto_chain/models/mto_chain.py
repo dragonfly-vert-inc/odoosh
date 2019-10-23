@@ -7,6 +7,8 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class MTOChain(models.Model):
@@ -65,6 +67,20 @@ class MTOChain(models.Model):
                 active_id).node_id
             result['html'] = self.env.ref(
                 'mto_chain.mto_cascade_view').render(rcontext)
+
+            rcontext['so_parent_date'] = "Date Discrepancy Report " +self.env['mto.discrepancy.report'].get_so_information(active_id)
+            rcontext['so_parent_q'] = "Quantity Discrepancy Report " + self.env['mto.discrepancy.report'].get_so_information(active_id)
+            rcontext['lines'] = self.env['mto.discrepancy.report'].get_so_line_discrepancy_report("date",active_id)
+            rcontext['lines'] = sorted(rcontext['lines'], key=lambda i: (i['discrepancy_start_status'], i['discrepancy_finish_status']),reverse=True)
+            rcontext['qlines'] = self.env['mto.discrepancy.report'].get_so_line_discrepancy_report("quantity",active_id)
+            rcontext['qlines'] = sorted(rcontext['qlines'], key=lambda i: i['discrepancy_status'],reverse=True)
+            # _logger.info(rcontext['lines'])
+            result['date_html'] = self.env.ref('syray_discrepancy_report.report_discrepancy_view').render(rcontext)
+            result['quantity_html'] = self.env.ref('syray_discrepancy_report.report_discrepancy_view_quantity').render(
+                rcontext)
+
+            # discrepancy['html'] = self.env['mto.discrepancy.report'].get_html()
+            result['html'] = result['html'] + result['date_html'] + result['quantity_html']
         return result
 
     @api.model

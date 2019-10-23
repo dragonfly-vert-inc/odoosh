@@ -40,7 +40,7 @@ odoo.define('mto_chain.mto_chain_action', function (require) {
             }
             return def.then(function () {
                 self.report_widget.$el.html(self.html);
-                self.report_widget.$el.find('.o_report_heading').html('<h1>MTO Chain</h1>');
+                // self.report_widget.$el.find('.o_report_heading').html('<h1>MTO Chain</h1>');
                 var mto_tree = $('#mto_tree', self.report_widget.$el)
                 mto_tree.jstree({
                     "core": {

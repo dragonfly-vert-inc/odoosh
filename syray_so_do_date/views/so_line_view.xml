@@ -1,0 +1,85 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+    <record model="ir.ui.view" id="sale_order_line_view_inherit">
+         <field name="name">sale.order.line.view.inherit1</field>
+         <field name="model">sale.order</field>
+         <field name="inherit_id" ref="sale.view_order_form"/>
+         <field name="arch" type="xml">
+             <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='name']" position="after">
+                 <field name="date_expected" string="Delivery Date" force_save="1" options="{'datepicker':{'minDate': 'now'}}"
+                 attrs="{'required': True, 'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                 <field name="sale_delay" invisible="1"/>
+             </xpath>
+<!--             <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='product_uom']" position="after">-->
+<!--                 <field name="sol_priority" force_save="1"-->
+<!--                 attrs="{'required': True,'readonly': [('state', 'in', ('done', 'cancel'))]}"/>-->
+<!--             </xpath>-->
+<!--             <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='product_uom_qty']" position="attributes">-->
+<!--                 <attribute name="readonly">[('state', 'in', ('done', 'cancel'))]</attribute>-->
+<!--                 <attribute name="force_save">1</attribute>-->
+<!--             </xpath>-->
+             <xpath expr="//field[@name='order_line']/tree/field[last()]" position="after">
+<!--                 <button name="view_mto" string="View MTO"/>-->
+                 <button special = "cancel" name="update_mto" string="Update" class="oe_highlight" attrs="{'invisible': [('node_id','=',False)], 'readonly': True}"/>
+             </xpath>
+         </field>
+    </record>
+
+    <record model="ir.ui.view" id="stock_picking_line_view_inherit">
+         <field name="name">stock.picking.line.view.inherit1</field>
+         <field name="model">stock.picking</field>
+         <field name="inherit_id" ref="stock.view_picking_form"/>
+         <field name="arch" type="xml">
+             <xpath expr="/form/sheet/notebook/page/field[@name='move_ids_without_package']/tree/field[@name='product_uom']" position="after">
+                 <field name="date_expected_custom" string="Delivery Date"
+                 attrs="{'invisible' : [('date_expected_custom', '==','')]}"/>
+<!--                 <field name="sale_delay" invisible="1"/>-->
+<!--                 <field name="date_expected" invisible="1"/>-->
+             </xpath>
+         </field>
+    </record>
+
+    <!-- actions opening views on models -->
+    <!--
+    <record model="ir.actions.act_window" id="syray_so_do_date.action_window">
+      <field name="name">syray_so_do_date window</field>
+      <field name="res_model">syray_so_do_date.syray_so_do_date</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+    -->
+
+    <!-- server action to the one above -->
+    <!--
+    <record model="ir.actions.server" id="syray_so_do_date.action_server">
+      <field name="name">syray_so_do_date server</field>
+      <field name="model_id" ref="model_syray_so_do_date_syray_so_do_date"/>
+      <field name="state">code</field>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "tree,form",
+          "res_model": self._name,
+        }
+      </field>
+    </record>
+    -->
+
+    <!-- Top menu item -->
+    <!--
+    <menuitem name="syray_so_do_date" id="syray_so_do_date.menu_root"/>
+    -->
+    <!-- menu categories -->
+    <!--
+    <menuitem name="Menu 1" id="syray_so_do_date.menu_1" parent="syray_so_do_date.menu_root"/>
+    <menuitem name="Menu 2" id="syray_so_do_date.menu_2" parent="syray_so_do_date.menu_root"/>
+    -->
+    <!-- actions -->
+    <!--
+    <menuitem name="List" id="syray_so_do_date.menu_1_list" parent="syray_so_do_date.menu_1"
+              action="syray_so_do_date.action_window"/>
+    <menuitem name="Server to list" id="syray_so_do_date" parent="syray_so_do_date.menu_2"
+              action="syray_so_do_date.action_server"/>
+    -->
+  </data>
+</odoo>
