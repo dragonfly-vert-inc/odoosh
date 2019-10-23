@@ -61,60 +61,62 @@ class DiscrepancyModel(models.TransientModel):
                 rcontext['qlines'] = self.get_so_line_discrepancy_report("quantity", so_line.id)
                 rcontext['qlines'] = sorted(rcontext['qlines'], key=lambda i: i['discrepancy_status'], reverse=True)
                 # _logger.info(rcontext['lines'])
-                result['date_html'] = self.env.ref('syray_discrepancy_report.report_discrepancy_view').render(rcontext)
-                result['quantity_html'] = self.env.ref('syray_discrepancy_report.report_discrepancy_view_quantity').render(rcontext)
+                result['date_html'] = self.env.ref('syray_discrepancy_report.report_discrepancy_view_so').render(rcontext)
+                result['quantity_html'] = self.env.ref('syray_discrepancy_report.report_discrepancy_view_quantity_so').render(rcontext)
                 result['html'] += result['date_html'] + result['quantity_html']
             return result
         else:
             _logger.info("active_model .......................................................")
             all_po_line_records = self.env['purchase.order.line'].search([])
             result['html'] = bytes('', 'utf-8')
-            for po_line in all_po_line_records:
-                if po_line.node_id:
-                    rcontext['so_parent_date'] = "Date Discrepancy Report"
-                    rcontext['so_parent_q'] = "Quantity Discrepancy Report"
-                    rcontext['lines'] = self.get_sep_po_line_discrepancy("date", po_line.id)
-                    rcontext['lines'] = sorted(rcontext['lines'],
-                                               key=lambda i: (
-                                                   i['discrepancy_start_status'], i['discrepancy_finish_status']),
-                                               reverse=True)
-                    rcontext['qlines'] = self.get_sep_po_line_discrepancy("quantity", po_line.id)
-                    rcontext['qlines'] = sorted(rcontext['qlines'], key=lambda i: i['discrepancy_status'], reverse=True)
-                    # _logger.info(rcontext['lines'])
-                    result['date_html'] = self.env.ref('syray_discrepancy_report.report_discrepancy_view_po').render(
-                        rcontext)
-                    result['quantity_html'] = self.env.ref(
-                        'syray_discrepancy_report.report_discrepancy_view_quantity_po').render(rcontext)
-                    result['html'] += result['date_html'] + result['quantity_html']
+            rcontext['so_parent_date'] = "Date Discrepancy Report"
+            rcontext['so_parent_q'] = "Quantity Discrepancy Report"
+            rcontext['lines'] = self.get_sep_po_line_discrepancy("date")
+            rcontext['lines'] = sorted(rcontext['lines'],
+                                       key=lambda i: (
+                                           i['discrepancy_start_status'], i['discrepancy_finish_status']),
+                                       reverse=True)
+            result['date_html'] = self.env.ref('syray_discrepancy_report.report_discrepancy_view_po').render(
+                rcontext)
+            rcontext['qlines'] = self.get_sep_po_line_discrepancy("quantity")
+            rcontext['qlines'] = sorted(rcontext['qlines'], key=lambda i: i['discrepancy_status'], reverse=True)
+            # _logger.info(rcontext['lines'])
+            result['quantity_html'] = self.env.ref(
+                'syray_discrepancy_report.report_discrepancy_view_quantity_po').render(rcontext)
+            result['html'] = result['date_html'] + result['quantity_html']
             return result
 
     @api.model
-    def get_sep_po_line_discrepancy(self, sector, id):
+    def get_sep_po_line_discrepancy(self, sector):
         discrepancy_list_data = []
         current_date = datetime.now()
         current_date_str = datetime.strftime(current_date, "%Y-%m-%d %H:%M:%S")
         current_date_frmt = datetime.strptime(current_date_str, "%Y-%m-%d %H:%M:%S")
-        # context = dict(self.env.context)
-        # active_id = context.get('active_id', False)
-        # active_model = context.get('model', False)
-        po_line = self.env['purchase.order.line'].browse(id)
-        po_node = po_line.node_id
-        # _logger.info(node_id)
-        nodes = po_node.parent_ids;
-        for node in nodes:
-            node_id = node.id
-            _logger.info(node_id)
-            res_model = node.res_model
-            _logger.info(res_model)
-            if sector == "date":
-                po_line_data = self._get_purchase_line_data(po_node, current_date_frmt, node, "sep")
-                if bool(po_line_data):
-                    discrepancy_list_data.append(po_line_data)
-            else:
-                po_line_data = self._get_purchase_line_quantity_data(po_node, current_date_frmt, node, "sep")
-                if bool(po_line_data):
-                    discrepancy_list_data.append(po_line_data)
-            # _logger.info(lines)
+
+        all_po_line_records = self.env['purchase.order.line'].search([])
+        for po_line in all_po_line_records:
+            if po_line.node_id:
+                # context = dict(self.env.context)
+                # active_id = context.get('active_id', False)
+                # active_model = context.get('model', False)
+                # po_line = self.env['purchase.order.line'].browse(id)
+                po_node = po_line.node_id
+                # _logger.info(node_id)
+                nodes = po_node.parent_ids;
+                for node in nodes:
+                    node_id = node.id
+                    _logger.info(node_id)
+                    res_model = node.res_model
+                    _logger.info(res_model)
+                    if sector == "date":
+                        po_line_data = self._get_purchase_line_data(po_node, current_date_frmt, node, "sep")
+                        if bool(po_line_data):
+                            discrepancy_list_data.append(po_line_data)
+                    else:
+                        po_line_data = self._get_purchase_line_quantity_data(po_node, current_date_frmt, node, "sep")
+                        if bool(po_line_data):
+                            discrepancy_list_data.append(po_line_data)
+                # _logger.info(lines)
         if sector == "date":
             lines = self._list_to_date_lines(discrepancy_list_data)
         else:
