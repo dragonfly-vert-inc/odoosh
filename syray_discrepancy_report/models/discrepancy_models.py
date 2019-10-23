@@ -523,8 +523,8 @@ class DiscrepancyModel(models.TransientModel):
         current_date_str = datetime.strftime(current_date, "%Y-%m-%d %H:%M:%S")
         current_date_frmt = datetime.strptime(current_date_str, "%Y-%m-%d %H:%M:%S")
         # _logger.info(current_date_frmt)
-        # mo_line = self._get_production_data(parent_node, current_date_frmt)
-        # discrepancy_list_data.append(mo_line)
+        mo_line = self._get_production_quantity_data(parent_node, current_date_frmt)
+        discrepancy_list_data.extend(mo_line)
         res_id = parent_node.res_id
         # _logger.info(res_id)
         work_order_data = self.env['mrp.workorder'].search([('production_id', '=', res_id)])
@@ -554,6 +554,52 @@ class DiscrepancyModel(models.TransientModel):
                     if bool(po_line):
                         discrepancy_list_data.append(po_line)
         return discrepancy_list_data
+
+    @api.model
+    def _get_production_quantity_data(self, node, current_date_frmt):
+        moq_list = []
+        context = dict(self.env.context)
+        active_id = context.get('active_id', False)
+        active_model = context.get('model', False)
+        list_data = {}
+        res_model = node.res_model
+        # _logger.info(res_model)
+        res_id = node.res_id
+        _logger.info("production_id")
+        _logger.info(res_id)
+        production_data = self.env[res_model].search([('id', '=', res_id)])
+        discrepancy_message = "No discrepancy"
+        discrepancy_status = False
+        name = production_data.name
+        stock_picking = self.env["stock.picking"].search([('origin', '=', name),('location_dest_id', '=', 18)])
+        if stock_picking:
+            for picking in stock_picking:
+                stock_picking_move_line = self.env["stock.move.line"].search([('picking_id', '=', picking.id)])
+                for move_line in stock_picking_move_line:
+                    if production_data.state == "confirmed":
+                        if move_line.qty_done == 0.0 and move_line.product_uom_qty != 0.0:
+                            discrepancy_message = production_data.name + " - " + move_line.product_id.name + " - <b> required quantity still not reserved. MO planned start date: </b>" + str(
+                                production_data.date_planned_start)
+                            discrepancy_status = True
+                    if production_data.state == "planned":
+                        if move_line.qty_done == 0.0 and move_line.product_uom_qty != 0.0:
+                            discrepancy_message = production_data.name + " - " + move_line.product_id.name + " - <b> required quantity still not reserved. MO planned work-order start date: </b>" + str(
+                                production_data.date_planned_start_wo)
+                            discrepancy_status = True
+                    ref = self._get_reference(res_model, res_id, name)
+                    list_data = {
+                        "res_model": res_model,
+                        "res_id": res_id,
+                        "source_doc_name": name,
+                        "work_center": "",
+                        "product_name": move_line.product_id.name,
+                        "discrepancy_message": discrepancy_message,
+                        "discrepancy_status": discrepancy_status,
+                        "reference_id": ref
+                    }
+                    if discrepancy_status:
+                        moq_list.append(list_data)
+        return moq_list
 
     @api.model
     def _get_wo_quantity_data(self, node, work_order, current_date_frmt,so_line_id):
