@@ -13,6 +13,7 @@
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'views/mto.priority.csv',
         'views/mto_chain_view.xml',
         'views/cancel_mto.xml',
         'views/sale_order.xml',
