@@ -127,8 +127,8 @@
             <field name="code">records.action_update()</field>
         </record>
         
-        <record id="mrp_production_priority" model="ir.ui.view">
-            <field name="name"></field>
+        <record id="mrp_workorder_priority" model="ir.ui.view">
+            <field name="name">mrp_workorder_priority</field>
             <field name="model">mrp.workorder</field>
             <field name="inherit_id" ref="mrp.mrp_production_workorder_tree_view_inherit" />
             <field name="arch" type="xml">
