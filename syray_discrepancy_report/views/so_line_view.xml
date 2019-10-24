@@ -16,5 +16,18 @@
          </field>
     </record>
 
+    <menuitem id="action_purchase_order_report_sub_all"
+            name="Purchase"
+            groups="purchase.group_purchase_manager"
+            action="purchase.action_purchase_order_report_all"
+            parent="purchase.purchase_report"
+            sequence="1"/>
+    <menuitem id="menu_report_purchase_discrepancy"
+            name="Purchase Discrepancy"
+            groups="purchase.group_purchase_manager"
+            action="action_discrepancy_report"
+            parent="purchase.purchase_report"
+            sequence="99"/>
+
   </data>
 </odoo>

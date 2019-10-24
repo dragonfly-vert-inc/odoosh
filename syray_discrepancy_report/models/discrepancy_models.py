@@ -31,7 +31,8 @@ class DiscrepancyModel(models.TransientModel):
         active_id = context.get('active_id', False)
         active_model = context.get('model', False)
         # _logger.info(active_id)
-        # _logger.info(active_model)
+        _logger.info("active_model .......................................................")
+        _logger.info(active_model)
         if active_id and active_model and active_model != "sale.order" :
             rcontext['so_parent_date'] = "Date Discrepancy Report " + self.get_so_information(active_id)
             rcontext['so_parent_q'] = "Quantity Discrepancy Report " + self.get_so_information(active_id)
@@ -60,10 +61,67 @@ class DiscrepancyModel(models.TransientModel):
                 rcontext['qlines'] = self.get_so_line_discrepancy_report("quantity", so_line.id)
                 rcontext['qlines'] = sorted(rcontext['qlines'], key=lambda i: i['discrepancy_status'], reverse=True)
                 # _logger.info(rcontext['lines'])
-                result['date_html'] = self.env.ref('syray_discrepancy_report.report_discrepancy_view').render(rcontext)
-                result['quantity_html'] = self.env.ref('syray_discrepancy_report.report_discrepancy_view_quantity').render(rcontext)
+                result['date_html'] = self.env.ref('syray_discrepancy_report.report_discrepancy_view_so').render(rcontext)
+                result['quantity_html'] = self.env.ref('syray_discrepancy_report.report_discrepancy_view_quantity_so').render(rcontext)
                 result['html'] += result['date_html'] + result['quantity_html']
             return result
+        else:
+            _logger.info("active_model .......................................................")
+            all_po_line_records = self.env['purchase.order.line'].search([])
+            result['html'] = bytes('', 'utf-8')
+            rcontext['so_parent_date'] = "Date Discrepancy Report"
+            rcontext['so_parent_q'] = "Quantity Discrepancy Report"
+            rcontext['lines'] = self.get_sep_po_line_discrepancy("date")
+            rcontext['lines'] = sorted(rcontext['lines'],
+                                       key=lambda i: (
+                                           i['discrepancy_start_status'], i['discrepancy_finish_status']),
+                                       reverse=True)
+            result['date_html'] = self.env.ref('syray_discrepancy_report.report_discrepancy_view_po').render(
+                rcontext)
+            rcontext['qlines'] = self.get_sep_po_line_discrepancy("quantity")
+            rcontext['qlines'] = sorted(rcontext['qlines'], key=lambda i: i['discrepancy_status'], reverse=True)
+            # _logger.info(rcontext['lines'])
+            result['quantity_html'] = self.env.ref(
+                'syray_discrepancy_report.report_discrepancy_view_quantity_po').render(rcontext)
+            result['html'] = result['date_html'] + result['quantity_html']
+            return result
+
+    @api.model
+    def get_sep_po_line_discrepancy(self, sector):
+        discrepancy_list_data = []
+        current_date = datetime.now()
+        current_date_str = datetime.strftime(current_date, "%Y-%m-%d %H:%M:%S")
+        current_date_frmt = datetime.strptime(current_date_str, "%Y-%m-%d %H:%M:%S")
+
+        all_po_line_records = self.env['purchase.order.line'].search([])
+        for po_line in all_po_line_records:
+            if po_line.node_id:
+                # context = dict(self.env.context)
+                # active_id = context.get('active_id', False)
+                # active_model = context.get('model', False)
+                # po_line = self.env['purchase.order.line'].browse(id)
+                po_node = po_line.node_id
+                # _logger.info(node_id)
+                nodes = po_node.parent_ids;
+                for node in nodes:
+                    node_id = node.id
+                    _logger.info(node_id)
+                    res_model = node.res_model
+                    _logger.info(res_model)
+                    if sector == "date":
+                        po_line_data = self._get_purchase_line_data(po_node, current_date_frmt, node, "sep")
+                        if bool(po_line_data):
+                            discrepancy_list_data.append(po_line_data)
+                    else:
+                        po_line_data = self._get_purchase_line_quantity_data(po_node, current_date_frmt, node, "sep")
+                        if bool(po_line_data):
+                            discrepancy_list_data.append(po_line_data)
+                # _logger.info(lines)
+        if sector == "date":
+            lines = self._list_to_date_lines(discrepancy_list_data)
+        else:
+            lines = self._list_to_quantity_lines(discrepancy_list_data)
+        return lines
 
     @api.model
     def get_so_information(self,id):
@@ -234,26 +292,30 @@ class DiscrepancyModel(models.TransientModel):
                     production_data.date_planned_finished) + " date"
                 discrepancy_finish_status = True
         elif production_data.state == "planned":
-            if production_data.date_planned_start.date() < production_data.date_planned_start_wo.date():
+            if production_data.date_planned_start_wo and production_data.date_planned_start.date() < production_data.date_planned_start_wo.date():
                 discrepancy_message_start = production_data.name + " will fail to start work-order in time due to Work Center unavailability"
                 discrepancy_start_status = True
-            elif current_date_frmt >= production_data.date_planned_start_wo:
+            elif production_data.date_planned_start_wo and current_date_frmt >= production_data.date_planned_start_wo:
                 discrepancy_message_start = production_data.name + " Missed work-order's scheduled start time of " + str(
                     production_data.date_planned_start_wo) + " date"
                 discrepancy_start_status = True
-            if production_data.date_planned_finished.date() < production_data.date_planned_finished_wo.date():
+            if production_data.date_planned_finished_wo and production_data.date_planned_finished.date() < production_data.date_planned_finished_wo.date():
                 discrepancy_message_end = production_data.name + " will fail to finish work-order in time due to Work Center unavailability"
                 discrepancy_finish_status = True
-            elif current_date_frmt >= production_data.date_planned_finished_wo:
+            elif production_data.date_planned_finished_wo and current_date_frmt >= production_data.date_planned_finished_wo:
                 discrepancy_message_end = production_data.name + " Missed work-order's scheduled finish time of " + str(
                     production_data.date_planned_finished_wo) + " date"
                 discrepancy_finish_status = True
         if production_data.state == "progress":
-            if current_date_frmt >= production_data.date_planned_start_wo:
+            if production_data.date_planned_start_wo and current_date_frmt >= production_data.date_planned_start_wo:
                 discrepancy_message_start = production_data.name + " production started at " + str(
                     production_data.date_start) + " date"
-            if current_date_frmt >= production_data.date_planned_finished_wo:
+            if production_data.date_planned_finished_wo and current_date_frmt >= production_data.date_planned_finished_wo:
                 discrepancy_message_end = production_data.name + " Missed work-order's scheduled finish time of " + str(
+                    production_data.date_planned_finished) + " date"
+                discrepancy_finish_status = True
+            elif not production_data.date_planned_finished_wo and current_date_frmt >= production_data.date_planned_finished:
+                discrepancy_message_end = production_data.name + " Missed scheduled finish time of " + str(
                     production_data.date_planned_finished) + " date"
                 discrepancy_finish_status = True
         # if current_date_frmt >= production_data.date_planned_start and ((production_data.state == "planned" or production_data.state == "confirmed") and production_data.state != "cancel"):
@@ -382,10 +444,13 @@ class DiscrepancyModel(models.TransientModel):
             "discrepancy_finish_status": discrepancy_finish_status,
             "reference_id": ref
         }
-        if discrepancy_start_status or discrepancy_finish_status:
-            return list_data
+        if so_line_id != "sep":
+            if discrepancy_start_status or discrepancy_finish_status:
+                return list_data
+            else:
+                return {}
         else:
-            return {}
+            return list_data
         # return list_data
 
     @api.model
@@ -405,7 +470,7 @@ class DiscrepancyModel(models.TransientModel):
         discrepancy_message_end = "Scheduled finish time not reached"
         discrepancy_start_status = False
         discrepancy_finish_status = False
-        if current_date_frmt >= work_order.date_planned_start and (
+        if work_order.date_planned_start and current_date_frmt >= work_order.date_planned_start and (
                 (work_order.state == "ready" or work_order.state == "pending") and work_order.state != "cancel"):
             discrepancy_message_start = work_order.name + " Missed scheduled start time of " + str(
                 work_order.date_planned_start) + " date"
@@ -414,12 +479,12 @@ class DiscrepancyModel(models.TransientModel):
         #         (work_order.state == "ready" or work_order.state == "pending") and work_order.state != "cancel"):
         #     discrepancy_message_start = work_order.name + " will not start on time due to Work Center unavailability."
         #     discrepancy_start_status = True
-        if current_date_frmt >= work_order.date_planned_finished and (
+        if work_order.date_planned_finished and current_date_frmt >= work_order.date_planned_finished and (
                 work_order.state != "done" and work_order.state != "cancel"):
             discrepancy_message_end = work_order.name + " Missed scheduled finish time of " + str(
                 work_order.date_planned_finished) + " date"
             discrepancy_finish_status = True
-        elif work_order.date_planned_finished > production_data.date_planned_finished and (
+        elif work_order.date_planned_finished and work_order.date_planned_finished > production_data.date_planned_finished and (
                 work_order.state != "done" and work_order.state != "cancel"):
             discrepancy_message_end = work_order.name + " will not finish on time due to Work Center unavailability."
             discrepancy_finish_status = True
@@ -458,8 +523,8 @@ class DiscrepancyModel(models.TransientModel):
         current_date_str = datetime.strftime(current_date, "%Y-%m-%d %H:%M:%S")
         current_date_frmt = datetime.strptime(current_date_str, "%Y-%m-%d %H:%M:%S")
         # _logger.info(current_date_frmt)
-        # mo_line = self._get_production_data(parent_node, current_date_frmt)
-        # discrepancy_list_data.append(mo_line)
+        mo_line = self._get_production_quantity_data(parent_node, current_date_frmt)
+        discrepancy_list_data.extend(mo_line)
         res_id = parent_node.res_id
         # _logger.info(res_id)
         work_order_data = self.env['mrp.workorder'].search([('production_id', '=', res_id)])
@@ -491,6 +556,52 @@ class DiscrepancyModel(models.TransientModel):
         return discrepancy_list_data
 
     @api.model
+    def _get_production_quantity_data(self, node, current_date_frmt):
+        moq_list = []
+        context = dict(self.env.context)
+        active_id = context.get('active_id', False)
+        active_model = context.get('model', False)
+        list_data = {}
+        res_model = node.res_model
+        # _logger.info(res_model)
+        res_id = node.res_id
+        _logger.info("production_id")
+        _logger.info(res_id)
+        production_data = self.env[res_model].search([('id', '=', res_id)])
+        discrepancy_message = "No discrepancy"
+        discrepancy_status = False
+        name = production_data.name
+        stock_picking = self.env["stock.picking"].search([('origin', '=', name),('location_dest_id', '=', 18)])
+        if stock_picking:
+            for picking in stock_picking:
+                stock_picking_move_line = self.env["stock.move.line"].search([('picking_id', '=', picking.id)])
+                for move_line in stock_picking_move_line:
+                    if production_data.state == "confirmed":
+                        if move_line.qty_done == 0.0 and move_line.product_uom_qty != 0.0:
+                            discrepancy_message = production_data.name + " - " + move_line.product_id.name + " - <b> required quantity still not reserved. MO planned start date: </b>" + str(
+                                production_data.date_planned_start)
+                            discrepancy_status = True
+                    if production_data.state == "planned":
+                        if move_line.qty_done == 0.0 and move_line.product_uom_qty != 0.0:
+                            discrepancy_message = production_data.name + " - " + move_line.product_id.name + " - <b> required quantity still not reserved. MO planned work-order start date: </b>" + str(
+                                production_data.date_planned_start_wo)
+                            discrepancy_status = True
+                    ref = self._get_reference(res_model, res_id, name)
+                    list_data = {
+                        "res_model": res_model,
+                        "res_id": res_id,
+                        "source_doc_name": name,
+                        "work_center": "",
+                        "product_name": move_line.product_id.name,
+                        "discrepancy_message": discrepancy_message,
+                        "discrepancy_status": discrepancy_status,
+                        "reference_id": ref
+                    }
+                    if discrepancy_status:
+                        moq_list.append(list_data)
+        return moq_list
+
+    @api.model
     def _get_wo_quantity_data(self, node, work_order, current_date_frmt,so_line_id):
         list_data = {}
         res_model = node.res_model
@@ -501,10 +612,10 @@ class DiscrepancyModel(models.TransientModel):
         discrepancy_message = "No discrepancy"
         discrepancy_status = False
         product_name = work_order.product_id.name
-        if current_date_frmt >= work_order.date_planned_finished and work_order.state != "cancel" and work_order.qty_produced < work_order.qty_producing:
+        if work_order.date_planned_finished and current_date_frmt >= work_order.date_planned_finished and work_order.state != "cancel" and work_order.qty_produced < work_order.qty_producing:
             discrepancy_message = work_order.name + " failed to produce required quantity. Current status " + str(work_order.qty_produced) + " / " + str(work_order.qty_producing)
             discrepancy_status = True
-        if current_date_frmt >= work_order.date_planned_finished and work_order.state != "cancel" and work_order.qty_produced > work_order.qty_producing:
+        if work_order.date_planned_finished and current_date_frmt >= work_order.date_planned_finished and work_order.state != "cancel" and work_order.qty_produced > work_order.qty_producing:
             discrepancy_message = work_order.name + " produced extra than required quantity. Current status " + str(work_order.qty_produced) + " / " + str(work_order.qty_producing)
             discrepancy_status = True
         if work_order.state == "cancel":
@@ -617,12 +728,14 @@ class DiscrepancyModel(models.TransientModel):
             "discrepancy_status": discrepancy_status,
             "reference_id": ref
         }
-        # _logger.info(list_data)
-        if discrepancy_status:
-            return list_data
+
+        if so_line_id != "sep":
+            if discrepancy_status:
+                return list_data
+            else:
+                return {}
         else:
-            return {}
-        # return list_data
+            return list_data
 
     @api.model
     def _get_reference(self, res_model, res_id, name):
