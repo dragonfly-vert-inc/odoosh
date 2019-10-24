@@ -11,6 +11,7 @@
     'category': 'Custom Development',
     'depends': ['mrp','stock','sale','purchase','web_tree_dynamic_colored_field'],
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'views/mto_chain_view.xml',
         'views/cancel_mto.xml',

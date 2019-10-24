@@ -24,6 +24,21 @@
                 <field name="date_planned_finished" position="attributes">
                     <attribute name="class" add="highlight-date" seperator=" "></attribute>
                 </field>
+                <xpath expr="//div[hasclass('oe_title')]" position="inside">
+                    <field name="released" invisible="1" />
+                    <div attrs="{'invisible': ['|',('state','not in',('planned'))]}">
+                        <h2 attrs="{'invisible': [('released','=',False)]}" style="color: green;}">
+                            Workorders Released
+                        </h2>
+                        <h2 attrs="{'invisible': [('released','!=',False)]}" style="color: red;}">
+                            Workorders Not Released
+                        </h2>
+                    </div>
+                </xpath>
+                <xpath expr="//header[last()]//button[last()]" position="after">
+                    <button name="button_release" string="Release" type="object" class="oe_highlight" attrs="{'invisible': ['|',('state','not in',('planned')),('released','!=',False)]}" groups="mrp.group_mrp_manager" />
+                    <button name="button_unrelease" string="Unrelease" type="object" attrs="{'invisible': ['|',('state','not in',('planned')),('released','=',False)]}" groups="mrp.group_mrp_manager" />
+                </xpath>
             </field>
         </record>
 
@@ -44,6 +59,9 @@
                 </xpath>
                 <xpath expr="//field[last()]" position="after">
                     <field name="priority_id" />
+                </xpath>
+                <xpath expr="//field[@name='state']" position="after">
+                    <field name="released" attrs="{'invisible': [('state','not in',('planned'))]}" />
                 </xpath>
             </field>
         </record>
