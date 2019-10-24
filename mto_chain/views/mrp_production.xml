@@ -126,5 +126,23 @@
             <field name="state">code</field>
             <field name="code">records.action_update()</field>
         </record>
+        
+        <record id="mrp_production_priority" model="ir.ui.view">
+            <field name="name"></field>
+            <field name="model">mrp.workorder</field>
+            <field name="inherit_id" ref="mrp.mrp_production_workorder_tree_view_inherit" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[1]" position="after">
+                    <field name="color" invisible="1" />
+                </xpath>
+                <xpath expr="/tree" position="attributes">
+                    <attribute name="colors">color_field: color</attribute>
+                </xpath>
+                <xpath expr="//field[last()]" position="after">
+                    <field name="priority_id" />
+                </xpath>
+            </field>
+        </record>
+        
     </data>
 </odoo>
