@@ -4,19 +4,42 @@
         <field name="name">purchase.order.type.form</field>
         <field name="model">purchase.order.type</field>
         <field name="arch" type="xml">
-            <form string="Purchase Order Type">
-                <sheet>
+          <form string="Purchase Order Type">
+            <sheet>
+	      <div class="oe_button_box" name="button_box">
+		<button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+		  <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+		</button>
+	      </div>
                     <div class="oe_title">
                         <h1>
                             <field name="name"/>
                         </h1>
                     </div>
+		    <group>
+		      <field name="currency_id"/>
+		    </group>
                     <group>
+		      <group>
                         <field name="manager"/>
                         <field name="controller" widget="many2many_tags"/>
                         <field name="vice_president"/>
                         <field name="vice_president_finance"/>
                         <field name="ceo"/>
+			<field name="cfo"/>
+		      </group>
+		      <group>
+			<field name="manager_amount"/>
+                        <field name="controller_amount"/>
+                        <field name="vp_amount"/>
+                        <field name="vpf_amount"/>
+                        <field name="ceo_amount"/>
+			<field name="cfo_amount"/>
+		      </group>
+		      <group>
+			<field name="override_threshold"/>
+		      </group>
+			
                     </group>
                 </sheet>
             </form>
@@ -64,9 +87,11 @@
             <field name="date_order" position="before">
                 <field name="po_type_id" options="{'no_create': True}"/>
                 <field name="show_approval_btn" invisible="1"/>
+		<field name="requested_by"/>
+		
             </field>
             <field name="state" position="attributes">
-                <attribute name="statusbar_visible">draft,sent,manager_approval,vp_approval,vp_finance_approval,ceo_approval,purchase</attribute>
+                <attribute name="statusbar_visible">draft,sent,manager_approval,vp_approval,vp_finance_approval,ceo_approval,cfo_approval,purchase</attribute>
             </field>
             <button id="bid_confirm" position="attributes">
                 <attribute name="groups">purchase.group_purchase_manager</attribute>
@@ -75,21 +100,21 @@
                 <attribute name="groups">purchase.group_purchase_manager</attribute>
             </button>
             <xpath expr="//header//button[@name='button_approve']" position="attributes">
-                <attribute name='states'></attribute>
-                <attribute name='name'>button_confirm</attribute>
+                <attribute name="states"></attribute>
+                <attribute name="name">button_confirm</attribute>
                 <attribute name="attrs">{'invisible': [('show_approval_btn', '=', False)]}</attribute>
             </xpath>
             <xpath expr="//button[@name='button_cancel']" position="attributes">
-                <attribute name='states'>draft,sent,purchase,manager_approval,vp_approval,vp_finance_approval,ceo_approval</attribute>
+                <attribute name="states">draft,sent,purchase,manager_approval,vp_approval,vp_finance_approval,ceo_approval,cfo_approval</attribute>
             </xpath>
             <xpath expr="//button[@name='button_cancel']" position="after">
                 <button name="button_reject" string="Reject" type="object" attrs="{'invisible': [('show_approval_btn', '=', False)]}"/>
             </xpath>
             <xpath expr="//div[@name='button_box']//button[@name='action_view_invoice']" position="attributes">
-                <attribute name='attrs'>{'invisible':['|', ('invoice_count', '=', 0), ('state', 'in', ('draft','sent','manager_approval','vp_approval','vp_finance_approval', 'ceo_approval'))]}</attribute>
+                <attribute name="attrs">{'invisible':['|', ('invoice_count', '=', 0), ('state', 'in', ('draft','sent','manager_approval','vp_approval','vp_finance_approval', 'ceo_approval', 'cfo_approval'))]}</attribute>
             </xpath>
             <xpath expr="//field[@name='order_line']//tree//field[@name='product_id']" position="attributes">
-                <attribute name="attrs">{'readonly': [('state', 'in', ('purchase', 'manager_approval','vp_approval','vp_finance_approval', 'ceo_approval','done', 'cancel'))]}</attribute>
+                <attribute name="attrs">{'readonly': [('state', 'in', ('purchase', 'manager_approval','vp_approval','vp_finance_approval', 'ceo_approval', 'cfo_approval', 'done', 'cancel'))]}</attribute>
             </xpath>
         </field>
     </record>
@@ -100,13 +125,14 @@
         <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
         <field name="arch" type="xml">
             <xpath expr="//filter[@name='draft']" position="attributes">
-                <attribute name='domain'>[('state','in',('draft','sent', 'manager_approval','vp_approval','vp_finance_approval', 'ceo_approval'))]</attribute>
+                <attribute name='domain'>[('state','in',('draft','sent', 'manager_approval','vp_approval','vp_finance_approval', 'ceo_approval', 'cfo_approval'))]</attribute>
             </xpath>
             <xpath expr="//filter[@name='to_approve']" position="replace">
                 <filter name="manager_approval" string="Manager Approval" domain="[('state', '=', 'manager_approval')]"/>
                 <filter name="vp_approval" string="Vice President Approval" domain="[('state', '=', 'vp_approval')]"/>
                 <filter name="vp_finance_approval" string="Vice President Finance Approval" domain="[('state', '=', 'vp_finance_approval')]"/>
                 <filter name="ceo_approval" string="CEO Approval" domain="[('state', '=', 'ceo_approval')]"/>
+		<filter name="cfo_approval" string="CFO Approval" domain="[('state', '=', 'cfo_approval')]"/>
             </xpath>
         </field>
     </record>
