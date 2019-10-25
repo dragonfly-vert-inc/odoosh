@@ -28,7 +28,12 @@ class QualityCheck(models.Model):
         self.ensure_one()
         UserInput = self.env['survey.user_input']
         if survey_template_id and user_id:
-            UserInput = UserInput.create({'survey_id': survey_template_id.id, 'partner_id': user_id.partner_id.id, 'quality_check_id': self.id})
+            UserInput = UserInput.create({
+                                'survey_id': survey_template_id.id,
+                                'partner_id': user_id.partner_id.id,
+                                'quality_check_id': self.id,
+                                'type': 'link',
+                            })
             public_url = '%s/%s' % (survey_template_id.public_url, UserInput.token)
             self.write({'public_url': public_url})
         return UserInput
