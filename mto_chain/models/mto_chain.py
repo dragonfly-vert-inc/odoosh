@@ -18,7 +18,7 @@ class MTOChain(models.Model):
 
     res_model = fields.Char()
     res_id = fields.Integer()
-    record_ref = fields.Reference(selection=[('purchase.order.line', 'Purchase Order Line'), ('mrp.production', 'Manufacturing Order'), ('sale.order.line'), ('Sale Order Line')],
+    record_ref = fields.Reference(selection=[('purchase.order', 'Purchase Order'), ('mrp.production', 'Manufacturing Order'), ('sale.order.line'), ('Sale Order Line')],
                                   compute='_get_ref',
                                   store=True)
 
