@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data noupdate="0">
-        <!-- <record id="purchase_order_form_link_mo" model="ir.ui.view">
+        <record id="purchase_order_form_link_mo" model="ir.ui.view">
             <field name="name">purchase_order_form_link_mo</field>
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="purchase.purchase_order_form" />
@@ -10,10 +10,12 @@
             <field name="priority" eval="16" />
             <field name="active" eval="True" />
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='order_line']//field[last()]" position="after">
-                    <button name="%(mo_linking_multiple_wizard_action)d" string="Link Procurement" type="action" icon="fa-link" context="{'default_purchase_line_id': id, 'product_id': product_id, 'mo_link': True}" />
+                <xpath expr="//notebook" position="before">
+                    <group>
+                        <button name="link_manufactures" string="Link Manufactures" type="object" class="oe_link"/>
+                    </group>
                 </xpath>
             </field>
-        </record> -->
+        </record>
     </data>
 </odoo>

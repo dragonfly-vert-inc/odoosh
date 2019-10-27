@@ -10,6 +10,11 @@
             <field name="priority" eval="16" />
             <field name="active" eval="True" />
             <field name="arch" type="xml">
+                <xpath expr="//notebook" position="before">
+                    <group>
+                        <button name="link_purchases" string="Link Procurements" type="object" class="oe_link"/>
+                    </group>
+                </xpath>
                 <field name="date_planned_start" position="attributes">
                     <attribute name="class" add="highlight-date" seperator=" "></attribute>
                 </field>

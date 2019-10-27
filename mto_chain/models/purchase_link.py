@@ -22,6 +22,12 @@ class PoMoLink(models.TransientModel):
     def link_manual_procurement(self):
         for linking in self:
             for line in linking.line_ids:
+                if not line.production_id.node_id:
+                    line.production_id.node_id = line.production_id.node_id.create({})
+                    line.production_id.node_id._set_ref(line.production_id)
+                if not line.purchase_id.node_id:
+                    line.purchase_id.node_id = line.purchase_id.node_id.create({})
+                    line.purchase_id.node_id._set_ref(line.purchase_id)
                 line.production_id.node_id.write({
                     'child_ids': [(4, line.purchase_id.node_id.id, False)]
                 })
@@ -48,4 +54,33 @@ class PoMoLinkingLine(models.TransientModel):
         ondelete='set null',
     )
     
-    
+
+class PurchaseOrder(models.Model):
+    _inherit = 'purchase.order'
+
+    @api.multi
+    def link_manufactures(self):
+        return {
+            'name': _('Link Manufactures'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'procurement.linking',
+            'context': {
+                'default_purchase_id': self.id
+            }
+        }
+        
+class MrpProduction(models.Model):
+    _inherit = 'mrp.production'
+
+    @api.multi
+    def link_purchases(self):
+        return {
+            'name': _('Link Procurements'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'procurement.linking',
+            'context': {
+                'default_production_id': self.id
+            }
+        }
