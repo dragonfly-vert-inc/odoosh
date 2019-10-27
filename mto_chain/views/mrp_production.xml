@@ -10,11 +10,6 @@
             <field name="priority" eval="16" />
             <field name="active" eval="True" />
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='move_raw_ids']/tree/field[last()]" position="after">
-                    <field name="need_to_procure" invisible="1" />
-                    <field name="free_quantity" attrs="{'invisible': [('need_to_procure','=',False)]}" />
-                    <button name="%(procurement_linking_wizard_action)d" string="Link Procurement" type="action" icon="fa-link" attrs="{'invisible': ['|',('free_quantity','&lt;=', 0),('need_to_procure','=',False)] }" context="{'default_raw_consumption_id': id, 'product_id': product_id }" />
-                </xpath>
                 <field name="date_planned_start" position="attributes">
                     <attribute name="class" add="highlight-date" seperator=" "></attribute>
                 </field>

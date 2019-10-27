@@ -48,9 +48,9 @@ class SaleOrderLine(models.Model):
         return return_date
 
 class PurchaseOrder(models.Model):
-    _name = 'purchase.order.line'
+    _name = 'purchase.order'
 
-    _inherit = ['purchase.order.line', 'mto.chain.mixin']
+    _inherit = ['purchase.order', 'mto.chain.mixin']
 
     @api.model
     def do_date_update(self, start_date=False, end_date=False):

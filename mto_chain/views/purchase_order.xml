@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data noupdate="0">
-        <record id="purchase_order_form_link_mo" model="ir.ui.view">
+        <!-- <record id="purchase_order_form_link_mo" model="ir.ui.view">
             <field name="name">purchase_order_form_link_mo</field>
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="purchase.purchase_order_form" />
@@ -14,6 +14,6 @@
                     <button name="%(mo_linking_multiple_wizard_action)d" string="Link Procurement" type="action" icon="fa-link" context="{'default_purchase_line_id': id, 'product_id': product_id, 'mo_link': True}" />
                 </xpath>
             </field>
-        </record>
+        </record> -->
     </data>
 </odoo>
