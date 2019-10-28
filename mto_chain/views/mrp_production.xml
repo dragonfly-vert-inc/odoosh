@@ -39,6 +39,12 @@
                     <button name="button_release" string="Release" type="object" class="oe_highlight" attrs="{'invisible': ['|',('state','not in',('planned')),('released','!=',False)]}" groups="mrp.group_mrp_manager" />
                     <button name="button_unrelease" string="Unrelease" type="object" attrs="{'invisible': ['|',('state','not in',('planned')),('released','=',False)]}" groups="mrp.group_mrp_manager" />
                 </xpath>
+                <xpath expr="//button[@name='button_plan']" position="attributes">
+                    <attribute name="groups">mrp.group_mrp_manager</attribute>
+                </xpath>
+                <xpath expr="//button[@name='button_unplan']" position="attributes">
+                    <attribute name="groups">mrp.group_mrp_manager</attribute>
+                </xpath>
             </field>
         </record>
 

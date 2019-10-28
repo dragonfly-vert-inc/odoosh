@@ -27,7 +27,6 @@
             </field>
         </record>
 
-
         <record id="procurement_linking_tree" model="ir.ui.view">
             <field name="name">procurement_linking_tree</field>
             <field name="model">procurement.linking</field>
@@ -51,12 +50,19 @@
             <field name="view_type">form</field>
             <field name="target">current</field>
         </record>
-
+        <record id="menu_linking" model="ir.ui.menu">
+            <field name="name">MTO</field>
+            <field name="sequence" eval="1000" />
+        </record>
+        
         <record id="menu_procurement_linking" model="ir.ui.menu">
-            <field name="name">Link procurement</field>
+            <field name="name">Manual procurement linking</field>
             <field name="sequence" eval="10" />
             <field name="action" ref="procurement_linking_action" />
+            <field name="parent_id" ref="menu_linking" />
         </record>
+
+
 
     </data>
 </odoo>

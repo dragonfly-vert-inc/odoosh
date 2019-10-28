@@ -34,3 +34,8 @@ class MrpProduction(models.Model):
         self.write({
             'released': False
         })
+
+    def button_unplan(self):
+        for production in self:
+            production.button_unrelease()
+        super(MrpProduction, self).button_unplan()
