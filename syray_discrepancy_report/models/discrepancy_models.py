@@ -33,7 +33,7 @@ class DiscrepancyModel(models.TransientModel):
         # _logger.info(active_id)
         _logger.info("active_model .......................................................")
         _logger.info(active_model)
-        if active_id and active_model and active_model != "sale.order" :
+        if active_id and active_model and active_model == "sale.order.line" :
             rcontext['so_parent_date'] = "Date Discrepancy Report " + self.get_so_information(active_id)
             rcontext['so_parent_q'] = "Quantity Discrepancy Report " + self.get_so_information(active_id)
             rcontext['lines'] = self.get_so_line_discrepancy_report("date", active_id)
@@ -67,7 +67,6 @@ class DiscrepancyModel(models.TransientModel):
             return result
         else:
             _logger.info("active_model .......................................................")
-            all_po_line_records = self.env['purchase.order.line'].search([])
             result['html'] = bytes('', 'utf-8')
             rcontext['so_parent_date'] = "Date Discrepancy Report"
             rcontext['so_parent_q'] = "Quantity Discrepancy Report"
