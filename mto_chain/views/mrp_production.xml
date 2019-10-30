@@ -10,10 +10,10 @@
             <field name="priority" eval="16" />
             <field name="active" eval="True" />
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='move_raw_ids']/tree/field[last()]" position="after">
-                    <field name="need_to_procure" invisible="1" />
-                    <field name="free_quantity" attrs="{'invisible': [('need_to_procure','=',False)]}" />
-                    <button name="%(procurement_linking_wizard_action)d" string="Link Procurement" type="action" icon="fa-link" attrs="{'invisible': ['|',('free_quantity','&lt;=', 0),('need_to_procure','=',False)] }" context="{'default_raw_consumption_id': id, 'product_id': product_id }" />
+                <xpath expr="//notebook" position="before">
+                    <group>
+                        <button name="link_purchases" string="Link Procurements" type="object" class="oe_link"/>
+                    </group>
                 </xpath>
                 <field name="date_planned_start" position="attributes">
                     <attribute name="class" add="highlight-date" seperator=" "></attribute>
@@ -38,6 +38,12 @@
                 <xpath expr="//header[last()]//button[last()]" position="after">
                     <button name="button_release" string="Release" type="object" class="oe_highlight" attrs="{'invisible': ['|',('state','not in',('planned')),('released','!=',False)]}" groups="mrp.group_mrp_manager" />
                     <button name="button_unrelease" string="Unrelease" type="object" attrs="{'invisible': ['|',('state','not in',('planned')),('released','=',False)]}" groups="mrp.group_mrp_manager" />
+                </xpath>
+                <xpath expr="//button[@name='button_plan']" position="attributes">
+                    <attribute name="groups">mrp.group_mrp_manager</attribute>
+                </xpath>
+                <xpath expr="//button[@name='button_unplan']" position="attributes">
+                    <attribute name="groups">mrp.group_mrp_manager</attribute>
                 </xpath>
             </field>
         </record>

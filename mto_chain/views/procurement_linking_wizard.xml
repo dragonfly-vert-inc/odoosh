@@ -4,7 +4,7 @@
         <!-- Form view for "model" -->
         <record id="procurement_linking_form" model="ir.ui.view">
             <field name="name">procurement_linking_form</field>
-            <field name="model">purchase.raw.link</field>
+            <field name="model">procurement.linking</field>
             <field name="type">form</field>
             <field name="mode">primary</field>
             <field name="priority" eval="16" />
@@ -12,57 +12,54 @@
             <field name="arch" type="xml">
                 <form >
                     <sheet>
-                        <group>
-                            <field name="raw_consumption_id" readonly="1" force_save="1" />
-                            <field name="purchase_line_id" domain="[('product_id','=',context.get('product_id'))]" options="{'no_create_edit': True}" />
-                        </group>
-                        <group>
-                            <field name="quantity" readonly="1" force_save="1" />
-                        </group>
+                        <field name="linked" invisible="1" />
+                        <field name="line_ids" attrs="{'readonly': [('linked','!=',False)]}">
+                            <tree editable="bottom">
+                                <field name="production_id" required="1" />
+                                <field name="purchase_id" required="1" />
+                            </tree>
+                        </field>
+                        <footer>
+                            <button name="link_manual_procurement" string="Link" type="object" class="oe_highlight" attrs="{'invisible': [('linked','!=',False)] }" />
+                        </footer>
                     </sheet>
-                    <footer>
-                        <button name="link_manual_procurement" string="Link" type="object" class="oe_highlight" attrs="{'invisible': [('quantity','&lt;=',0)]}" />
-                    </footer>
                 </form>
             </field>
         </record>
-        <record id="mo_linking_multiple" model="ir.ui.view">
-            <field name="name">mo_linking_multiple</field>
-            <field name="model">purchase.raw.link</field>
-            <field name="type">form</field>
+
+        <record id="procurement_linking_tree" model="ir.ui.view">
+            <field name="name">procurement_linking_tree</field>
+            <field name="model">procurement.linking</field>
+            <field name="type">tree</field>
             <field name="mode">primary</field>
             <field name="priority" eval="16" />
             <field name="active" eval="True" />
             <field name="arch" type="xml">
-                <form >
-                    <sheet>
-                        <group>
-                            <field name="purchase_line_id" invisible="1" force_save="1" />
-                            <field name="raw_consumption_ids" domain="[('product_id','=',context.get('product_id')),('raw_material_production_id','!=',False),('free_quantity','&gt;=',0)]" options="{'no_create_edit': True}" widget="many2many_tags" context="{'mo_link': True, }" />
-                            <field name="quantity" readonly="1" force_save="1" />
-                        </group>
-                    </sheet>
-                    <footer>
-                        <button name="link_manual_mo" string="Link" type="object" class="oe_highlight" />
-                    </footer>
-                </form>
+                <tree>
+                    <field name="line_ids" />
+                </tree>
             </field>
         </record>
-        <record id="procurement_linking_wizard_action" model="ir.actions.act_window">
+
+
+        <record id="procurement_linking_action" model="ir.actions.act_window">
             <field name="type">ir.actions.act_window</field>
             <field name="name">Link Procurement</field>
-            <field name="res_model">purchase.raw.link</field>
-            <field name="view_mode">form</field>
-            <field name="target">new</field>
-            <field name="view_id" ref="procurement_linking_form" />
+            <field name="res_model">procurement.linking</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
         </record>
-        <record id="mo_linking_multiple_wizard_action" model="ir.actions.act_window">
-            <field name="type">ir.actions.act_window</field>
-            <field name="name">Link MO</field>
-            <field name="res_model">purchase.raw.link</field>
-            <field name="view_mode">form</field>
-            <field name="target">new</field>
-            <field name="view_id" ref="mo_linking_multiple" />
+        <record id="menu_linking" model="ir.ui.menu">
+            <field name="name">PO-MO Linking</field>
+            <field name="sequence" eval="1000" />
+        </record>
+        
+        <record id="menu_procurement_linking" model="ir.ui.menu">
+            <field name="name">PO-MO Linking</field>
+            <field name="sequence" eval="10" />
+            <field name="action" ref="procurement_linking_action" />
+            <field name="parent_id" ref="menu_linking" />
         </record>
     </data>
 </odoo>

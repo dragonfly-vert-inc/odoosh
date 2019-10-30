@@ -15,12 +15,14 @@ class MTOChain(models.Model):
     _name = 'mto.chain'
     _description = u'MTO Chain'
 
-    _rec_name = 'record_ref'
+    _rec_name = 'name'
     _order = 'res_model ASC, res_id ASC'
 
+    
+    name = fields.Char()
     res_model = fields.Char()
     res_id = fields.Integer()
-    record_ref = fields.Reference(selection=[('purchase.order.line', 'Purchase Order Line'), ('mrp.production', 'Manufacturing Order'), ('sale.order.line'), ('Sale Order Line')],
+    record_ref = fields.Reference(selection=[('purchase.order', 'Purchase Order'), ('mrp.production', 'Manufacturing Order'), ('sale.order.line', 'Sale Order Line')],
                                   compute='_get_ref',
                                   store=True)
 
@@ -53,7 +55,7 @@ class MTOChain(models.Model):
     def _set_ref(self, record):
         self.ensure_one()
         record.ensure_one()
-        self.write({'res_model': record._name, 'res_id': record.id})
+        self.write({'res_model': record._name, 'res_id': record.id, 'name': record.name})
 
     @api.model
     def get_html(self):

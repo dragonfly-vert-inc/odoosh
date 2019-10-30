@@ -21,8 +21,12 @@ var discrepancy_report_generic = AbstractAction.extend(ControlPanelMixin, {
         if (action.context.context) {
             this.given_context = action.context.context;
         }
-        this.given_context.active_id = action.context.active_id || action.params.active_id;
-        this.given_context.model = action.context.active_model || false;
+        if (action.context.active_id || action.params.active_id) {
+            this.given_context.active_id = action.context.active_id || action.params.active_id;
+        }
+        // this.given_context.active_id = action.context.active_id || action.params.active_id;
+        // this.given_context.model = action.context.active_model || false;
+        this.given_context.model = action.context.active_model || 'mto.discrepancy.report';
         this.given_context.ttype = action.context.ttype || false;
         this.given_context.auto_unfold = action.context.auto_unfold || false;
         this.given_context.lot_name = action.context.lot_name || false;

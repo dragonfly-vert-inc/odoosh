@@ -26,14 +26,14 @@
             <field name="priority" eval="16" />
             <field name="active" eval="True" />
             <field name="arch" type="xml">
-                <form string="MTO Chain" create="false" delete="false" edit="false">
+                <form string="MTO Chain" create="false" delete="false" edit="true">
                     <header>
                     </header>
                     <sheet>
                         <group>
-                            <field name="record_ref" />
-                            <field name="res_model" />
+                            <field name="record_ref" readonly="1"/>
                             <field name="parent_ids" widget="many2many_tags" />
+                            <field name="child_ids" widget="many2many_tags" />
                         </group>
                     </sheet>
                 </form>
@@ -103,9 +103,9 @@
                                 </span>
                             </div>
                         </t>
-                        <t t-if="node.res_model=='purchase.order.line'">
+                        <t t-if="node.res_model=='purchase.order'">
                             <div class="node-title">
-                                <t t-esc="'%s %s'%(node.record_ref.order_id.name, node.record_ref.product_id.name)" />
+                                <t t-esc="'%s'%(node.record_ref.name)" />
                             </div>
                             <div class="node-times">
                                 <span class="node-start-time">
@@ -139,7 +139,7 @@
             <field name="active" eval="True" />
             <field name="arch" type="xml">
                 <search string="MTO Chain">
-                    <field name="record_ref" />
+                    <field name="name" />
                 </search>
             </field>
         </record>
@@ -147,15 +147,29 @@
         <!-- Main window action for "model" -->
         <record id="action_mto_chain" model="ir.actions.act_window">
             <field name="type">ir.actions.act_window</field>
-            <field name="name">MTO Chain</field>
+            <field name="name">Links</field>
             <field name="res_model">mto.chain</field>
             <field name="view_mode">tree,form</field>
             <field name="view_type">form</field>
             <field name="target">current</field>
-            <field name="domain">[]</field>
+            <field name="domain">[('res_model','in',('mrp.production','sale.order.line'))]</field>
             <field name="context">{}</field>
             <field name="search_view_id" ref="mto_chain_search" />
         </record>
+        
+        <record id="menu_linking" model="ir.ui.menu">
+            <field name="name">MTO</field>
+            <field name="sequence" eval="1000" />
+        </record>
+
+        <record id="menu_mto_chain" model="ir.ui.menu" >
+            <field name="name">MTO Links</field>
+            <field name="sequence" eval="10" />
+            <field name="action" ref="action_mto_chain" />
+            <field eval="[(6,0,[ref('base.group_no_one')])]" name="groups_id"/>
+            <field name="parent_id" ref="menu_linking" />
+        </record>
+        
 
         <template id="mto_chain_assets" name="mto chain assets" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
