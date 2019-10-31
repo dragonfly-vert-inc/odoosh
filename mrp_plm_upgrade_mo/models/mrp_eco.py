@@ -22,7 +22,7 @@ class MrpEco(models.Model):
                 raw_moves = production.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
                 raw_moves._do_unreserve()
                 raw_moves._action_cancel()
-                raw_moves.unlink()
+                raw_moves.sudo().unlink()
                 picking_ids = production.picking_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
                 picking_ids.action_cancel()
                 if production.workorder_ids:
