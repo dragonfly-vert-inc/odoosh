@@ -16,30 +16,32 @@ PO_APPROVAL_STATE = [
 class PurchaseOrderType(models.Model):
     _name = "purchase.order.type"
     _description = "Purchase Order Type"
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    currency_id = fields.Many2one('res.currency', ondelete='restrict', string='Currency', default=lambda self: self.env.user.company_id.currency_id)
+    currency_id = fields.Many2one('res.currency', ondelete='restrict', string='Currency', default=lambda self: self.env.user.company_id.currency_id, track_visibility='onchange')
 
-    name = fields.Char(required=True)
-    manager = fields.Many2one('hr.employee', string='Manager')
+    name = fields.Char(required=True, track_visibility='onchange')
+    manager = fields.Many2one('hr.employee', string='Manager', track_visibility='onchange')
     controller = fields.Many2many('hr.employee', string='Controllers')
-    vice_president = fields.Many2one('hr.employee', string='Vice President')
-    vice_president_finance = fields.Many2one('hr.employee', string='Vice President Finance')
-    ceo = fields.Many2one('hr.employee', string='COO')  # they want to name this COO instead
-    cfo = fields.Many2one('hr.employee', string='CFO')
+    vice_president = fields.Many2one('hr.employee', string='Vice President', track_visibility='onchange')
+    vice_president_finance = fields.Many2one('hr.employee', string='Vice President Finance', track_visibility='onchange')
+    ceo = fields.Many2one('hr.employee', string='COO', track_visibility='onchange')  # they want to name this COO instead
+    cfo = fields.Many2one('hr.employee', string='CFO', track_visibility='onchange')
 
-    manager_amount = fields.Monetary(string='Manager Amount')
-    controller_amount = fields.Monetary(string='Controllers Amount')
-    vp_amount = fields.Monetary(string='Vice President Amount')
-    vpf_amount = fields.Monetary(string='VP Finance Amount')
-    ceo_amount = fields.Monetary(string='COO Amount')
-    cfo_amount = fields.Monetary(string='CFO Amount')
+    manager_amount = fields.Monetary(string='Manager Amount', track_visibility='onchange')
+    controller_amount = fields.Monetary(string='Controllers Amount', track_visibility='onchange')
+    vp_amount = fields.Monetary(string='Vice President Amount', track_visibility='onchange')
+    vpf_amount = fields.Monetary(string='VP Finance Amount', track_visibility='onchange')
+    ceo_amount = fields.Monetary(string='COO Amount', track_visibility='onchange')
+    cfo_amount = fields.Monetary(string='CFO Amount', track_visibility='onchange')
 
-    override_threshold = fields.Boolean('Override Threshold')
-    active = fields.Boolean('Active', default=True)
+    override_threshold = fields.Boolean('Override Threshold', track_visibility='onchange')
+    active = fields.Boolean('Active', default=True, track_visibility='onchange')
 
 
 class PurchaseOrder(models.Model):
     _inherit = "purchase.order"
+    
 
     po_type_id = fields.Many2one('purchase.order.type', string='PO Type', track_visibility='onchange')
     state = fields.Selection(selection=[
@@ -48,7 +50,7 @@ class PurchaseOrder(models.Model):
         ('manager_approval', 'Manager Approval'),
         ('vp_approval', 'VP Approval'),
         ('vp_finance_approval', 'VP Finance Approval'),
-        ('ceo_approval', 'CEO Approval'),
+        ('ceo_approval', 'COO Approval'),
         ('cfo_approval', 'CFO Approval'),
         ('purchase', 'Purchase Order'),
         ('done', 'Locked'),
