@@ -23,3 +23,7 @@ class ResConfigSettings(models.TransientModel):
         related='company_id.ceo_approval_amount',
         currency_field='company_currency_id',
         readonly=False)
+    cfo_approval_amount = fields.Monetary(
+        related='company_id.cfo_approval_amount',
+        currency_field='company_currency_id',
+        readonly=False)
