@@ -8,24 +8,40 @@ PO_APPROVAL_STATE = [
     'manager_approval',
     'vp_approval',
     'vp_finance_approval',
-    'ceo_approval'
+    'ceo_approval',
+    'cfo_approval'
 ]
 
 
 class PurchaseOrderType(models.Model):
     _name = "purchase.order.type"
     _description = "Purchase Order Type"
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(required=True)
-    manager = fields.Many2one('hr.employee', string='Manager')
+    currency_id = fields.Many2one('res.currency', ondelete='restrict', string='Currency', default=lambda self: self.env.user.company_id.currency_id, track_visibility='onchange')
+
+    name = fields.Char(required=True, track_visibility='onchange')
+    manager = fields.Many2one('hr.employee', string='Manager', track_visibility='onchange')
     controller = fields.Many2many('hr.employee', string='Controllers')
-    vice_president = fields.Many2one('hr.employee', string='Vice President')
-    vice_president_finance = fields.Many2one('hr.employee', string='Vice President Finance')
-    ceo = fields.Many2one('hr.employee', string='CEO')
+    vice_president = fields.Many2one('hr.employee', string='Vice President', track_visibility='onchange')
+    vice_president_finance = fields.Many2one('hr.employee', string='Vice President Finance', track_visibility='onchange')
+    ceo = fields.Many2one('hr.employee', string='COO', track_visibility='onchange')  # they want to name this COO instead
+    cfo = fields.Many2one('hr.employee', string='CFO', track_visibility='onchange')
+
+    manager_amount = fields.Monetary(string='Manager Amount', track_visibility='onchange')
+    controller_amount = fields.Monetary(string='Controllers Amount', track_visibility='onchange')
+    vp_amount = fields.Monetary(string='Vice President Amount', track_visibility='onchange')
+    vpf_amount = fields.Monetary(string='VP Finance Amount', track_visibility='onchange')
+    ceo_amount = fields.Monetary(string='COO Amount', track_visibility='onchange')
+    cfo_amount = fields.Monetary(string='CFO Amount', track_visibility='onchange')
+
+    override_threshold = fields.Boolean('Override Threshold', track_visibility='onchange')
+    active = fields.Boolean('Active', default=True, track_visibility='onchange')
 
 
 class PurchaseOrder(models.Model):
     _inherit = "purchase.order"
+    
 
     po_type_id = fields.Many2one('purchase.order.type', string='PO Type', track_visibility='onchange')
     state = fields.Selection(selection=[
@@ -34,16 +50,18 @@ class PurchaseOrder(models.Model):
         ('manager_approval', 'Manager Approval'),
         ('vp_approval', 'VP Approval'),
         ('vp_finance_approval', 'VP Finance Approval'),
-        ('ceo_approval', 'CEO Approval'),
+        ('ceo_approval', 'COO Approval'),
+        ('cfo_approval', 'CFO Approval'),
         ('purchase', 'Purchase Order'),
         ('done', 'Locked'),
         ('cancel', 'Cancelled')
     ])
-    show_approval_btn = fields.Boolean(compute='_compute_show_approval_btn')
+    show_approval_btn = fields.Boolean(compute='_compute_show_approval_btn', store=False) 
+    requested_by = fields.Many2one('hr.employee', string='Requested By')
 
     @api.multi
     def _compute_show_approval_btn(self):
-        for po in self.filtered(lambda p: p.state in ['manager_approval', 'vp_approval', 'ceo_approval', 'vp_finance_approval']):
+        for po in self.filtered(lambda p: p.state in ['manager_approval', 'vp_approval', 'ceo_approval', 'vp_finance_approval', 'cfo_approval']):
             po.show_approval_btn = po._is_valid_user_for_approval()
 
     @api.multi
@@ -60,6 +78,7 @@ class PurchaseOrder(models.Model):
                 partners_to_notify |= self.po_type_id.vice_president.user_id.partner_id
         elif self.state == 'vp_approval':
             partners_to_notify |= self.po_type_id.manager.user_id.partner_id
+
         template = self.env.ref('dragonfly_purchase.mail_template_po_reject')
         template.send_mail(self.id, force_send=True, email_values={'recipient_ids': [(4, p.id) for p in partners_to_notify]})
 
@@ -69,7 +88,7 @@ class PurchaseOrder(models.Model):
     @api.multi
     def button_confirm(self):
         for order in self:
-            if order.state not in ['draft', 'sent', 'manager_approval', 'vp_approval', 'vp_finance_approval', 'ceo_approval']:
+            if order.state not in ['draft', 'sent', 'manager_approval', 'vp_approval', 'vp_finance_approval', 'ceo_approval', 'cfo_approval']:
                 continue
             order._add_supplier_to_product()
             # =========== Comment Current flow Start============
@@ -86,36 +105,48 @@ class PurchaseOrder(models.Model):
             # Custom Code Start
             order._approve_order()
             # Custom Code End
+
+        # add email notification to order user and requested by
+        for order in self:
+            
+            if order.state == 'purchase':
+                partners_to_notify = [order.user_id and order.user_id.partner_id, order.requested_by and order.requested_by.user_id.partner_id]
+                template = self.env.ref('dragonfly_purchase.mail_template_po_confirmed')
+                template.send_mail(order.id, force_send=True, email_values={'recipient_ids': [(4, p.id) for p in partners_to_notify if p]})
         return True
 
     def _need_approval(self, approval_amount):
         if (not self.po_type_id or
                 self.company_id.po_double_validation != 'two_step' or
-                self.amount_total < approval_amount['vp_finance_amount'] or
+                # self.amount_total < approval_amount['manager_amount'] or
                 self.user_has_groups('account.group_account_manager')):
             return False
         return True
 
     def _get_user_in_cc(self, approval_amount):
         users_to_add_as_follower = self.env['res.users']
-        if self.amount_total < approval_amount['manager_amount']:
-            users_to_add_as_follower |= self.po_type_id.manager.user_id
+        # if self.amount_total < approval_amount['manager_amount']:
+        # new spec ask manager for approval all the time
+        users_to_add_as_follower |= self.requested_by.user_id
         users_to_add_as_follower |= self.po_type_id.controller.mapped('user_id')
         return users_to_add_as_follower
 
     def _get_approval_state(self, state=False, approval_amount=None):
         amount = self.amount_total
         state = state or self.state
-        if amount < approval_amount['manager_amount'] and state in ('draft', 'sent'):
-            result = 'vp_finance_approval'
-        elif amount >= approval_amount['manager_amount'] and state in ('draft', 'sent'):
+        # if amount < approval_amount['manager_amount'] and state in ('draft', 'sent'):
+        #     result = 'vp_finance_approval'
+        
+        if amount >= approval_amount['manager_amount'] and state in ('draft', 'sent'):
             result = 'manager_approval'
         elif amount >= approval_amount['vp_amount'] and state == 'manager_approval':
             result = 'vp_approval'
-        elif amount >= approval_amount['vp_finance_amount'] and state in ('manager_approval', 'vp_approval'):
+        elif amount >= approval_amount['vp_finance_amount'] and state == 'vp_approval':
             result = 'vp_finance_approval'
         elif amount >= approval_amount['ceo_amount'] and state == 'vp_finance_approval':
             result = 'ceo_approval'
+        elif amount >= approval_amount['cfo_amount'] and state == 'ceo_approval':
+            result = 'cfo_approval'
         else:
             result = False
 
@@ -146,13 +177,28 @@ class PurchaseOrder(models.Model):
         """
             Return the minimum amount required for approval of each entity
         """
+        manager_amount = self.company_id.manager_approval_amount
+        vp_amount = self.company_id.vp_approval_amount
+        vp_finance_amount = self.company_id.vp_finance_approval_amount
+        ceo_amount = self.company_id.ceo_approval_amount
+        cfo_amount = self.company_id.cfo_approval_amount
         currency = self.env.user.company_id.currency_id
+        
+        if self.po_type_id.override_threshold:
+            manager_amount = self.po_type_id.manager_amount
+            vp_amount = self.po_type_id.vp_amount
+            vp_finance_amount = self.po_type_id.vpf_amount
+            ceo_amount = self.po_type_id.ceo_amount
+            cfo_amount = self.po_type_id.cfo_amount
+            currency = self.po_type_id.currency_id or self.env.user.company_id.currency_id  # fall back to company if currency is not defined
+        
         today = fields.Date.today()
         return {
-            'manager_amount': currency._convert(self.company_id.manager_approval_amount, self.currency_id, self.company_id, self.date_order or today),
-            'vp_amount': currency._convert(self.company_id.vp_approval_amount, self.currency_id, self.company_id, self.date_order or today),
-            'vp_finance_amount': currency._convert(self.company_id.vp_finance_approval_amount, self.currency_id, self.company_id, self.date_order or today),
-            'ceo_amount': currency._convert(self.company_id.ceo_approval_amount, self.currency_id, self.company_id, self.date_order or today),
+            'manager_amount': currency._convert(manager_amount, self.currency_id, self.company_id, self.date_order or today),
+            'vp_amount': currency._convert(vp_amount, self.currency_id, self.company_id, self.date_order or today),
+            'vp_finance_amount': currency._convert(vp_finance_amount, self.currency_id, self.company_id, self.date_order or today),
+            'ceo_amount': currency._convert(ceo_amount, self.currency_id, self.company_id, self.date_order or today),
+            'cfo_amount': currency._convert(cfo_amount, self.currency_id, self.company_id, self.date_order or today),
         }
 
     def _get_user_by_approval_state(self):
@@ -161,6 +207,7 @@ class PurchaseOrder(models.Model):
             'vp_approval': self.po_type_id.vice_president.user_id,
             'vp_finance_approval': self.po_type_id.vice_president_finance.user_id,
             'ceo_approval': self.po_type_id.ceo.user_id,
+            'cfo_approval': self.po_type_id.cfo.user_id,
         }
 
     def _get_state_by_user(self):
@@ -170,6 +217,7 @@ class PurchaseOrder(models.Model):
             self.po_type_id.vice_president.user_id.id: 'vp_approval',
             self.po_type_id.vice_president_finance.user_id.id: 'vp_finance_approval',
             self.po_type_id.ceo.user_id.id: 'ceo_approval',
+            self.po_type_id.cfo.user_id.id: 'cfo_approval',
         }
 
     @api.multi
@@ -182,6 +230,8 @@ class PurchaseOrder(models.Model):
             if self.state in ('draft', 'sent'):
                 self._add_follower_with_message(users=self._get_user_in_cc(approval_amount))
             state = self._get_approval_state(approval_amount=approval_amount)
+            if self.env.uid in self._get_state_by_user().keys():
+                self.message_unsubscribe(partner_ids=self.env.user.partner_id.ids)
             if not state:
                 if self.user_has_groups('account.group_account_manager') or self.po_type_id and self.env.uid in self._get_state_by_user().keys():
                     return self.button_approve()
@@ -201,6 +251,7 @@ class PurchaseOrder(models.Model):
         self.message_post(body=msg_body, partner_ids=user.partner_id.ids)
         # Hack to forcefully unsubsribe since this 'mail_post_autofollow' context is forcefully passed in purchase message post
         self.message_unsubscribe(partner_ids=user.partner_id.ids)
+        
 
     def _add_follower_with_message(self, users=None):
         if not users:
