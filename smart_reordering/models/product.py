@@ -101,10 +101,8 @@ class Product(models.Model):
             res[product_id]['qty_available'] = float_round(qty_available, precision_rounding=rounding)
             res[product_id]['incoming_qty'] = float_round(moves_in_res.get(product_id, 0.0), precision_rounding=rounding)            
             res[product_id]['outgoing_qty'] = float_round(moves_out_res.get(product_id, 0.0), precision_rounding=rounding) * (1+(product.security_stock/100)) #added security stock percentage into demand calculation
-            res[product_id]['virtual_available'] = float_round(
-                qty_available + res[product_id]['incoming_qty'] - res[product_id]['outgoing_qty'],
-                precision_rounding=rounding)
-            res[product_id]['responsible_moves'] = Move.search(domain_move_out_todo).filtered(lambda m: not m.responsible_purchases).ids
+            res[product_id]['virtual_available'] = float_round(qty_available + res[product_id]['incoming_qty'] - res[product_id]['outgoing_qty'], precision_rounding=rounding)
+            res[product_id]['responsible_moves'] = Move.search(domain_move_out_todo).ids
         return res
           
     @api.depends('stock_move_ids.product_qty', 'stock_move_ids.state')

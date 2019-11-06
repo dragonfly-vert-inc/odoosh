@@ -17,6 +17,10 @@ from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, float_compare, float_roun
 
 from odoo.exceptions import UserError
 
+
+import logging
+_logger = logging.getLogger(__name__)
+
 class StockRule(models.Model):
     _inherit = 'stock.rule'
 
@@ -67,8 +71,42 @@ class StockRule(models.Model):
             self.env['purchase.order.line'].sudo().create(vals)
         if values.get('orderpoint_id', False):
             po.write({
-                'responsible_moves': [(4,move_id,False) for move_id in values.get('responsible_moves',[])]
+                'responsible_moves': [(4, move_id, False) for move_id in values.get('responsible_moves', [])]
             })
+            lines = []
+            try:
+                for move in po.responsible_moves.sorted('date'):
+                    if move.state != 'assigned' and not move.move_orig_ids and not move.created_purchase_line_id:
+                        # move._action_assign()
+                        while move:
+                            paren_record = move.raw_material_production_id if move.raw_material_production_id else move.sale_line_id
+                            if move.raw_material_production_id: 
+                                lines.append((0, False, {
+                                    'purchase_id': po_line.id,
+                                    'production_id': move.raw_material_production_id.id,
+                                }))
+                                break
+                            elif move.sale_line_id:
+                                lines.append((0, False, {
+                                    'purchase_id': po_line.id,
+                                    'sale_id': move.sale_line_id.id,
+                                }))
+                                break
+                            move = move.move_dest_ids[0] if move.move_dest_ids else False
+                if lines:
+                    pl = self.env['procurement.linking'].search([('purchase_id','=',po.id),('linked','=',False)], limit=1)
+                    if pl:
+                        pl.write({
+                            'line_ids': lines
+                        })
+                    else:
+                        self.env['procurement.linking'].create({
+                            'purchase_id': po.id,
+                            'line_ids': lines
+                        })
+            except Exception as e:
+                _logger.warn(e.name)
+                continue
 
 
 class ProcurementGroup(models.Model):

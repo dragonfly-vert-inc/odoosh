@@ -32,3 +32,4 @@ class PurchaseOrder(models.Model):
     def button_cancel(self):
         self.write({'responsible_moves': [(6, False, [])]})
         super(PurchaseOrder, self).button_cancel()
+
