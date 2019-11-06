@@ -48,13 +48,17 @@ class SaleOrderLine(models.Model):
         return return_date
 
 class PurchaseOrder(models.Model):
-    _name = 'purchase.order'
+    _name = 'purchase.order.line'
 
-    _inherit = ['purchase.order', 'mto.chain.mixin']
+    _inherit = ['purchase.order.line', 'mto.chain.mixin']
 
     @api.model
     def do_date_update(self, start_date=False, end_date=False):
         return False, False
+
+    def name_get(self):
+        return [(record.id, '%s / %s'%(record.order_id.name, record.product_id.name)) for record in self]
+
 
 class MrpProduction(models.Model):
     _name = 'mrp.production'

@@ -103,9 +103,9 @@
                                 </span>
                             </div>
                         </t>
-                        <t t-if="node.res_model=='purchase.order'">
+                        <t t-if="node.res_model=='purchase.order.line'">
                             <div class="node-title">
-                                <t t-esc="'%s'%(node.record_ref.name)" />
+                                <t t-esc="'%s'%(node.record_ref.display_name)" />
                             </div>
                             <div class="node-times">
                                 <span class="node-start-time">
