@@ -421,31 +421,49 @@ class DiscrepancyModel(models.TransientModel):
     @api.model
     def _get_purchase_line_data(self, res_id, current_date_frmt, parent_node,so_line_id):
         # _logger.info(res_id)
-        production_data = self.env[parent_node.res_model].search([('id', '=', parent_node.res_id)])
-        purchase_data = self.env['purchase.order.line'].search([('id', '=', res_id)])
-
         discrepancy_message_start = "Scheduled start time not reached"
         discrepancy_message_end = "Scheduled finish time not reached"
         discrepancy_start_status = False
         discrepancy_finish_status = False
+        purchase_data = self.env['purchase.order.line'].search([('id', '=', res_id)])
 
-        name = production_data.name + " - " + purchase_data.order_id.name + " - " + purchase_data.product_id.name
-        ref = self._get_reference('purchase.order.line', res_id, name)
-
-        # current_date_frmt = current_date_frmt.date()
-        if current_date_frmt <= production_data.date_planned_start and purchase_data.date_planned > production_data.date_planned_start:
-            discrepancy_message_start = "Purchase order will miss parent MO's scheduled start date"
-            discrepancy_message_end = ""
-            discrepancy_start_status = True
-            discrepancy_finish_status = True
-        elif current_date_frmt > production_data.date_planned_start and purchase_data.product_qty > purchase_data.qty_received:
-            discrepancy_message_start = "Purchase order missed parent MO's scheduled start date"
-            discrepancy_message_end = ""
-            discrepancy_start_status = True
-            discrepancy_finish_status = True
+        if parent_node.res_model == "sale.order.line":
+            sales_line = self.env[parent_node.res_model].search([('id', '=', parent_node.res_id)])
+            name = sales_line.order_id.name + " - " + purchase_data.order_id.name + " - " + purchase_data.product_id.name
+            ref = self._get_reference('purchase.order.line', res_id, name)
+            # current_date_frmt = current_date_frmt.date()
+            if current_date_frmt <= sales_line.date_expected and purchase_data.date_planned > sales_line.date_expected:
+                discrepancy_message_start = "Purchase order will miss parent MO's scheduled start date"
+                discrepancy_message_end = ""
+                discrepancy_start_status = True
+                discrepancy_finish_status = True
+            elif current_date_frmt > sales_line.date_expected and purchase_data.product_qty > purchase_data.qty_received:
+                discrepancy_message_start = "Purchase order missed parent MO's scheduled start date"
+                discrepancy_message_end = ""
+                discrepancy_start_status = True
+                discrepancy_finish_status = True
+            else:
+                discrepancy_message_start = "No Discrepancy"
+                discrepancy_message_end = ""
         else:
-            discrepancy_message_start = "No Discrepancy"
-            discrepancy_message_end = ""
+            production_data = self.env[parent_node.res_model].search([('id', '=', parent_node.res_id)])
+            name = production_data.name + " - " + purchase_data.order_id.name + " - " + purchase_data.product_id.name
+            ref = self._get_reference('purchase.order.line', res_id, name)
+
+            # current_date_frmt = current_date_frmt.date()
+            if current_date_frmt <= production_data.date_planned_start and purchase_data.date_planned > production_data.date_planned_start:
+                discrepancy_message_start = "Purchase order will miss parent MO's scheduled start date"
+                discrepancy_message_end = ""
+                discrepancy_start_status = True
+                discrepancy_finish_status = True
+            elif current_date_frmt > production_data.date_planned_start and purchase_data.product_qty > purchase_data.qty_received:
+                discrepancy_message_start = "Purchase order missed parent MO's scheduled start date"
+                discrepancy_message_end = ""
+                discrepancy_start_status = True
+                discrepancy_finish_status = True
+            else:
+                discrepancy_message_start = "No Discrepancy"
+                discrepancy_message_end = ""
         # _logger.info(ref)
         list_data = {
             "res_model": 'purchase.order.line',
