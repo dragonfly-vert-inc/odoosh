@@ -15,7 +15,7 @@
                         <field name="linked" invisible="1" />
                         <field name="line_ids" attrs="{'readonly': [('linked','!=',False)]}">
                             <tree editable="bottom">
-                                <field name="purchase_id"  />
+                                <field name="purchase_id" attrs="{'invisible': [('from_stock','=',True)]}" />
                                 <field name="production_id"  />
                                 <field name="sale_id"  />
                                 <field name="supply_quantity"  />
