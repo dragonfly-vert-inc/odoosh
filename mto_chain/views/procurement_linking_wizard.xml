@@ -15,8 +15,15 @@
                         <field name="linked" invisible="1" />
                         <field name="line_ids" attrs="{'readonly': [('linked','!=',False)]}">
                             <tree editable="bottom">
-                                <field name="production_id" required="1" />
-                                <field name="purchase_id" required="1" />
+                                <field name="purchase_id" attrs="{'invisible': [('from_stock','=',True)]}" />
+                                <field name="production_id"  />
+                                <field name="sale_id"  />
+                                <field name="supply_quantity"  />
+                                <field name="supply_uom"  />
+                                <field name="demand_quantity"  />
+                                <field name="demand_uom"  />
+                                <field name="from_stock"  />
+                                <field name="source"  />
                             </tree>
                         </field>
                         <footer>
@@ -36,7 +43,8 @@
             <field name="active" eval="True" />
             <field name="arch" type="xml">
                 <tree>
-                    <field name="line_ids" />
+                    <field name="purchase_id" />
+                    <field name="linked" />
                 </tree>
             </field>
         </record>
