@@ -74,6 +74,7 @@ class StockRule(models.Model):
                 'responsible_moves': [(4, move_id, False) for move_id in values.get('responsible_moves', [])]
             })
             lines = []
+            po_line = po_line if po_line else po.order_line.filtered(lambda line: line.product_id == product_id)
             for move in po.responsible_moves.sorted('date'):
                 try:
                     if move.state != 'assigned' and not move.move_orig_ids and not move.created_purchase_line_id:
