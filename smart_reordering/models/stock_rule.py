@@ -96,7 +96,7 @@ class StockRule(models.Model):
                                 break
                             move = move.move_dest_ids[0] if move.move_dest_ids else False
                 except Exception as e:
-                    _logger.warn(e.name)
+                    _logger.warn(e)
                     continue
             if lines:
                 pl = self.env['procurement.linking'].search([('purchase_id','=',po.id),('linked','=',False)], limit=1)
