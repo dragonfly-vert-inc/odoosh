@@ -433,12 +433,12 @@ class DiscrepancyModel(models.TransientModel):
             ref = self._get_reference('purchase.order.line', res_id, name)
             # current_date_frmt = current_date_frmt.date()
             if current_date_frmt <= sales_line.date_expected and purchase_data.date_planned > sales_line.date_expected:
-                discrepancy_message_start = "Purchase order will miss parent MO's scheduled start date"
+                discrepancy_message_start = "Purchase order will miss parent SO's scheduled delivery date"
                 discrepancy_message_end = ""
                 discrepancy_start_status = True
                 discrepancy_finish_status = True
             elif current_date_frmt > sales_line.date_expected and purchase_data.product_qty > purchase_data.qty_received:
-                discrepancy_message_start = "Purchase order missed parent MO's scheduled start date"
+                discrepancy_message_start = "Purchase order missed parent SO's scheduled delivery date"
                 discrepancy_message_end = ""
                 discrepancy_start_status = True
                 discrepancy_finish_status = True
