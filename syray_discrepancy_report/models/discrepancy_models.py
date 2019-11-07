@@ -93,14 +93,50 @@ class DiscrepancyModel(models.TransientModel):
         current_date_str = datetime.strftime(current_date, "%Y-%m-%d %H:%M:%S")
         current_date_frmt = datetime.strptime(current_date_str, "%Y-%m-%d %H:%M:%S")
 
-        all_po_records = self.env['purchase.order'].search([])
-        for po in all_po_records:
-            if po.node_id:
+        # all_po_records = self.env['purchase.order'].search([])
+        # for po in all_po_records:
+        #     if po.node_id:
+        #         # context = dict(self.env.context)
+        #         # active_id = context.get('active_id', False)
+        #         # active_model = context.get('model', False)
+        #         # po_line = self.env['purchase.order.line'].browse(id)
+        #         po_node = po.node_id
+        #         # _logger.info(node_id)
+        #         nodes = po_node.parent_ids;
+        #         for node in nodes:
+        #             node_id = node.id
+        #             _logger.info(node_id)
+        #             res_model = node.res_model
+        #             _logger.info(res_model)
+        #             production_data = self.env[node.res_model].search([('id', '=', node.res_id)])
+        #             bom_line_data = self.env['mrp.bom.line'].search([('bom_id', '=', production_data.bom_id.id)])
+        #
+        #             for bom_line in bom_line_data:
+        #                 bom_plist.append(bom_line.product_id)
+        #
+        #             purchase_order_line = self.env['purchase.order.line'].search([('order_id', '=', po_node.res_id)])
+        #             for line in purchase_order_line:
+        #                 if line.product_id in bom_plist:
+        #                     if sector == "date":
+        #                         po_line_data = self._get_purchase_line_data(line.id, current_date_frmt, node, "sep")
+        #                         if bool(po_line_data):
+        #                             discrepancy_list_data.append(po_line_data)
+        #                     else:
+        #                         po_line_data = self._get_purchase_line_quantity_data(line.id, current_date_frmt, node,
+        #                                                                              "sep")
+        #                         if bool(po_line_data):
+        #                             discrepancy_list_data.append(po_line_data)
+        #
+        #         # _logger.info(lines)
+
+        all_po_line_records = self.env['purchase.order.line'].search([])
+        for po_line in all_po_line_records:
+            if po_line.node_id:
                 # context = dict(self.env.context)
                 # active_id = context.get('active_id', False)
                 # active_model = context.get('model', False)
                 # po_line = self.env['purchase.order.line'].browse(id)
-                po_node = po.node_id
+                po_node = po_line.node_id
                 # _logger.info(node_id)
                 nodes = po_node.parent_ids;
                 for node in nodes:
@@ -108,25 +144,14 @@ class DiscrepancyModel(models.TransientModel):
                     _logger.info(node_id)
                     res_model = node.res_model
                     _logger.info(res_model)
-                    production_data = self.env[node.res_model].search([('id', '=', node.res_id)])
-                    bom_line_data = self.env['mrp.bom.line'].search([('bom_id', '=', production_data.bom_id.id)])
-
-                    for bom_line in bom_line_data:
-                        bom_plist.append(bom_line.product_id)
-
-                    purchase_order_line = self.env['purchase.order.line'].search([('order_id', '=', po_node.res_id)])
-                    for line in purchase_order_line:
-                        if line.product_id in bom_plist:
-                            if sector == "date":
-                                po_line_data = self._get_purchase_line_data(line.id, current_date_frmt, node, "sep")
-                                if bool(po_line_data):
-                                    discrepancy_list_data.append(po_line_data)
-                            else:
-                                po_line_data = self._get_purchase_line_quantity_data(line.id, current_date_frmt, node,
-                                                                                     "sep")
-                                if bool(po_line_data):
-                                    discrepancy_list_data.append(po_line_data)
-
+                    if sector == "date":
+                        po_line_data = self._get_purchase_line_data(po_node.res_id, current_date_frmt, node, "sep")
+                        if bool(po_line_data):
+                            discrepancy_list_data.append(po_line_data)
+                    else:
+                        po_line_data = self._get_purchase_line_quantity_data(po_node.res_id, current_date_frmt, node, "sep")
+                        if bool(po_line_data):
+                            discrepancy_list_data.append(po_line_data)
                 # _logger.info(lines)
         if sector == "date":
             lines = self._list_to_date_lines(discrepancy_list_data)
