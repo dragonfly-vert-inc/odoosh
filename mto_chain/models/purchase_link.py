@@ -38,6 +38,8 @@ class PoMoLink(models.Model):
                     while(move.move_orig_ids):
                         move=move.move_orig_ids
                     move.created_purchase_line_id = line.purchase_id
+                    if line.purchase_id.move_ids:
+                        move.move_orig_ids = line.purchase_id.move_ids
             linking.linked = True
 
 class PoMoLinkingLine(models.Model):
