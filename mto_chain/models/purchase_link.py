@@ -22,7 +22,7 @@ class PoMoLink(models.Model):
     @api.multi
     def link_manual_procurement(self):
         for linking in self:
-            for line in linking.line_ids:
+            for line in linking.line_ids.filtered(lambda line: not line.from_stock):
                 parent_record = line.production_id if line.production_id else line.sale_id
                 if not parent_record.node_id:
                     parent_record.node_id = parent_record.node_id.create({})
@@ -52,7 +52,7 @@ class PoMoLinkingLine(models.Model):
     supply_uom = fields.Many2one(string=u'Supply Unit',comodel_name='uom.uom',related='purchase_id.product_uom')
     demand_quantity = fields.Float(string="Demand Quantity", compute='_get_demand')
     demand_uom = fields.Many2one(string=u'Demand Unit',comodel_name='uom.uom',compute='_get_demand')
-    from_stock = fields.Boolean()
+    from_stock = fields.Boolean(readonly=True)
     source = fields.Char(compute='_get_source')
 
     def _get_source(self):
