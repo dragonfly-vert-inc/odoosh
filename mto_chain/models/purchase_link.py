@@ -58,17 +58,19 @@ class PoMoLinkingLine(models.Model):
     def _get_source(self):
         for record in self:
             if record.production_id.node_id:
-                record.source = record.production_id.node_id._get_parent().display_name
+                record.source = record.production_id.node_id._get_parent().record_ref.display_name
 
 
     def _get_demand(self):
         for record in self:
+            moves = False
             if record.purchase_id and record.production_id:
-                record.demand_quantity = sum(record.production_id.move_raw_ids.filtered(lambda m: m.product_id == record.purchase_id.product_id).mapped('product_uom_qty'))
-                record.demand_uom = record.production_id.move_raw_ids.filtered(lambda m: m.product_id == record.purchase_id.product_id).mapped('product_uom')
+                moves = record.production_id.move_raw_ids.filtered(lambda m: m.product_id == record.purchase_id.product_id)
             elif record.purchase_id and record.sale_id:
-                record.demand_quantity = sum(record.sale_id.move_ids.mapped('product_uom_qty'))
-                record.demand_uom = record.sale_id.move_ids.mapped('product_uom')
+                moves = record.sale_id.move_ids
+            if moves:
+                record.demand_quantity = sum(moves.mapped('product_uom_qty')) - sum(moves.mapped('reserved_availability'))
+                record.demand_uom = moves.mapped('product_uom')
 
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order.line'
