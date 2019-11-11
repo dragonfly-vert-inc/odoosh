@@ -79,20 +79,21 @@ class StockRule(models.Model):
                 try:
                     if move.state != 'assigned' and not move.move_orig_ids and not move.created_purchase_line_id:
                         move._action_assign()
+                        is_assigned = bool(move.state == 'assigned')
                         while move:
                             paren_record = move.raw_material_production_id if move.raw_material_production_id else move.sale_line_id
                             if move.raw_material_production_id: 
                                 lines.append((0, False, {
                                     'purchase_id': po_line.id,
                                     'production_id': move.raw_material_production_id.id,
-                                    'from_stock': move.state == 'assigned'
+                                    'from_stock': is_assigned
                                 }))
                                 break
                             elif move.sale_line_id:
                                 lines.append((0, False, {
                                     'purchase_id': po_line.id,
                                     'sale_id': move.sale_line_id.id,
-                                    'from_stock': move.state == 'assigned'
+                                    'from_stock': is_assigned
                                 }))
                                 break
                             move = move.move_dest_ids[0] if move.move_dest_ids else False
