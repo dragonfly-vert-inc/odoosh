@@ -65,33 +65,33 @@ class StockRule(models.Model):
                 if line._merge_in_existing_line(product_id, product_qty, product_uom, location_id, name, origin, values):
                     vals = self._update_purchase_order_line(product_id, product_qty, product_uom, values, line, partner)
                     po_line = line.write(vals)
+                    purchased_line = line
                     break
         if not po_line:
             vals = self._prepare_purchase_order_line(product_id, product_qty, product_uom, values, po, partner)
-            self.env['purchase.order.line'].sudo().create(vals)
+            purchased_line = self.env['purchase.order.line'].sudo().create(vals)
+       
         if values.get('orderpoint_id', False):
             po.write({
                 'responsible_moves': [(4, move_id, False) for move_id in values.get('responsible_moves', [])]
             })
             lines = []
-            po_line = po_line if po_line else po.order_line.filtered(lambda line: line.product_id == product_id)
             for move in po.responsible_moves.sorted('date'):
                 try:
                     if move.state != 'assigned' and not move.move_orig_ids and not move.created_purchase_line_id:
                         move._action_assign()
                         is_assigned = bool(move.state == 'assigned')
                         while move:
-                            paren_record = move.raw_material_production_id if move.raw_material_production_id else move.sale_line_id
                             if move.raw_material_production_id: 
                                 lines.append((0, False, {
-                                    'purchase_id': po_line.id,
+                                    'purchase_id': purchased_line.id,
                                     'production_id': move.raw_material_production_id.id,
                                     'from_stock': is_assigned
                                 }))
                                 break
                             elif move.sale_line_id:
                                 lines.append((0, False, {
-                                    'purchase_id': po_line.id,
+                                    'purchase_id': purchased_line.id,
                                     'sale_id': move.sale_line_id.id,
                                     'from_stock': is_assigned
                                 }))
@@ -104,7 +104,7 @@ class StockRule(models.Model):
                 pl = self.env['procurement.linking'].search([('purchase_id','=',po.id),('linked','=',False)], limit=1)
                 if pl:
                     pl.write({
-                        'line_ids': lines
+                        'line_ids': [(6, False, [])] + lines
                     })
                 else:
                     self.env['procurement.linking'].create({
