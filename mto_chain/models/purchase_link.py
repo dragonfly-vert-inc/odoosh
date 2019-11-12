@@ -66,10 +66,11 @@ class PoMoLinkingLine(models.Model):
     def _get_demand(self):
         for record in self:
             moves = False
+            demand_quantity = 0
             if record.purchase_id and record.production_id:
-                moves = record.production_id.move_raw_ids.filtered(lambda m: m.product_id == record.purchase_id.product_id)
+                moves = record.production_id.move_raw_ids.filtered(lambda m: m.product_id == record.purchase_id.product_id).mapped('move_orig_ids')
             elif record.purchase_id and record.sale_id:
-                moves = record.sale_id.move_ids
+                moves = record.sale_id.move_ids.mapped('move_orig_ids')
             if moves:
                 record.demand_quantity = sum(moves.mapped('product_uom_qty')) - sum(moves.mapped('reserved_availability'))
                 record.demand_uom = moves.mapped('product_uom')
