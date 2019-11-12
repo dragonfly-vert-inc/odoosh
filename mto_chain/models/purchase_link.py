@@ -50,7 +50,7 @@ class PoMoLinkingLine(models.Model):
     purchase_id = fields.Many2one(string=u'Purchase',comodel_name='purchase.order.line',ondelete='set null')
     production_id = fields.Many2one(string=u'Production',comodel_name='mrp.production',ondelete='set null')
     sale_id = fields.Many2one(string=u'Sale Line',comodel_name='sale.order.line',ondelete='set null')
-    supply_quantity = fields.Float(related='purchase_id.product_uom_qty')
+    supply_quantity = fields.Float(related='purchase_id.product_qty', string="Supply Quantity")
     supply_uom = fields.Many2one(string=u'Supply Unit',comodel_name='uom.uom',related='purchase_id.product_uom')
     demand_quantity = fields.Float(string="Demand Quantity", compute='_get_demand')
     demand_uom = fields.Many2one(string=u'Demand Unit',comodel_name='uom.uom',compute='_get_demand')
