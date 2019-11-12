@@ -76,7 +76,7 @@ class StockRule(models.Model):
                 'responsible_moves': [(4, move_id, False) for move_id in values.get('responsible_moves', [])]
             })
             lines = []
-            for move in po.responsible_moves.sorted('date'):
+            for move in self.env['stock.move'].browse(values.get('orderpoint_id', False)).sorted('date'):
                 try:
                     if move.state != 'assigned' and not move.move_orig_ids and not move.created_purchase_line_id:
                         move._action_assign()
@@ -104,7 +104,7 @@ class StockRule(models.Model):
                 pl = self.env['procurement.linking'].search([('purchase_id','=',po.id),('linked','=',False)], limit=1)
                 if pl:
                     pl.write({
-                        'line_ids': [(6, False, [])] + lines
+                        'line_ids': lines
                     })
                 else:
                     self.env['procurement.linking'].create({
