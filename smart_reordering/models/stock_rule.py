@@ -76,7 +76,7 @@ class StockRule(models.Model):
                 'responsible_moves': [(4, move_id, False) for move_id in values.get('responsible_moves', [])]
             })
             lines = []
-            for move in self.env['stock.move'].browse(values.get('responsible_moves', False)).sorted('date'):
+            for move in self.env['stock.move'].browse(values.get('responsible_moves', [])).sorted('date'):
                 try:
                     if move.state != 'assigned' and not move.move_orig_ids and not move.created_purchase_line_id:
                         move._action_assign()
