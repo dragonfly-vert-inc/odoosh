@@ -43,7 +43,7 @@
         <template id="mto_cascade_view">
             <div class="container o_stock_reports_page o_stock_reports_no_print">
                 <span t-if="node_id" class="o_report_heading text-center">
-                    <h1>MTO Chain</h1>
+                    <h1>Procurement Chain</h1>
                 </span>
                 <div class="mto_chain_report">
                     <div class="mto_button_box">
