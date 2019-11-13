@@ -13,6 +13,11 @@
                 <xpath expr="//field[@name='order_line']//field[last()]" position="after">
                     <button name="link_manufactures" string="Link Manufactures" icon="fa-link" type="object" class="oe_link"/>
                 </xpath>
+                <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                    <button type="action" name="%(procurement_linking_action)d" class="oe_stat_button" icon="fa-pencil-square-o" >
+                        Links
+                    </button>
+                </xpath>
             </field>
         </record>
     </data>
