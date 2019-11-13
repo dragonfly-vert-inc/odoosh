@@ -14,8 +14,8 @@ from odoo.addons import decimal_precision as dp
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    security_stock = fields.Float(string=u'Security Stock Percentage',
-                                  help="Demand = Original Demand * (1+(Security Stock Percentage/100))", default=0)
+    security_stock = fields.Float(string=u'Safety Stock',
+                                  help="Demand = Original Demand * (1+(Safety Stock/100))", default=0)
 
     selected_vendor_id = fields.Many2one(
         string=u'Selected Vendor',
