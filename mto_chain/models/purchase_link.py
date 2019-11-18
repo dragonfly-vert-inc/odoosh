@@ -38,6 +38,8 @@ class PoMoLink(models.Model):
                     while(move.move_orig_ids):
                         move=move.move_orig_ids
                     move.created_purchase_line_id = line.purchase_id
+                    if line.purchase_id.move_ids:
+                        move.move_orig_ids = line.purchase_id.move_ids
             linking.linked = True
 
 class PoMoLinkingLine(models.Model):
@@ -48,7 +50,7 @@ class PoMoLinkingLine(models.Model):
     purchase_id = fields.Many2one(string=u'Purchase',comodel_name='purchase.order.line',ondelete='set null')
     production_id = fields.Many2one(string=u'Production',comodel_name='mrp.production',ondelete='set null')
     sale_id = fields.Many2one(string=u'Sale Line',comodel_name='sale.order.line',ondelete='set null')
-    supply_quantity = fields.Float(related='purchase_id.product_uom_qty')
+    supply_quantity = fields.Float(related='purchase_id.product_qty', string="Supply Quantity")
     supply_uom = fields.Many2one(string=u'Supply Unit',comodel_name='uom.uom',related='purchase_id.product_uom')
     demand_quantity = fields.Float(string="Demand Quantity", compute='_get_demand')
     demand_uom = fields.Many2one(string=u'Demand Unit',comodel_name='uom.uom',compute='_get_demand')
@@ -64,10 +66,11 @@ class PoMoLinkingLine(models.Model):
     def _get_demand(self):
         for record in self:
             moves = False
+            demand_quantity = 0
             if record.purchase_id and record.production_id:
-                moves = record.production_id.move_raw_ids.filtered(lambda m: m.product_id == record.purchase_id.product_id)
+                moves = record.production_id.move_raw_ids.filtered(lambda m: m.product_id == record.purchase_id.product_id).mapped('move_orig_ids')
             elif record.purchase_id and record.sale_id:
-                moves = record.sale_id.move_ids
+                moves = record.sale_id.move_ids.mapped('move_orig_ids')
             if moves:
                 record.demand_quantity = sum(moves.mapped('product_uom_qty')) - sum(moves.mapped('reserved_availability'))
                 record.demand_uom = moves.mapped('product_uom')

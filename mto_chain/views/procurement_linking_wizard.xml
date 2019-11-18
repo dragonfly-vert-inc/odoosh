@@ -12,6 +12,9 @@
             <field name="arch" type="xml">
                 <form >
                     <sheet>
+                        <group>
+                            <field name="purchase_id" />
+                        </group>
                         <field name="linked" invisible="1" />
                         <field name="line_ids" attrs="{'readonly': [('linked','!=',False)]}">
                             <tree editable="bottom">
@@ -49,7 +52,20 @@
             </field>
         </record>
 
-
+        <record id="procurement_linking_search" model="ir.ui.view">
+            <field name="name">procurement_linking_search</field>
+            <field name="model">procurement.linking</field>
+            <field name="type">search</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <search string="procurement.linking">
+                    <field name="purchase_id" />
+                </search>
+            </field>
+        </record>
+  
         <record id="procurement_linking_action" model="ir.actions.act_window">
             <field name="type">ir.actions.act_window</field>
             <field name="name">Link Procurement</field>
@@ -57,7 +73,10 @@
             <field name="view_mode">tree,form</field>
             <field name="view_type">form</field>
             <field name="target">current</field>
+            <field name="search_view_id" ref="procurement_linking_search" />
+            <field name="context">{'search_default_purchase_id': context.get("active_id")}</field>
         </record>
+        
         <record id="menu_linking" model="ir.ui.menu">
             <field name="name">PO-MO Linking</field>
             <field name="sequence" eval="1000" />
