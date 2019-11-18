@@ -179,6 +179,7 @@ class DiscrepancyModel(models.TransientModel):
     @api.model
     def get_so_line_discrepancy_report(self, sector, id):
         discrepancy_list_data = []
+        production_list_data = []
         po_line_data = {}
         # context = dict(self.env.context)
         # active_id = context.get('active_id', False)
@@ -197,14 +198,18 @@ class DiscrepancyModel(models.TransientModel):
             # _logger.info(res_model)
             if res_model == "mrp.production" and sector == "date":
                 discrepancy_list_data = self._recursive_node(node, discrepancy_list_data, id)
+                #discrepancy_list_data.extend(production_list_data)
             elif res_model == "mrp.production" and sector == "quantity":
                 discrepancy_list_data = self._quantity_recursive_node(node, discrepancy_list_data, id)
+                #discrepancy_list_data.extend(production_list_data)
             elif res_model == "purchase.order.line" and sector == "date":
                 po_line_data = self._get_purchase_line_data_so(node.res_id, current_date_frmt, id)
-                discrepancy_list_data.append(po_line_data)
+                if bool(po_line_data):
+                    discrepancy_list_data.append(po_line_data)
             elif res_model == "purchase.order.line" and sector == "quantity":
                 po_line_data = self._get_purchase_line_quantity_data_so(node.res_id, current_date_frmt, id)
-                discrepancy_list_data.append(po_line_data)
+                if bool(po_line_data):
+                    discrepancy_list_data.append(po_line_data)
         # _logger.info(discrepancy_list_data)
         if sector == "date":
             lines = self._list_to_date_lines(discrepancy_list_data)
