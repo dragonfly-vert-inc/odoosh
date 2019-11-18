@@ -30,7 +30,8 @@ class DiscrepancyModel(models.TransientModel):
         context = dict(self.env.context)
         active_id = context.get('active_id', False)
         active_model = context.get('model', False)
-        # _logger.info(active_id)
+        _logger.info("active_id.........................................................")
+        _logger.info(active_id)
         _logger.info("active_model .......................................................")
         _logger.info(active_model)
         if active_id and active_model and active_model == "sale.order.line" :
@@ -178,11 +179,16 @@ class DiscrepancyModel(models.TransientModel):
     @api.model
     def get_so_line_discrepancy_report(self, sector, id):
         discrepancy_list_data = []
+        po_line_data = {}
         # context = dict(self.env.context)
         # active_id = context.get('active_id', False)
         # active_model = context.get('model', False)
+        current_date = datetime.now()
+        current_date_str = datetime.strftime(current_date, "%Y-%m-%d %H:%M:%S")
+        current_date_frmt = datetime.strptime(current_date_str, "%Y-%m-%d %H:%M:%S")
         node_id = self.env['sale.order.line'].browse(id).node_id
-        # _logger.info(node_id)
+        _logger.info("id.......................................................................")
+        _logger.info(id)
         nodes = node_id.child_ids;
         for node in nodes:
             node_id = node.id
@@ -193,6 +199,12 @@ class DiscrepancyModel(models.TransientModel):
                 discrepancy_list_data = self._recursive_node(node, discrepancy_list_data, id)
             elif res_model == "mrp.production" and sector == "quantity":
                 discrepancy_list_data = self._quantity_recursive_node(node, discrepancy_list_data, id)
+            elif res_model == "purchase.order.line" and sector == "date":
+                po_line_data = self._get_purchase_line_data_so(node.res_id, current_date_frmt, id)
+                discrepancy_list_data.append(po_line_data)
+            elif res_model == "purchase.order.line" and sector == "quantity":
+                po_line_data = self._get_purchase_line_quantity_data_so(node.res_id, current_date_frmt, id)
+                discrepancy_list_data.append(po_line_data)
         # _logger.info(discrepancy_list_data)
         if sector == "date":
             lines = self._list_to_date_lines(discrepancy_list_data)
@@ -417,6 +429,58 @@ class DiscrepancyModel(models.TransientModel):
                     pq_list.append(po_line_data)
 
         return pq_list
+
+    @api.model
+    def _get_purchase_line_data_so(self, res_id, current_date_frmt, so_line_id):
+        _logger.info(so_line_id)
+        discrepancy_message_start = "Scheduled start time not reached"
+        discrepancy_message_end = "Scheduled finish time not reached"
+        discrepancy_start_status = False
+        discrepancy_finish_status = False
+        purchase_data = self.env['purchase.order.line'].search([('id', '=', res_id)])
+
+        sales_line = self.env['sale.order.line'].browse(so_line_id)
+        name = sales_line.order_id.name + " - " + purchase_data.order_id.name + " - " + purchase_data.product_id.name
+        ref = self._get_reference('purchase.order.line', res_id, name)
+
+        # current_date_frmt = current_date_frmt.date()
+
+        if current_date_frmt <= sales_line.date_expected and purchase_data.date_planned > sales_line.date_expected:
+            discrepancy_message_start = "Purchase order will miss parent SO's scheduled delivery date"
+            discrepancy_message_end = ""
+            discrepancy_start_status = True
+            discrepancy_finish_status = True
+
+        elif current_date_frmt > sales_line.date_expected and purchase_data.product_qty > purchase_data.qty_received:
+            discrepancy_message_start = "Purchase order missed parent SO's scheduled delivery date"
+            discrepancy_message_end = ""
+            discrepancy_start_status = True
+            discrepancy_finish_status = True
+
+        else:
+            discrepancy_message_start = "No Discrepancy"
+            discrepancy_message_end = ""
+
+        # _logger.info(ref)
+        list_data = {
+            "res_model": 'purchase.order.line',
+            "res_id": res_id,
+            "source_doc_name": name,
+            "work_center": "",
+            "discrepancy_message_start": discrepancy_message_start,
+            "discrepancy_message_end": discrepancy_message_end,
+            "discrepancy_start_status": discrepancy_start_status,
+            "discrepancy_finish_status": discrepancy_finish_status,
+            "reference_id": ref
+        }
+        if so_line_id != "sep":
+            if discrepancy_start_status or discrepancy_finish_status:
+                return list_data
+            else:
+                return {}
+        else:
+            return list_data
+        # return list_data
 
     @api.model
     def _get_purchase_line_data(self, res_id, current_date_frmt, parent_node,so_line_id):
@@ -695,7 +759,7 @@ class DiscrepancyModel(models.TransientModel):
         return pq_list
 
     @api.model
-    def _get_purchase_line_quantity_data(self, res_id, current_date_frmt, parent_node,so_line_id):
+    def _get_purchase_line_quantity_data(self, res_id, current_date_frmt, parent_node, so_line_id):
         # _logger.info(res_id)
         discrepancy_message = "No Discrepancy"
         discrepancy_status = False
@@ -747,6 +811,48 @@ class DiscrepancyModel(models.TransientModel):
                 return {}
         else:
             return list_data
+
+    @api.model
+    def _get_purchase_line_quantity_data_so(self, res_id, current_date_frmt, so_line_id):
+        # _logger.info(res_id)
+        discrepancy_message = "No Discrepancy"
+        discrepancy_status = False
+        purchase_data = self.env['purchase.order.line'].search([('id', '=', res_id)])
+
+        sales_line = self.env['sale.order.line'].browse(so_line_id)
+        name = sales_line.order_id.name + " - " + purchase_data.order_id.name + " - " + purchase_data.product_id.name
+        ref = self._get_reference('purchase.order.line', res_id, name)
+
+        # current_date_frmt = current_date_frmt.date()
+        if current_date_frmt >= sales_line.date_expected and purchase_data.product_qty > purchase_data.qty_received:
+            discrepancy_message = purchase_data.order_id.name + " - " + purchase_data.name + " failed to receive required quantity. Current status " + str(
+                purchase_data.qty_received) + " / " + str(purchase_data.product_qty)
+            discrepancy_status = True
+        if current_date_frmt >= sales_line.date_expected and purchase_data.product_qty < purchase_data.qty_received:
+            discrepancy_message = purchase_data.order_id.name + " - " + purchase_data.name + " received extra quantity. Current status " + str(
+                purchase_data.qty_received) + " / " + str(purchase_data.product_qty)
+            discrepancy_status = True
+
+        # _logger.info(ref)
+        list_data = {
+            "res_model": 'purchase.order.line',
+            "res_id": res_id,
+            "source_doc_name": name,
+            "work_center": "",
+            "product_name": purchase_data.name,
+            "discrepancy_message": discrepancy_message,
+            "discrepancy_status": discrepancy_status,
+            "reference_id": ref
+        }
+
+        if so_line_id != "sep":
+            if discrepancy_status:
+                return list_data
+            else:
+                return {}
+        else:
+            return list_data
+
 
     @api.model
     def _get_reference(self, res_model, res_id, name):
