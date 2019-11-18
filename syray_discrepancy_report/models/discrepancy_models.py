@@ -444,22 +444,22 @@ class DiscrepancyModel(models.TransientModel):
         ref = self._get_reference('purchase.order.line', res_id, name)
 
         # current_date_frmt = current_date_frmt.date()
+        if sales_line.date_expected:
+            if current_date_frmt <= sales_line.date_expected and purchase_data.date_planned > sales_line.date_expected:
+                discrepancy_message_start = "Purchase order will miss parent SO's scheduled delivery date"
+                discrepancy_message_end = ""
+                discrepancy_start_status = True
+                discrepancy_finish_status = True
 
-        if current_date_frmt <= sales_line.date_expected and purchase_data.date_planned > sales_line.date_expected:
-            discrepancy_message_start = "Purchase order will miss parent SO's scheduled delivery date"
-            discrepancy_message_end = ""
-            discrepancy_start_status = True
-            discrepancy_finish_status = True
+            elif current_date_frmt > sales_line.date_expected and purchase_data.product_qty > purchase_data.qty_received:
+                discrepancy_message_start = "Purchase order missed parent SO's scheduled delivery date"
+                discrepancy_message_end = ""
+                discrepancy_start_status = True
+                discrepancy_finish_status = True
 
-        elif current_date_frmt > sales_line.date_expected and purchase_data.product_qty > purchase_data.qty_received:
-            discrepancy_message_start = "Purchase order missed parent SO's scheduled delivery date"
-            discrepancy_message_end = ""
-            discrepancy_start_status = True
-            discrepancy_finish_status = True
-
-        else:
-            discrepancy_message_start = "No Discrepancy"
-            discrepancy_message_end = ""
+            else:
+                discrepancy_message_start = "No Discrepancy"
+                discrepancy_message_end = ""
 
         # _logger.info(ref)
         list_data = {
@@ -496,19 +496,20 @@ class DiscrepancyModel(models.TransientModel):
             name = sales_line.order_id.name + " - " + purchase_data.order_id.name + " - " + purchase_data.product_id.name
             ref = self._get_reference('purchase.order.line', res_id, name)
             # current_date_frmt = current_date_frmt.date()
-            if current_date_frmt <= sales_line.date_expected and purchase_data.date_planned > sales_line.date_expected:
-                discrepancy_message_start = "Purchase order will miss parent SO's scheduled delivery date"
-                discrepancy_message_end = ""
-                discrepancy_start_status = True
-                discrepancy_finish_status = True
-            elif current_date_frmt > sales_line.date_expected and purchase_data.product_qty > purchase_data.qty_received:
-                discrepancy_message_start = "Purchase order missed parent SO's scheduled delivery date"
-                discrepancy_message_end = ""
-                discrepancy_start_status = True
-                discrepancy_finish_status = True
-            else:
-                discrepancy_message_start = "No Discrepancy"
-                discrepancy_message_end = ""
+            if sales_line.date_expected:
+                if current_date_frmt <= sales_line.date_expected and purchase_data.date_planned > sales_line.date_expected:
+                    discrepancy_message_start = "Purchase order will miss parent SO's scheduled delivery date"
+                    discrepancy_message_end = ""
+                    discrepancy_start_status = True
+                    discrepancy_finish_status = True
+                elif current_date_frmt > sales_line.date_expected and purchase_data.product_qty > purchase_data.qty_received:
+                    discrepancy_message_start = "Purchase order missed parent SO's scheduled delivery date"
+                    discrepancy_message_end = ""
+                    discrepancy_start_status = True
+                    discrepancy_finish_status = True
+                else:
+                    discrepancy_message_start = "No Discrepancy"
+                    discrepancy_message_end = ""
         else:
             production_data = self.env[parent_node.res_model].search([('id', '=', parent_node.res_id)])
             name = production_data.name + " - " + purchase_data.order_id.name + " - " + purchase_data.product_id.name
@@ -770,14 +771,15 @@ class DiscrepancyModel(models.TransientModel):
             name = sale_line.order_id.name + " - " + purchase_data.order_id.name
             ref = self._get_reference('purchase.order.line', res_id, name)
             # current_date_frmt = current_date_frmt.date()
-            if current_date_frmt >= sale_line.date_expected and purchase_data.product_qty > purchase_data.qty_received:
-                discrepancy_message = purchase_data.order_id.name + " - " + purchase_data.name + " failed to receive required quantity. Current status " + str(
-                    purchase_data.qty_received) + " / " + str(purchase_data.product_qty)
-                discrepancy_status = True
-            if current_date_frmt >= sale_line.date_expected and purchase_data.product_qty < purchase_data.qty_received:
-                discrepancy_message = purchase_data.order_id.name + " - " + purchase_data.name + " received extra quantity. Current status " + str(
-                    purchase_data.qty_received) + " / " + str(purchase_data.product_qty)
-                discrepancy_status = True
+            if sale_line.date_expected:
+                if current_date_frmt >= sale_line.date_expected and purchase_data.product_qty > purchase_data.qty_received:
+                    discrepancy_message = purchase_data.order_id.name + " - " + purchase_data.name + " failed to receive required quantity. Current status " + str(
+                        purchase_data.qty_received) + " / " + str(purchase_data.product_qty)
+                    discrepancy_status = True
+                if current_date_frmt >= sale_line.date_expected and purchase_data.product_qty < purchase_data.qty_received:
+                    discrepancy_message = purchase_data.order_id.name + " - " + purchase_data.name + " received extra quantity. Current status " + str(
+                        purchase_data.qty_received) + " / " + str(purchase_data.product_qty)
+                    discrepancy_status = True
         else:
             production_data = self.env[parent_node.res_model].search([('id', '=', parent_node.res_id)])
             name = production_data.name + " - " + purchase_data.order_id.name
@@ -824,14 +826,15 @@ class DiscrepancyModel(models.TransientModel):
         ref = self._get_reference('purchase.order.line', res_id, name)
 
         # current_date_frmt = current_date_frmt.date()
-        if current_date_frmt >= sales_line.date_expected and purchase_data.product_qty > purchase_data.qty_received:
-            discrepancy_message = purchase_data.order_id.name + " - " + purchase_data.name + " failed to receive required quantity. Current status " + str(
-                purchase_data.qty_received) + " / " + str(purchase_data.product_qty)
-            discrepancy_status = True
-        if current_date_frmt >= sales_line.date_expected and purchase_data.product_qty < purchase_data.qty_received:
-            discrepancy_message = purchase_data.order_id.name + " - " + purchase_data.name + " received extra quantity. Current status " + str(
-                purchase_data.qty_received) + " / " + str(purchase_data.product_qty)
-            discrepancy_status = True
+        if sales_line.date_expected:
+            if current_date_frmt >= sales_line.date_expected and purchase_data.product_qty > purchase_data.qty_received:
+                discrepancy_message = purchase_data.order_id.name + " - " + purchase_data.name + " failed to receive required quantity. Current status " + str(
+                    purchase_data.qty_received) + " / " + str(purchase_data.product_qty)
+                discrepancy_status = True
+            if current_date_frmt >= sales_line.date_expected and purchase_data.product_qty < purchase_data.qty_received:
+                discrepancy_message = purchase_data.order_id.name + " - " + purchase_data.name + " received extra quantity. Current status " + str(
+                    purchase_data.qty_received) + " / " + str(purchase_data.product_qty)
+                discrepancy_status = True
 
         # _logger.info(ref)
         list_data = {
