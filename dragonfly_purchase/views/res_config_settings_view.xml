@@ -11,12 +11,12 @@
                     Minimum amount required for approval of PO
                 </div>
                 <div class="row mt16">
-                    <label for="vp_finance_approval_amount" class="col-lg-5 o_light_label"/>
-                    <field name="vp_finance_approval_amount"/>
                     <label for="manager_approval_amount" class="col-lg-5 o_light_label"/>
                     <field name="manager_approval_amount"/>
                     <label for="vp_approval_amount" class="col-lg-5 o_light_label"/>
                     <field name="vp_approval_amount"/>
+		    <label for="vp_finance_approval_amount" class="col-lg-5 o_light_label"/>
+                    <field name="vp_finance_approval_amount"/>
                     <label for="ceo_approval_amount" class="col-lg-5 o_light_label"/>
                     <field name="ceo_approval_amount"/>
 		    <label for="cfo_approval_amount" class="col-lg-5 o_light_label"/>
