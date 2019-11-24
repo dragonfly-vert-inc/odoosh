@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data noupdate="0">
+        <record id="action_report_eco_bom_changes" model="ir.actions.client">
+            <field name="name">Bom Changes</field>
+            <field name="tag">eco_bom_changes</field>
+        </record>
         <record id="mrp_eco_update_mo" model="ir.ui.view">
             <field name="name">mrp_eco_update_mo</field>
             <field name="model">mrp.eco</field>
@@ -13,7 +17,82 @@
                 <xpath expr="//button[@name='action_apply']" position="after">
                     <button string="Upgrade MO" name="button_upgrade_mo" type="object" class="oe_highlight" attrs="{'invisible': ['|',('type', 'not in', ('bom')),('state', 'not in', ('done'))]}" groups="mrp.group_mrp_manager,mrp_plm.group_plm_manager"/>
                 </xpath>
+                <xpath expr="//div[@name='button_box']/button[1]" position="before">
+                    <button class="oe_stat_button" name="%(action_report_eco_bom_changes)d" type="action" icon="fa-exchange" context="{'bom_id': bom_id, 'eco_id': id}" string="Change Report" />
+                    <button class="oe_stat_button" name="open_all_components" type="object" icon="fa-book" string="All Boms" />
+                    <button class="oe_stat_button" name="open_all_components_bom" type="object" icon="fa-book" string="All Components" />
+                </xpath>
             </field>
         </record>
+        <template id="assets_backend" name="eco changes assets" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/mrp_plm_upgrade_mo/static/src/js/eco_bom_change.js"></script>
+            </xpath>
+        </template>
+        <template id="assets_common" name="eco changes common assets" inherit_id="web.assets_common">
+            <xpath expr="." position="inside">
+                <link rel="stylesheet" type="text/scss" href="/mrp_plm_upgrade_mo/static/src/scss/style.scss" />
+            </xpath>
+        </template>
+        <template id="eco_change_report_table">
+            <t t-if="data.get('eco_changes')">
+                <t t-set="parent_id" t-value="data.get('bom').id" />
+                <tr t-att-parent_id="parent_id">
+                    <t t-set="space_td" t-value="'margin-left: '+ str(data.get('level',0) * 20) + 'px;'"/>
+                    <td colspan="7">
+                        <table width="100%" class="eco-change-table">
+                            <tr>
+                                <th>
+                                    <span t-att-style="space_td"></span>
+                                    <span class="o_mrp_bom_no_fold">Type</span>
+                                </th>
+                                <th>
+                                    <span class="o_mrp_bom_no_fold">Product</span>
+                                </th>
+                                <th>
+                                    <span class="o_mrp_bom_no_fold">Quantity</span>
+                                </th>
+                                <th>
+                                    <span class="o_mrp_bom_no_fold">Unit of Measure</span>
+                                </th>
+                                <th>
+                                    <span class="o_mrp_bom_no_fold">Consumed in Operation</span>
+                                </th>
+                            </tr>
+                            <t t-foreach="data['eco_changes']" t-as="change_line">
+                                <tr t-attf-class="#{change_line.change_type}" >
+                                    <td>
+                                        <span t-att-style="space_td"></span>
+                                        <span t-field="change_line.change_type" class="o_mrp_bom_no_fold" />
+                                    </td>
+                                    <td>
+                                        <span t-field="change_line.product_id" class="o_mrp_bom_no_fold" />
+                                    </td>
+                                    <td>
+                                        <span t-field="change_line.upd_product_qty" class="o_mrp_bom_no_fold" />
+                                    </td>
+                                    <td>
+                                        <span t-field="change_line.uom_change" class="o_mrp_bom_no_fold" />
+                                    </td>
+                                    <td>
+                                        <span t-field="change_line.operation_change" class="o_mrp_bom_no_fold" />
+                                    </td>
+                                </tr>
+                            </t>
+                        </table>
+                    </td>
+                </tr>
+            </t>
+        </template>
+        <template id="eco_change_report" inherit_id="mrp.report_mrp_bom" primary="True">
+            <xpath expr="//t[@t-call='mrp.report_mrp_bom_line']" position="before">
+                <t t-call="mrp_plm_upgrade_mo.eco_change_report_table" />
+            </xpath>
+        </template>
+        <template id="eco_change_report_line" inherit_id="mrp.report_mrp_bom_line" primary="True">
+            <xpath expr="//t[@t-as='l']" position="before">
+                <t t-call="mrp_plm_upgrade_mo.eco_change_report_table" />
+            </xpath>
+        </template>
     </data>
 </odoo>
