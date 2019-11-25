@@ -6,15 +6,10 @@ var mrp_bom_report = require('mrp.mrp_bom_report');
 var session = require('web.session');
 
 var EcoBomChange = mrp_bom_report.extend({
-    init: function(parent, action) {
-        this._super.apply(this, arguments);
-        this.given_context.bom_id = action.context.bom_id;
-        this.given_context.model = action.context.active_model;
-    },
     get_html: function() {
         var self = this;
         var args = [
-            this.given_context.bom_id,
+            false,
             this.given_context.searchQty || 1,
             this.given_context.searchVariant,
         ];
