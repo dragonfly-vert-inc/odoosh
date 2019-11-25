@@ -19,12 +19,19 @@ class ReportBomStructure(models.AbstractModel):
         return self.env.ref('mrp_plm_upgrade_mo.eco_change_report_line').render({'data': lines})
 
     def _get_bom(self, bom_id=False, product_id=False, line_qty=False, line_id=False, level=False):
-        lines = super(ReportBomStructure, self)._get_bom(bom_id, product_id, line_qty, line_id, level)
-        if self._context.get('model', False) == 'mrp.eco':
+        if not bom_id:
             if self._context.get('active_id', False):
-                eco = self._context['active_id']
-                active_eco = self.env['mrp.eco'].search([('id','child_of',eco),('bom_id','=',bom_id)])
-                lines['eco_changes'] = active_eco.bom_change_ids
+                eco = self.env['mrp.eco'].browse(self._context['active_id'])
+                if eco.state == 'done':
+                    bom_id = eco.new_bom_id.id
+                else:
+                    bom_id = eco.bom_id.id
+
+        lines = super(ReportBomStructure, self)._get_bom(bom_id, product_id, line_qty, line_id, level)
+        if self._context.get('active_id', False):
+            eco = self._context['active_id']
+            active_eco = self.env['mrp.eco'].search([('id','child_of',eco),'|',('bom_id','=',bom_id),('new_bom_id','=',bom_id)])
+            lines['eco_changes'] = active_eco.bom_change_ids
         return lines
 
     @api.model
@@ -103,11 +110,12 @@ class MrpEco(models.Model):
     @api.multi
     def write(self, vals):
         res = super(MrpEco, self).write(vals)
-        if not self.parent_id and vals.get('stage_id'):
-            for child_eco in (self.search([('id','child_of',self.id)]) - self):
-                child_eco.write({
-                    'stage_id': vals.get('stage_id')
-                })
+        for e in self:
+            if vals.get('stage_id') and not e.parent_id:
+                for child_eco in (self.search([('id','child_of',e.id)]) - e):
+                    child_eco.write({
+                        'stage_id': vals.get('stage_id')
+                    })
         return res
 
     @api.multi
@@ -125,3 +133,11 @@ class MrpEco(models.Model):
             if not eco.parent_id:
                 for child_eco in (self.search([('id','child_of',eco.id)]) - eco):
                     child_eco.reject()
+    
+    @api.multi
+    def action_apply(self):
+        super(MrpEco, self).action_apply()
+        for eco in self:
+            if not eco.parent_id:
+                for child_eco in (self.search([('id','child_of',eco.id)]) - eco):
+                    child_eco.action_apply()
