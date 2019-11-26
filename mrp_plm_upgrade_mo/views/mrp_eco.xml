@@ -21,6 +21,7 @@
                     <button class="oe_stat_button" name="%(action_report_eco_bom_changes)d" type="action" icon="fa-exchange" context="{'bom_id': bom_id, 'eco_id': id}" string="Change Report" />
                     <button class="oe_stat_button" name="open_all_components" type="object" icon="fa-book" string="All Boms" />
                     <button class="oe_stat_button" name="open_all_components_bom" type="object" icon="fa-book" string="All Components" />
+                    <button class="oe_stat_button" name="get_all_eco" type="object" icon="fa-book" string="All Eco" />
                 </xpath>
             </field>
         </record>
@@ -101,5 +102,22 @@
             <xpath expr="//td[hasclass('o_mrp_prod_cost')]" position="replace" />
             <xpath expr="//td[hasclass('o_mrp_bom_cost')]" position="replace" />
         </template>
+        
+        <record id="mrp_eco_search_multi_level" model="ir.ui.view">
+            <field name="name">mrp_eco_search_multi_level</field>
+            <field name="model">mrp.eco</field>
+            <field name="inherit_id" ref="mrp_plm.mrp_eco_search" />
+            <field name="arch" type="xml">
+                <xpath expr="//filter[last()]" position="after">
+                    <filter string="Multilevel" name="multilevel_eco" domain="[('parent_id','=',False)]"/>
+                </xpath>                
+            </field>
+        </record>
+        <record id="mrp_plm.mrp_eco_action" model="ir.actions.act_window">
+            <field name="context">{'search_default_type_id': [active_id], 'default_type_id': active_id, 'search_default_multilevel_eco': True}</field>
+        </record>
+        <record id="mrp_plm.mrp_eco_action_main" model="ir.actions.act_window">
+            <field name="context">{'search_default_multilevel_eco': True}</field>            
+        </record>
     </data>
 </odoo>
