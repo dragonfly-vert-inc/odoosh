@@ -39,7 +39,7 @@
                 <t t-set="parent_id" t-value="data.get('bom').id" />
                 <tr t-att-parent_id="parent_id">
                     <t t-set="space_td" t-value="'margin-left: '+ str(data.get('level',0) * 20) + 'px;'"/>
-                    <td colspan="7">
+                    <td colspan="5">
                         <table width="100%" class="eco-change-table">
                             <tr>
                                 <th>
@@ -60,7 +60,7 @@
                                 </th>
                             </tr>
                             <t t-foreach="data['eco_changes']" t-as="change_line">
-                                <tr t-attf-class="#{change_line.change_type}" >
+                                <tr t-attf-class="#{change_line.change_type}">
                                     <td>
                                         <span t-att-style="space_td"></span>
                                         <span t-field="change_line.change_type" class="o_mrp_bom_no_fold" />
@@ -85,14 +85,21 @@
             </t>
         </template>
         <template id="eco_change_report" inherit_id="mrp.report_mrp_bom" primary="True">
-            <xpath expr="//t[@t-call='mrp.report_mrp_bom_line']" position="before">
-                <t t-call="mrp_plm_upgrade_mo.eco_change_report_table" />
+            <xpath expr="//th[hasclass('o_mrp_prod_cost')]" position="replace" />
+            <xpath expr="//th[hasclass('o_mrp_bom_cost')]" position="replace" />
+            <xpath expr="//td[hasclass('o_mrp_prod_cost')]" position="replace" />
+            <xpath expr="//td[hasclass('o_mrp_bom_cost')]" position="replace" />
+            <xpath expr="//tfoot" position="replace" />
+            <xpath expr="//t[@t-call='mrp.report_mrp_bom_line']" position="replace">
+                <t t-if="data['report_type'] == 'html'" t-call="mrp_plm_upgrade_mo.eco_change_report_line"/>
             </xpath>
         </template>
         <template id="eco_change_report_line" inherit_id="mrp.report_mrp_bom_line" primary="True">
             <xpath expr="//t[@t-as='l']" position="before">
                 <t t-call="mrp_plm_upgrade_mo.eco_change_report_table" />
             </xpath>
+            <xpath expr="//td[hasclass('o_mrp_prod_cost')]" position="replace" />
+            <xpath expr="//td[hasclass('o_mrp_bom_cost')]" position="replace" />
         </template>
     </data>
 </odoo>

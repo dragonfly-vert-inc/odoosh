@@ -46,7 +46,12 @@ var EcoBomChange = mrp_bom_report.extend({
             .then(function (result) {
                 self.render_html(event, $parent, result);
             });
-      },
+    },
+    set_html: function() {
+        var self = this;
+        self.$el.html(self.data.lines);
+        self.update_cp();
+    },
 });
 
 core.action_registry.add('eco_bom_changes', EcoBomChange);
