@@ -141,3 +141,8 @@ class MrpEco(models.Model):
             if not eco.parent_id:
                 for child_eco in (self.search([('id','child_of',eco.id)]) - eco):
                     child_eco.action_apply()
+
+    @api.multi
+    def get_all_eco(self):
+        action = self.env.ref('mrp_plm.mrp_eco_action_main').read()[0]
+        return dict(action, domain=[('id','child_of', self.id)], context={})
