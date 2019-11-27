@@ -101,6 +101,7 @@
             </xpath>
             <xpath expr="//td[hasclass('o_mrp_prod_cost')]" position="replace" />
             <xpath expr="//td[hasclass('o_mrp_bom_cost')]" position="replace" />
+            <xpath expr="//t[@t-if=&quot;data['operations']&quot;]" position="replace" />            
         </template>
         
         <record id="mrp_eco_search_multi_level" model="ir.ui.view">
