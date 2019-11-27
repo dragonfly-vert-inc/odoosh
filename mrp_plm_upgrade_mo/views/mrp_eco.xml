@@ -94,6 +94,9 @@
             <xpath expr="//t[@t-call='mrp.report_mrp_bom_line']" position="replace">
                 <t t-if="data['report_type'] == 'html'" t-call="mrp_plm_upgrade_mo.eco_change_report_line"/>
             </xpath>
+            <xpath expr="//h1[contains(text(), 'BoM Structure &amp; Cost')]" position="replace" >
+                <h1>BOM Change Report</h1>
+            </xpath>
         </template>
         <template id="eco_change_report_line" inherit_id="mrp.report_mrp_bom_line" primary="True">
             <xpath expr="//t[@t-as='l']" position="before">
@@ -101,6 +104,7 @@
             </xpath>
             <xpath expr="//td[hasclass('o_mrp_prod_cost')]" position="replace" />
             <xpath expr="//td[hasclass('o_mrp_bom_cost')]" position="replace" />
+            <xpath expr="//t[@t-if=&quot;data['operations']&quot;]" position="replace" />            
         </template>
         
         <record id="mrp_eco_search_multi_level" model="ir.ui.view">
