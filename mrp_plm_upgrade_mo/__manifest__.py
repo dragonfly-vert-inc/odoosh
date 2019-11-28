@@ -12,7 +12,8 @@
     'depends': ['mrp_plm'],
     'data': [
         'views/mrp_bom.xml',
-        'views/mrp_eco.xml'
+        'views/mrp_eco.xml',
+        'views/wizard.xml'
     ],
     'demo': [],
     'installable': True,
