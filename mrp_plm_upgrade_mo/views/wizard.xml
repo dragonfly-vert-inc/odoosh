@@ -8,9 +8,9 @@
             <field name="arch" type="xml">
                 <form create="0" edit="0" delete="0">
                     <sheet>
-                        <h1>
+                        <h2>
                             Do you want to update all confirmed, and in progress MO?
-                        </h1>                  
+                        </h2>                  
                     </sheet>
                     <footer>
                         <button name="action_apply" string="Yes" type="object" class="oe_highlight"/>
