@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data noupdate="0">
+        <record id="action_report_eco_bom_changes" model="ir.actions.client">
+            <field name="name">Bom Changes</field>
+            <field name="tag">eco_bom_changes</field>
+        </record>
         <record id="mrp_eco_update_mo" model="ir.ui.view">
             <field name="name">mrp_eco_update_mo</field>
             <field name="model">mrp.eco</field>
@@ -10,10 +14,123 @@
             <field name="priority" eval="16" />
             <field name="active" eval="True" />
             <field name="arch" type="xml">
-                <xpath expr="//button[@name='action_apply']" position="after">
-                    <button string="Upgrade MO" name="button_upgrade_mo" type="object" class="oe_highlight" attrs="{'invisible': ['|',('type', 'not in', ('bom')),('state', 'not in', ('done'))]}" groups="mrp.group_mrp_manager,mrp_plm.group_plm_manager"/>
+                <xpath expr="//div[@name='button_box']/button[1]" position="before">
+                    <button class="oe_stat_button" name="%(action_report_eco_bom_changes)d" type="action" icon="fa-exchange" context="{'bom_id': bom_id, 'eco_id': id}" string="Change Report" />
+                    <button class="oe_stat_button" name="open_all_components" attrs="{'invisible': [('state','in',('done',))]}" type="object" icon="fa-book" string="All Boms" />
+                    <button class="oe_stat_button" name="open_all_components_bom" attrs="{'invisible': [('state','in',('done',))]}" type="object" icon="fa-book" string="All Components" />
+                    <button class="oe_stat_button" name="get_all_eco" attrs="{'invisible': [('state','in',('done',))]}" type="object" icon="fa-book" string="All Eco" />
+                </xpath>
+                <xpath expr="//header//button[@name='open_new_bom']" position="attributes">
+                    <attribute name="attrs">{'invisible': "['|',('new_bom_id', '=', False),('state','in',('done',))]"}</attribute>
+                </xpath>
+                <xpath expr="//header//button[@name='open_new_routing']" position="attributes">
+                    <attribute name="attrs">{'invisible': "['|',('new_routing_id', '=', False),('state','in',('done',))]"}</attribute>
+                </xpath>
+                <xpath expr="//div[@name='button_box']//button[@name='open_new_bom']" position="attributes">
+                    <attribute name="attrs">{'invisible': "['|',('new_bom_id', '=', False),('state','in',('done',))]"}</attribute>
+                </xpath>
+                <xpath expr="//div[@name='button_box']//button[@name='open_new_routing']" position="attributes">
+                    <attribute name="attrs">{'invisible': "['|',('new_routing_id', '=', False),('state','in',('done',))]"}</attribute>
                 </xpath>
             </field>
+        </record>
+        <template id="assets_backend" name="eco changes assets" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/mrp_plm_upgrade_mo/static/src/js/eco_bom_change.js"></script>
+            </xpath>
+        </template>
+        <template id="assets_common" name="eco changes common assets" inherit_id="web.assets_common">
+            <xpath expr="." position="inside">
+                <link rel="stylesheet" type="text/scss" href="/mrp_plm_upgrade_mo/static/src/scss/style.scss" />
+            </xpath>
+        </template>
+        <template id="eco_change_report_table">
+            <t t-if="data.get('eco_changes')">
+                <t t-set="parent_id" t-value="data.get('bom').id" />
+                <tr t-att-parent_id="parent_id">
+                    <t t-set="space_td" t-value="'margin-left: '+ str(data.get('level',0) * 20) + 'px;'"/>
+                    <td colspan="5">
+                        <table width="100%" class="eco-change-table">
+                            <tr>
+                                <th>
+                                    <span t-att-style="space_td"></span>
+                                    <span class="o_mrp_bom_no_fold">Type</span>
+                                </th>
+                                <th>
+                                    <span class="o_mrp_bom_no_fold">Product</span>
+                                </th>
+                                <th>
+                                    <span class="o_mrp_bom_no_fold">Quantity</span>
+                                </th>
+                                <th>
+                                    <span class="o_mrp_bom_no_fold">Unit of Measure</span>
+                                </th>
+                                <th>
+                                    <span class="o_mrp_bom_no_fold">Consumed in Operation</span>
+                                </th>
+                            </tr>
+                            <t t-foreach="data['eco_changes']" t-as="change_line">
+                                <tr t-attf-class="#{change_line.change_type}">
+                                    <td>
+                                        <span t-att-style="space_td"></span>
+                                        <span t-field="change_line.change_type" class="o_mrp_bom_no_fold" />
+                                    </td>
+                                    <td>
+                                        <span t-field="change_line.product_id" class="o_mrp_bom_no_fold" />
+                                    </td>
+                                    <td>
+                                        <span t-field="change_line.upd_product_qty" class="o_mrp_bom_no_fold" />
+                                    </td>
+                                    <td>
+                                        <span t-field="change_line.uom_change" class="o_mrp_bom_no_fold" />
+                                    </td>
+                                    <td>
+                                        <span t-field="change_line.operation_change" class="o_mrp_bom_no_fold" />
+                                    </td>
+                                </tr>
+                            </t>
+                        </table>
+                    </td>
+                </tr>
+            </t>
+        </template>
+        <template id="eco_change_report" inherit_id="mrp.report_mrp_bom" primary="True">
+            <xpath expr="//th[hasclass('o_mrp_prod_cost')]" position="replace" />
+            <xpath expr="//th[hasclass('o_mrp_bom_cost')]" position="replace" />
+            <xpath expr="//td[hasclass('o_mrp_prod_cost')]" position="replace" />
+            <xpath expr="//td[hasclass('o_mrp_bom_cost')]" position="replace" />
+            <xpath expr="//tfoot" position="replace" />
+            <xpath expr="//t[@t-call='mrp.report_mrp_bom_line']" position="replace">
+                <t t-if="data['report_type'] == 'html'" t-call="mrp_plm_upgrade_mo.eco_change_report_line"/>
+            </xpath>
+            <xpath expr="//h1[contains(text(), 'BoM Structure &amp; Cost')]" position="replace" >
+                <h1>BOM Change Report</h1>
+            </xpath>
+        </template>
+        <template id="eco_change_report_line" inherit_id="mrp.report_mrp_bom_line" primary="True">
+            <xpath expr="//t[@t-as='l']" position="before">
+                <t t-call="mrp_plm_upgrade_mo.eco_change_report_table" />
+            </xpath>
+            <xpath expr="//td[hasclass('o_mrp_prod_cost')]" position="replace" />
+            <xpath expr="//td[hasclass('o_mrp_bom_cost')]" position="replace" />
+            <xpath expr="//t[@t-if=&quot;data['operations']&quot;]" position="replace" />            
+        </template>
+
+        <record id="mrp_eco_search_multi_level" model="ir.ui.view">
+            <field name="name">mrp_eco_search_multi_level</field>
+            <field name="model">mrp.eco</field>
+            <field name="inherit_id" ref="mrp_plm.mrp_eco_search" />
+            <field name="arch" type="xml">
+                <xpath expr="//filter[last()]" position="after">
+                    <filter string="Multilevel" name="multilevel_eco" domain="[('parent_id','=',False)]"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="mrp_plm.mrp_eco_action" model="ir.actions.act_window">
+            <field name="context">{'search_default_type_id': [active_id], 'default_type_id': active_id, 'search_default_multilevel_eco': True}</field>
+        </record>
+        <record id="mrp_plm.mrp_eco_action_main" model="ir.actions.act_window">
+            <field name="context">{'search_default_multilevel_eco': True}</field>
         </record>
     </data>
 </odoo>
