@@ -141,8 +141,19 @@ class MrpEco(models.Model):
             if not eco.parent_id:
                 for child_eco in (self.search([('id','child_of',eco.id)]) - eco):
                     child_eco.action_apply()
+        return self.env.ref('mrp_plm_upgrade_mo.apply_update').read()[0]
 
     @api.multi
     def get_all_eco(self):
         action = self.env.ref('mrp_plm.mrp_eco_action_main').read()[0]
         return dict(action, domain=[('id','child_of', self.id)], context={})
+
+
+
+class ApplyUpdateWizard(models.TransientModel):
+    _name = 'apply.update.wizard'
+    _description = 'Apply update Wizard'
+
+    @api.multi
+    def action_apply(self):
+        self.env['mrp.eco'].browse(self._context.get('active_id')).button_upgrade_mo()

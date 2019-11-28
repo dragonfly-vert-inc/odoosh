@@ -14,14 +14,23 @@
             <field name="priority" eval="16" />
             <field name="active" eval="True" />
             <field name="arch" type="xml">
-                <xpath expr="//button[@name='action_apply']" position="after">
-                    <button string="Upgrade MO" name="button_upgrade_mo" type="object" class="oe_highlight" attrs="{'invisible': ['|',('type', 'not in', ('bom')),('state', 'not in', ('done'))]}" groups="mrp.group_mrp_manager,mrp_plm.group_plm_manager"/>
-                </xpath>
                 <xpath expr="//div[@name='button_box']/button[1]" position="before">
                     <button class="oe_stat_button" name="%(action_report_eco_bom_changes)d" type="action" icon="fa-exchange" context="{'bom_id': bom_id, 'eco_id': id}" string="Change Report" />
-                    <button class="oe_stat_button" name="open_all_components" type="object" icon="fa-book" string="All Boms" />
-                    <button class="oe_stat_button" name="open_all_components_bom" type="object" icon="fa-book" string="All Components" />
-                    <button class="oe_stat_button" name="get_all_eco" type="object" icon="fa-book" string="All Eco" />
+                    <button class="oe_stat_button" name="open_all_components" attrs="{'invisible': [('state','in',('done',))]}" type="object" icon="fa-book" string="All Boms" />
+                    <button class="oe_stat_button" name="open_all_components_bom" attrs="{'invisible': [('state','in',('done',))]}" type="object" icon="fa-book" string="All Components" />
+                    <button class="oe_stat_button" name="get_all_eco" attrs="{'invisible': [('state','in',('done',))]}" type="object" icon="fa-book" string="All Eco" />
+                </xpath>
+                <xpath expr="//header//button[@name='open_new_bom']" position="attributes">
+                    <attribute name="attrs">{'invisible': "['|',('new_bom_id', '=', False),('state','in',('done',))]"}</attribute>
+                </xpath>
+                <xpath expr="//header//button[@name='open_new_routing']" position="attributes">
+                    <attribute name="attrs">{'invisible': "['|',('new_routing_id', '=', False),('state','in',('done',))]"}</attribute>
+                </xpath>
+                <xpath expr="//div[@name='button_box']//button[@name='open_new_bom']" position="attributes">
+                    <attribute name="attrs">{'invisible': "['|',('new_bom_id', '=', False),('state','in',('done',))]"}</attribute>
+                </xpath>
+                <xpath expr="//div[@name='button_box']//button[@name='open_new_routing']" position="attributes">
+                    <attribute name="attrs">{'invisible': "['|',('new_routing_id', '=', False),('state','in',('done',))]"}</attribute>
                 </xpath>
             </field>
         </record>
@@ -106,7 +115,7 @@
             <xpath expr="//td[hasclass('o_mrp_bom_cost')]" position="replace" />
             <xpath expr="//t[@t-if=&quot;data['operations']&quot;]" position="replace" />            
         </template>
-        
+
         <record id="mrp_eco_search_multi_level" model="ir.ui.view">
             <field name="name">mrp_eco_search_multi_level</field>
             <field name="model">mrp.eco</field>
@@ -114,14 +123,14 @@
             <field name="arch" type="xml">
                 <xpath expr="//filter[last()]" position="after">
                     <filter string="Multilevel" name="multilevel_eco" domain="[('parent_id','=',False)]"/>
-                </xpath>                
+                </xpath>
             </field>
         </record>
         <record id="mrp_plm.mrp_eco_action" model="ir.actions.act_window">
             <field name="context">{'search_default_type_id': [active_id], 'default_type_id': active_id, 'search_default_multilevel_eco': True}</field>
         </record>
         <record id="mrp_plm.mrp_eco_action_main" model="ir.actions.act_window">
-            <field name="context">{'search_default_multilevel_eco': True}</field>            
+            <field name="context">{'search_default_multilevel_eco': True}</field>
         </record>
     </data>
 </odoo>
