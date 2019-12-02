@@ -24,7 +24,8 @@
     },
     'data': [
         'views/rma.xml',
-        'views/rma_template.xml'
+        'views/rma_template.xml',
+        'views/purchase_form_bill.xml'
     ],
     'demo': [
     ],

@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data noupdate="0">
-        
         <record id="view_rma_purchase" model="ir.ui.view">
             <field name="name">view_rma_purchase</field>
             <field name="model">rma.rma</field>
             <field name="inherit_id" ref="rma.view_rma_rma_form" />
             <field name="arch" type="xml">
+                <xpath expr="//field[@name='stock_picking_id']" position="attributes">
+                    <attribute name="domain">[('purchase_id', '=', purchase_id),('picking_type_code','=','incoming')]</attribute>
+                </xpath>
                 <xpath expr="//field[@name='stock_picking_id']" position="before">
                     <field name="from_purchase" invisible="1" />
                     <field name="purchase_id" options="{'no_create': True}" attrs="{'invisible': [('from_purchase', '=', False)], 'required': [('from_purchase', '=', True)], 'readonly': [('state', 'in', ('confirmed', 'done', 'cancel'))]}"/>
@@ -15,6 +17,13 @@
                 </xpath>
                 <xpath expr="//button[@name='action_add_picking_lines']" position="attributes">
                     <attribute name="attrs">{'invisible': ['|', '&amp;', ('stock_picking_id', '=', False), ('inventory_id', '=', False), ('state', '!=', 'draft')]}</attribute>
+                </xpath>
+                <xpath expr="//header//button[last()]" position="after">
+                    <button name="create_credit_note" string="Bill Refund" type="object" class="oe_highlight" attrs="{'invisible': ['|',('state','not in',('done',)),'|',('invoice_id','!=',False),('from_inv', '=', False)]}"/>
+                    <field name="invoice_id" invisible="1"/>
+                </xpath>
+                <xpath expr="//div[@name='button_box']" position="inside">
+                    <button class="oe_stat_button" name="open_invoice" icon="fa-pencil-square-o" type="object" attrs="{'invisible': [('invoice_id','=',False)]}" string="Invoice" />
                 </xpath>
             </field>
         </record>
