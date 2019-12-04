@@ -41,7 +41,7 @@ class RMA(models.Model):
                 type, line.product_id, self.partner_id.property_account_position_id, self.env.user.company_id)
             lines.append((0, 0, {
                 'product_id': line.product_id.id,
-                'quantity': line.product_uom_qty,
+                'quantity': line.done_qty,
                 'uom_id': line.product_uom_id.id,
                 'name': line.product_id.name,
                 'origin': self.name,
@@ -58,6 +58,11 @@ class RMA(models.Model):
         action = self.env.ref('account.action_invoice_in_refund').read()[0]
         return dict(action, views=[(False, 'form')], res_id=self.invoice_id.id)
 
+    def _create_out_picking(self):
+        res = super(RMA, self)._create_out_picking()
+        res.rma_id = self
+        return res
+
 
 class RMAPickingMakeLines(models.TransientModel):
     _inherit = 'rma.picking.make.lines'
@@ -69,3 +74,18 @@ class RMAPickingMakeLines(models.TransientModel):
                 self.line_ids |= make_lines_obj.create(self._line_values(l))
         else:
             super(RMAPickingMakeLines, self)._create_lines()
+
+
+class RMALine(models.Model):
+    _inherit = 'rma.line'
+
+    done_qty = fields.Float(string='Done', compute='_compute_done')
+    def _compute_done(self):
+        for line in self:
+            lines = self.env['stock.picking'].search([('rma_id','=',line.rma_id.id)]).mapped('move_lines').filtered(lambda l: l.state == 'done' and l.product_id == line.product_id)
+            line.done_qty = sum(lines.mapped('quantity_done'))
+
+class StockPicking(models.Model):
+    _inherit = 'stock.picking'
+
+    rma_id = fields.Many2one(comodel_name='rma.rma',ondelete='set null',)
