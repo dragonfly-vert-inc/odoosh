@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="view_rma_template_purchase" model="ir.ui.view">
+            <field name="name">view_rma_template_purchase</field>
+            <field name="model">rma.template</field>
+            <field name="inherit_id" ref="rma.view_rma_template_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='usage']" position="after">
+                    <field name="from_purchase" attrs="{'invisible': [('usage', '!=', 'stock_picking')]}" />
+                    <field name="from_inv" attrs="{'invisible': [('usage', '!=', False)]}" />
+                </xpath>
+            </field>
+        </record>
+        
+    </data>
+</odoo>
