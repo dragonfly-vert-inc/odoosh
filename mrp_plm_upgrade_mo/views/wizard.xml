@@ -9,7 +9,7 @@
                 <form create="0" edit="0" delete="0">
                     <sheet>
                         <h2>
-                            Do you want to update all confirmed, and in progress MO?
+                            Do you want to update all confirmed and in progress MO?
                         </h2>                  
                     </sheet>
                     <footer>

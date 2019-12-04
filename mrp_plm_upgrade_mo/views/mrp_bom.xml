@@ -50,5 +50,17 @@
             <field name="context">{}</field>
             <field name="search_view_id" ref="bom_line_search_view" />
         </record>
+        
+        <record id="mrp_bom_line_view_bom" model="ir.ui.view">
+            <field name="name">mrp_bom_line_view_form</field>
+            <field name="model">mrp.bom.line</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_line_view_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='product_id']" position="before">
+                    <field name="bom_id" />
+                </xpath>
+            </field>
+        </record>
+        
     </data>
 </odoo>
