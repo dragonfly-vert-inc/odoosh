@@ -83,6 +83,7 @@
                                 <t t-esc="'%s %s'%(node.record_ref.name,node.record_ref.product_id.name)" />
                             </div>
                             <div class="node-times">
+                                <span t-field="node.record_ref.state" class="node-start-time" />
                                 <span class="node-start-time">
                                     <strong>Start: </strong>
                                     <t t-esc="node.record_ref.date_planned_start" t-options="{'widget': 'datetime'}" />
