@@ -28,6 +28,14 @@
                 <xpath expr="//field[@name='lines']//field[@name='product_uom_qty']" position="after">
                     <field name="done_qty" />
                 </xpath>
+                
+                <xpath expr="//button[@name='open_stock_picking_rmas']" position="replace">
+                    <button class="oe_stat_button" name="open_stock_picking_rmas" icon="fa-cubes"
+                            type="object" attrs="{'invisible': ['|', ('stock_picking_id', '=', False), ('stock_picking_rma_count', '&lt;=', 1)]}">
+                        <field name="stock_picking_rma_count" string="RMAs for this picking" widget="statinfo" />
+                    </button>
+                </xpath>
+                
             </field>
         </record>
         
