@@ -26,6 +26,7 @@ var EcoBomChange = mrp_bom_report.extend({
     get_bom: function(event) {
         var self = this;
         var $parent = $(event.currentTarget).closest('tr');
+        var currentTarget = event.currentTarget;
         var activeID = $parent.data('id');
         var productID = $parent.data('product_id');
         var lineID = $parent.data('line');
@@ -44,13 +45,40 @@ var EcoBomChange = mrp_bom_report.extend({
                 context: this.given_context,
             })
             .then(function (result) {
-                self.render_html(event, $parent, result);
+                self.render_html(event, $parent, result, currentTarget);
             });
     },
     set_html: function() {
-        var self = this;
-        self.$el.html(self.data.lines);
-        self.update_cp();
+        this.$el.html(this.data.lines);
+        this.expand_fold();
+        this.update_cp();
+    },
+    render_html: function(event, $el, result, currentTarget){
+        if (result.indexOf('mrp.document') > 0) {
+            if (this.$('.o_mrp_has_attachments').length === 0) {
+                var column = $('<th/>', {
+                    class: 'o_mrp_has_attachments',
+                    title: 'Files attached to the product Attachments',
+                    text: 'Attachments',
+                });
+                this.$('table thead th:last-child').after(column);
+            }
+        }
+        $el.after(result);
+        var parent = $(currentTarget).toggleClass('o_mrp_bom_foldable o_mrp_bom_unfoldable fa-caret-right fa-caret-down');
+        this.expand_fold();
+        this._reload_report_type();
+    },
+    expand_fold: function() {
+        var expanded = [];
+        $('.o_mrp_bom_unfoldable', this.$el).each(
+            function() {
+                if (expanded.indexOf(this.$target)<0){
+                    $(this).click();
+                    expanded.push(this.$target);    
+                }
+            }
+        )
     },
 });
 
