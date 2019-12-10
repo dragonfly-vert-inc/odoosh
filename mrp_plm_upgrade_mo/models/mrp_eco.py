@@ -86,7 +86,7 @@ class MrpEco(models.Model):
     def button_upgrade_mo(self):
         if self.bom_id and self.new_bom_id:
             pending_orders = self.env['mrp.production'].search([('bom_id','=',self.bom_id.id),('state','in',('confirmed','planned'))])
-            for production in pending_orders:
+            for production in pending_orders.filtered(lambda p: p.check_mto_progress()):
                 finish_moves = production.move_finished_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
                 raw_moves = production.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
                 raw_moves._do_unreserve()
