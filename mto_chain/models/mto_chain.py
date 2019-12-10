@@ -143,6 +143,14 @@ class MTOChain(models.Model):
             for child in self.child_ids:
                 child.action_mo_unplan()
 
+    def get_childs(self):
+        current = self
+        records = self
+        while(current.mapped('child_ids')):
+            current = current.mapped('child_ids')
+            records += current
+        return records
+
 class MTOChainMixin(models.AbstractModel):
     _name = 'mto.chain.mixin'
 
