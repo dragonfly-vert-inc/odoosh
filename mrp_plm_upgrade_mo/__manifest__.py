@@ -9,7 +9,7 @@
     'description': """
     """,
     'category': 'Custom Development',
-    'depends': ['mrp_plm'],
+    'depends': ['mto_chain', 'mrp_plm'],
     'data': [
         'views/mrp_bom.xml',
         'views/mrp_eco.xml',

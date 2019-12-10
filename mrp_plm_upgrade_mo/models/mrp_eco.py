@@ -86,7 +86,9 @@ class MrpEco(models.Model):
     def button_upgrade_mo(self):
         if self.bom_id and self.new_bom_id:
             pending_orders = self.env['mrp.production'].search([('bom_id','=',self.bom_id.id),('state','in',('confirmed','planned'))])
-            for production in pending_orders:
+            update_orders = pending_orders.filtered(lambda p: p.check_mto_progress())
+            for production in update_orders:
+                prev_child_mo = production.node_id.get_childs().filtered(lambda r: r.res_model == 'mrp.production').mapped('record_ref') - production
                 finish_moves = production.move_finished_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
                 raw_moves = production.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
                 raw_moves._do_unreserve()
@@ -102,9 +104,14 @@ class MrpEco(models.Model):
                 finish_moves._do_unreserve()
                 finish_moves._action_cancel()
                 message = "Bills of Material Updated from: <a href=# data-oe-model=%s data-oe-id=%d>%s</a>" % (self._name, self.id, self.name)
+                cancel_message = "MO Canceled from: <a href=# data-oe-model=%s data-oe-id=%d>%s</a>" % (self._name, self.id, self.name)
+                for mo in prev_child_mo:
+                    mo.action_cancel()
+                    mo.message_post(body=cancel_message)
                 production.message_post(body=message)
+                
             if pending_orders:
-                return dict(self.env.ref('mrp.mrp_production_action').read()[0], domain=[('id','in',pending_orders.ids)])
+                return dict(self.env.ref('mrp.mrp_production_action').read()[0], domain=[('id','in',update_orders.ids)])
     
 
     @api.multi
@@ -156,4 +163,4 @@ class ApplyUpdateWizard(models.TransientModel):
 
     @api.multi
     def action_apply(self):
-        self.env['mrp.eco'].browse(self._context.get('active_id')).button_upgrade_mo()
+        return self.env['mrp.eco'].browse(self._context.get('active_id')).button_upgrade_mo()

@@ -39,3 +39,19 @@ class MrpProduction(models.Model):
         for production in self:
             production.button_unrelease()
         super(MrpProduction, self).button_unplan()
+    
+    def check_mto_progress(self):
+        childs =  self.node_id.get_childs().filtered(lambda r: r.res_model == 'mrp.production').mapped('record_ref')
+        if all(childs.mapped(lambda p: p.state not in ('progress', 'done'))):
+            return True
+        return False
+
+    def action_cancel(self):
+        res = super(MrpProduction, self).action_cancel()
+        for production in self:
+            if production.node_id:
+                production.node_id.write({
+                    'parent_ids': [(6, False, [])],
+                    'child_ids': [(6, False, [])],
+                })
+        return res
