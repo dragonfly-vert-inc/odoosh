@@ -18,9 +18,9 @@
                         <field name="linked" invisible="1" />
                         <field name="line_ids" attrs="{'readonly': [('linked','!=',False)]}">
                             <tree editable="bottom">
-                                <field name="purchase_id" attrs="{'invisible': [('from_stock','=',True)]}" />
-                                <field name="production_id"  />
-                                <field name="sale_id"  />
+                                <field name="purchase_line_id" attrs="{'invisible': [('from_stock','=',True)]}" />
+                                <field name="production_id" attrs="{'required': [('sale_id','=',False)], 'readonly': [('sale_id','!=',False)]}" />
+                                <field name="sale_id" attrs="{'required': [('production_id','=',False)], 'readonly': [('production_id','!=',False)]}" />
                                 <field name="supply_quantity"  />
                                 <field name="supply_uom"  />
                                 <field name="demand_quantity"  />
