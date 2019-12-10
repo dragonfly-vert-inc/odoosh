@@ -110,7 +110,7 @@ class MrpEco(models.Model):
                     mo.message_post(body=cancel_message)
                 production.message_post(body=message)
                 
-            if pending_orders:
+            if update_orders:
                 return dict(self.env.ref('mrp.mrp_production_action').read()[0], domain=[('id','in',update_orders.ids)])
     
 
