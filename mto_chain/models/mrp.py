@@ -45,3 +45,13 @@ class MrpProduction(models.Model):
         if all(childs.mapped(lambda p: p.state not in ('progress', 'done'))):
             return True
         return False
+
+    def action_cancel(self):
+        res = super(MrpProduction, self).action_cancel()
+        for production in self:
+            if production.node_id:
+                production.node_id.write({
+                    'parent_ids': [(6, False, [])],
+                    'child_ids': [(6, False, [])],
+                })
+        return res
