@@ -27,19 +27,19 @@ class PoMoLink(models.Model):
                 if not parent_record.node_id:
                     parent_record.node_id = parent_record.node_id.create({})
                     parent_record.node_id._set_ref(parent_record)
-                if not line.purchase_id.node_id:
-                    line.purchase_id.node_id = line.purchase_id.node_id.create({})
-                    line.purchase_id.node_id._set_ref(line.purchase_id)
+                if not line.purchase_line_id.node_id:
+                    line.purchase_line_id.node_id = line.purchase_line_id.node_id.create({})
+                    line.purchase_line_id.node_id._set_ref(line.purchase_line_id)
                 parent_record.node_id.write({
-                    'child_ids': [(4, line.purchase_id.node_id.id, False)]
+                    'child_ids': [(4, line.purchase_line_id.node_id.id, False)]
                 })
-                moves = line.production_id.move_raw_ids.filtered(lambda m: m.product_id == line.purchase_id.product_id) if line.production_id else line.sale_id.move_ids
+                moves = line.production_id.move_raw_ids.filtered(lambda m: m.product_id == line.purchase_line_id.product_id) if line.production_id else line.sale_id.move_ids
                 for move in moves:
                     while(move.move_orig_ids):
                         move=move.move_orig_ids
-                    move.created_purchase_line_id = line.purchase_id
-                    if line.purchase_id.move_ids:
-                        move.move_orig_ids = line.purchase_id.move_ids
+                    move.created_purchase_line_id = line.purchase_line_id
+                    if line.purchase_line_id.move_ids:
+                        move.move_orig_ids = line.purchase_line_id.move_ids
             linking.linked = True
 
 class PoMoLinkingLine(models.Model):
@@ -47,11 +47,11 @@ class PoMoLinkingLine(models.Model):
     _description = u'Procurement Raw Material Consumption Linking Line'
 
     linking_id = fields.Many2one(comodel_name='procurement.linking',ondelete='set null')    
-    purchase_id = fields.Many2one(string=u'Purchase',comodel_name='purchase.order.line',ondelete='set null')
+    purchase_line_id = fields.Many2one(string=u'Purchase',comodel_name='purchase.order.line',ondelete='set null')
     production_id = fields.Many2one(string=u'Production',comodel_name='mrp.production',ondelete='set null')
     sale_id = fields.Many2one(string=u'Sale Line',comodel_name='sale.order.line',ondelete='set null')
-    supply_quantity = fields.Float(related='purchase_id.product_qty', string="Supply Quantity")
-    supply_uom = fields.Many2one(string=u'Supply Unit',comodel_name='uom.uom',related='purchase_id.product_uom')
+    supply_quantity = fields.Float(related='purchase_line_id.product_qty', string="Supply Quantity")
+    supply_uom = fields.Many2one(string=u'Supply Unit',comodel_name='uom.uom',related='purchase_line_id.product_uom')
     demand_quantity = fields.Float(string="Demand Quantity", compute='_get_demand')
     demand_uom = fields.Many2one(string=u'Demand Unit',comodel_name='uom.uom',compute='_get_demand')
     from_stock = fields.Boolean(readonly=True)
@@ -67,9 +67,9 @@ class PoMoLinkingLine(models.Model):
         for record in self:
             moves = False
             demand_quantity = 0
-            if record.purchase_id and record.production_id:
-                moves = record.production_id.move_raw_ids.filtered(lambda m: m.product_id == record.purchase_id.product_id).mapped('move_orig_ids')
-            elif record.purchase_id and record.sale_id:
+            if record.purchase_line_id and record.production_id:
+                moves = record.production_id.move_raw_ids.filtered(lambda m: m.product_id == record.purchase_line_id.product_id).mapped('move_orig_ids')
+            elif record.purchase_line_id and record.sale_id:
                 moves = record.sale_id.move_ids.mapped('move_orig_ids')
             if moves:
                 record.demand_quantity = sum(moves.mapped('product_uom_qty')) - sum(moves.mapped('reserved_availability'))
@@ -86,7 +86,8 @@ class PurchaseOrder(models.Model):
             'view_mode': 'form',
             'res_model': 'procurement.linking',
             'context': {
-                'default_purchase_id': self.id
+                'default_purchase_line_id': self.id,
+                'default_purchase_id': self.order_id.id,
             }
         }
         
