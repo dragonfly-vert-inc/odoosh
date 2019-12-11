@@ -8,6 +8,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 from odoo.addons import decimal_precision as dp
+from itertools import groupby
 
 class ReportBomStructure(models.AbstractModel):
     _name = 'report.mrp.report_eco_changes'
@@ -49,7 +50,16 @@ class MrpEco(models.Model):
     _parent_store = True
 
     parent_path = fields.Char(index=True)
-    parent_id = fields.Many2one(comodel_name='mrp.eco', ondelete='restrict')
+    parent_id = fields.Many2one(comodel_name='mrp.eco', ondelete='set null')
+
+    @api.model
+    def get_multi(self):
+        all_eco = self.search([('id', 'child_of', self.id)], order='product_tmpl_id, id')
+        for k,g in groupby(all_eco, lambda eco: eco.product_tmpl_id.id):
+            ecos = list(g)
+            if len(ecos)>1:
+                return ecos
+        return []
 
     @api.multi
     def action_new_revision(self):
@@ -69,6 +79,14 @@ class MrpEco(models.Model):
                         'stage_id': eco.stage_id.id
                     })
                     child_eco.action_new_revision()
+            #remove multiple eco for same product created from recursion
+            if not eco.parent_id:
+                multi_eco = eco.get_multi()
+                while(multi_eco):
+                    for meco in multi_eco[1:]:
+                        self.search([('id','child_of',meco.id)]).unlink()
+                    multi_eco = eco.get_multi()
+
 
     @api.multi
     def open_all_components(self):
