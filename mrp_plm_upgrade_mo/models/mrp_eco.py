@@ -8,11 +8,46 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 from odoo.addons import decimal_precision as dp
-from itertools import groupby
 
 class ReportBomStructure(models.AbstractModel):
     _name = 'report.mrp.report_eco_changes'
     _inherit = 'report.mrp.report_bom_structure'
+
+    def _get_bom_lines(self, bom, bom_quantity, product, line_id, level):
+        components = []
+        total = 0
+        all_ecos = self.env['mrp.eco'].search([('id','child_of',self.env.context.get('active_id'))])
+        for line in bom.bom_line_ids:
+            line_quantity = (bom_quantity / (bom.product_qty or 1.0)) * line.product_qty
+            if line._skip_bom_line(product):
+                continue
+            price = line.product_id.uom_id._compute_price(line.product_id.standard_price, line.product_uom_id) * line_quantity
+            if line.child_bom_id:
+                factor = line.product_uom_id._compute_quantity(line_quantity, line.child_bom_id.product_uom_id) / line.child_bom_id.product_qty
+                sub_total = self._get_price(line.child_bom_id, factor, line.product_id)
+            else:
+                sub_total = price
+            sub_total = self.env.user.company_id.currency_id.round(sub_total)
+            child_bom_id = all_ecos.filtered(lambda eco: eco.product_tmpl_id.id == line.product_id.product_tmpl_id.id).new_bom_id
+            components.append({
+                'prod_id': line.product_id.id,
+                'prod_name': line.product_id.display_name,
+                'code': line.child_bom_id and self._get_bom_reference(line.child_bom_id) or '',
+                'prod_qty': line_quantity,
+                'prod_uom': line.product_uom_id.name,
+                'prod_cost': self.env.user.company_id.currency_id.round(price),
+                'parent_id': bom.id,
+                'line_id': line.id,
+                'level': level or 0,
+                'total': sub_total,
+                'child_bom': child_bom_id.id,
+                'phantom_bom': line.child_bom_id and line.child_bom_id.type == 'phantom' or False,
+                'attachments': self.env['mrp.document'].search(['|', '&',
+                    ('res_model', '=', 'product.product'), ('res_id', '=', line.product_id.id), '&', ('res_model', '=', 'product.template'), ('res_id', '=', line.product_id.product_tmpl_id.id)]),
+
+            })
+            total += sub_total
+        return components, total
 
     @api.model
     def get_bom(self, bom_id=False, product_id=False, line_qty=False, line_id=False, level=False):
@@ -23,11 +58,7 @@ class ReportBomStructure(models.AbstractModel):
         if not bom_id:
             if self._context.get('active_id', False):
                 eco = self.env['mrp.eco'].browse(self._context['active_id'])
-                if eco.state == 'done':
-                    bom_id = eco.new_bom_id.id
-                else:
-                    bom_id = eco.bom_id.id
-
+                bom_id = eco.new_bom_id.id
         lines = super(ReportBomStructure, self)._get_bom(bom_id, product_id, line_qty, line_id, level)
         if self._context.get('active_id', False):
             eco = self._context['active_id']
@@ -51,15 +82,8 @@ class MrpEco(models.Model):
 
     parent_path = fields.Char(index=True)
     parent_id = fields.Many2one(comodel_name='mrp.eco', ondelete='set null')
-
-    @api.model
-    def get_multi(self):
-        all_eco = self.search([('id', 'child_of', self.id)], order='product_tmpl_id, id')
-        for k,g in groupby(all_eco, lambda eco: eco.product_tmpl_id.id):
-            ecos = list(g)
-            if len(ecos)>1:
-                return ecos
-        return []
+    child_ids = fields.One2many(comodel_name='mrp.eco',inverse_name='parent_id',)
+    
 
     @api.multi
     def action_new_revision(self):
@@ -67,26 +91,23 @@ class MrpEco(models.Model):
         Bom = self.env['mrp.bom']
         Eco = self.env['mrp.eco']
         for eco in self:
-            if eco.type in ('bom', 'both'):
-                for child_bom in eco.bom_id.bom_line_ids.mapped('child_bom_id'):
-                    child_eco = Eco.create({
-                        'parent_id': eco.id,
-                        'name': child_bom.display_name + eco.bom_id.display_name,
-                        'type_id': eco.type_id.id,
-                        'type': 'bom',
-                        'product_tmpl_id': child_bom.product_tmpl_id.id,
-                        'bom_id': child_bom.id,
-                        'stage_id': eco.stage_id.id
+            if eco.type in ('bom', 'both') and not eco.parent_id:
+                child_boms = eco.bom_id.bom_line_ids.mapped('child_bom_id')
+                all_boms = self.env['mrp.bom']
+                while(child_boms):
+                    all_boms += child_boms
+                    child_boms = child_boms.mapped('bom_line_ids').mapped('child_bom_id')
+                all_boms = all_boms.mapped(lambda self: self)
+                eco.write({
+                    'child_ids': [(0, 0, {
+                            'name': '%s (%s)' %(child_bom.display_name, eco.name),
+                            'type_id': eco.type_id.id,
+                            'type': 'bom',
+                            'product_tmpl_id': child_bom.product_tmpl_id.id,
+                            'bom_id': child_bom.id,
+                            'stage_id': eco.stage_id.id}) for child_bom in all_boms]
                     })
-                    child_eco.action_new_revision()
-            #remove multiple eco for same product created from recursion
-            if not eco.parent_id:
-                multi_eco = eco.get_multi()
-                while(multi_eco):
-                    for meco in multi_eco[1:]:
-                        self.search([('id','child_of',meco.id)]).unlink()
-                    multi_eco = eco.get_multi()
-
+                eco.child_ids.action_new_revision()
 
     @api.multi
     def open_all_components(self):
