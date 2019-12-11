@@ -84,7 +84,7 @@ class StockRule(models.Model):
                         while move:
                             if move.raw_material_production_id: 
                                 lines.append((0, False, {
-                                    'purchase_id': purchased_line.id,
+                                    'purchase_line_id': purchased_line.id,
                                     'sale_id': False,
                                     'production_id': move.raw_material_production_id.id,
                                     'from_stock': is_assigned
@@ -92,7 +92,7 @@ class StockRule(models.Model):
                                 break
                             elif move.sale_line_id:
                                 lines.append((0, False, {
-                                    'purchase_id': purchased_line.id,
+                                    'purchase_line_id': purchased_line.id,
                                     'sale_id': move.sale_line_id.id,
                                     'production_id': False,
                                     'from_stock': is_assigned
@@ -105,8 +105,8 @@ class StockRule(models.Model):
             if lines:
                 pl = self.env['procurement.linking'].search([('purchase_id','=',po.id),('linked','=',False)], limit=1)
                 if pl:
-                    plines = pl.line_ids.mapped(lambda l: (l.purchase_id.id, l.production_id.id, l.sale_id.id))
-                    lines = [line for line in lines if (line[2]['purchase_id'], line[2]['production_id'], line[2]['sale_id']) not in plines]
+                    plines = pl.line_ids.mapped(lambda l: (l.purchase_line_id.id, l.production_id.id, l.sale_id.id))
+                    lines = [line for line in lines if (line[2]['purchase_line_id'], line[2]['production_id'], line[2]['sale_id']) not in plines]
                     pl.write({
                         'line_ids': lines
                     })
