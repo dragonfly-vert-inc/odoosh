@@ -63,6 +63,9 @@ class RMA(models.Model):
         res.rma_id = self
         return res
 
+    @api.onchange('partner_id')
+    def onchange_partner_id(self):
+        self.partner_shipping_id = self.partner_id
 
 class RMAPickingMakeLines(models.TransientModel):
     _inherit = 'rma.picking.make.lines'
