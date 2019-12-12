@@ -26,11 +26,17 @@
                 <xpath expr="//header//button[@name='open_new_routing']" position="attributes">
                     <attribute name="attrs">{'invisible': "['|',('new_routing_id', '=', False),('state','in',('done',))]"}</attribute>
                 </xpath>
+                <xpath expr="//header//button[@name='action_see_attachments']" position="attributes">
+                    <attribute name="attrs">{'invisible': "['|', ('state', 'in', ('confirmed','done')), ('type', '=', 'routing')]"}</attribute>
+                </xpath>
                 <xpath expr="//div[@name='button_box']//button[@name='open_new_bom']" position="attributes">
                     <attribute name="attrs">{'invisible': "['|',('new_bom_id', '=', False),('state','in',('done',))]"}</attribute>
                 </xpath>
                 <xpath expr="//div[@name='button_box']//button[@name='open_new_routing']" position="attributes">
                     <attribute name="attrs">{'invisible': "['|',('new_routing_id', '=', False),('state','in',('done',))]"}</attribute>
+                </xpath>
+                <xpath expr="//div[@name='button_box']//button[@name='action_see_attachments']" position="attributes">
+                    <attribute name="attrs">{'invisible': ['|', ('state', 'in', ('confirmed','done')), ('type', '=', 'routing')]}</attribute>
                 </xpath>
             </field>
         </record>
