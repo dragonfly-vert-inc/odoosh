@@ -18,7 +18,14 @@ class StockMove(models.Model):
         comodel_name='sale.order.line',
         compute='_compute_mto_parent',
     )
+    raw_mto_parent_location = fields.Many2one(
+        string=u'Parent Location',
+        comodel_name='stock.location',
+        compute='_compute_mto_parent',
+    )
     
+    
+
     @api.depends('raw_material_production_id')
     def _compute_mto_parent(self):
         for move in self:
@@ -32,6 +39,7 @@ class StockMove(models.Model):
                         raw_mto_parent = production.node_id._get_parent()
                         if raw_mto_parent.res_model == 'sale.order.line':
                             origin_move.raw_mto_parent = raw_mto_parent.record_ref
+                            origin_move.raw_mto_parent_location = raw_mto_parent.record_ref.order_id.sub_location_id
                     break
     
     @api.model
