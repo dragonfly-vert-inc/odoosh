@@ -12,6 +12,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[last()]" position="after">
                     <field name="raw_mto_parent" widget="many2one_list" />
+                    <field name="raw_mto_parent_location" widget="many2one_list" />
                 </xpath>
             </field>
         </record>

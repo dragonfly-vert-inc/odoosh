@@ -35,7 +35,8 @@
                         <field name="stock_picking_rma_count" string="RMAs for this picking" widget="statinfo" />
                     </button>
                 </xpath>
-                
+                <xpath expr="//sheet[2]" position="replace">
+                </xpath>
             </field>
         </record>
         

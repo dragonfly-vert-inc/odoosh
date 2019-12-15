@@ -10,12 +10,9 @@ from odoo.exceptions import UserError, ValidationError
 
 
 
-class StockReorder(models.Model):
-    _inherit = 'stock.warehouse.orderpoint'
+class MrpProduction(models.Model):
+    _inherit = 'mrp.production'
 
     
-    qty_multiple = fields.Float(compute='_get_qty_multiple')
-
-    def _get_qty_multiple(self):
-        for record in self:
-            record.qty_multiple = record.product_id.selected_vendor_id.min_qty
+    eco_updated = fields.Boolean(string='Eco updated', default=False, readonly=True)
+    
