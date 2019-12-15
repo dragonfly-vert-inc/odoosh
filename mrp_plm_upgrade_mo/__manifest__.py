@@ -13,7 +13,8 @@
     'data': [
         'views/mrp_bom.xml',
         'views/mrp_eco.xml',
-        'views/wizard.xml'
+        'views/wizard.xml',
+        'views/mto_chain.xml'
     ],
     'demo': [],
     'installable': True,
