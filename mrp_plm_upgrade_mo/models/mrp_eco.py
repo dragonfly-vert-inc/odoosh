@@ -150,8 +150,8 @@ class MrpEco(models.Model):
                 production.message_post(body=message)
                 production.eco_updated = True
                 
-            if update_orders:
-                return dict(self.env.ref('mrp.mrp_production_action').read()[0], domain=[('id','in',update_orders.ids)])
+            # if update_orders:
+            #     return dict(self.env.ref('mrp.mrp_production_action').read()[0], domain=[('id','in',update_orders.ids)])
     
 
     @api.multi
