@@ -84,6 +84,16 @@ class MrpEco(models.Model):
     parent_id = fields.Many2one(comodel_name='mrp.eco', ondelete='set null')
     child_ids = fields.One2many(comodel_name='mrp.eco',inverse_name='parent_id',)
     
+    updated_mos_count = fields.Integer(compute="get_updated_mo")
+    
+    def get_updated_mo(self):
+        for record in self:
+            record.updated_mos_count = len(self.env['mrp.production'].search([('bom_id','=',record.new_bom_id.id),('eco_updated','=',True)]))
+
+    @api.multi
+    def get_updated_mo_list(self):
+        updated_mos_count = self.env['mrp.production'].search([('bom_id','=',self.new_bom_id.id),('eco_updated','=',True)])
+        return dict(self.env.ref('mrp.mrp_production_action').read()[0], domain=[('id','in',updated_mos_count.ids)])
 
     @api.multi
     def action_new_revision(self):
