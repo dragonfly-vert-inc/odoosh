@@ -32,15 +32,20 @@ class StockMove(models.Model):
             origin_move = move
             while move:
                 production = move.raw_material_production_id
-                if not production:
-                    move = move.move_dest_ids[0] if move.move_dest_ids else False
-                else:
+                sale = move.sale_line_id
+                if production:
                     if production.node_id:
                         raw_mto_parent = production.node_id._get_parent()
                         if raw_mto_parent.res_model == 'sale.order.line':
                             origin_move.raw_mto_parent = raw_mto_parent.record_ref
                             origin_move.raw_mto_parent_location = raw_mto_parent.record_ref.order_id.sub_location_id
                     break
+                elif sale:
+                    origin_move.raw_mto_parent = sale
+                    origin_move.raw_mto_parent_location = sale.order_id.sub_location_id
+                    break
+                else:
+                    move = move.move_dest_ids[0] if move.move_dest_ids else False
     
     @api.model
     def _prepare_merge_moves_distinct_fields(self):
