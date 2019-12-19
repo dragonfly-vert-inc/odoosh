@@ -38,3 +38,8 @@
 .button_plan:hover {
   background: #007a77;
 }
+.status-cancel .node-times,
+.status-cancel .node-title {
+    text-decoration: line-through;
+    color: red;
+}
