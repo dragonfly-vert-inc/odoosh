@@ -46,8 +46,8 @@ class MrpProduction(models.Model):
             return True
         return False
 
-    def action_cancel(self):
-        res = super(MrpProduction, self).action_cancel()
+    def action_cancel_with_mto(self):
+        self.action_cancel()
         for production in self:
             if production.node_id:
                 production.node_id.write({
