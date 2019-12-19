@@ -54,4 +54,3 @@ class MrpProduction(models.Model):
                     'parent_ids': [(6, False, [])],
                     'child_ids': [(6, False, [])],
                 })
-        return res
