@@ -155,7 +155,7 @@ class MrpEco(models.Model):
                 message = "Bills of Material Updated from: <a href=# data-oe-model=%s data-oe-id=%d>%s</a>" % (self._name, self.id, self.name)
                 cancel_message = "MO Canceled from: <a href=# data-oe-model=%s data-oe-id=%d>%s</a>" % (self._name, self.id, self.name)
                 for mo in prev_child_mo:
-                    mo.action_cancel()
+                    mo.action_cancel_with_mto()
                     mo.message_post(body=cancel_message)
                 production.message_post(body=message)
                 production.eco_updated = True
