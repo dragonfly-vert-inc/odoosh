@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <template id="mto_recursive_node" inherit_id="mto_chain.mto_recursive_node">
+            <xpath expr="//t[@t-if=&quot;node.res_model=='mrp.production'&quot;]/div[1]/div[1]" position="inside">
+                <span class="fa fa-refresh" style="color: black;" t-if="node.record_ref.eco_updated" />
+            </xpath>
+        </template>
+    </data>
+</odoo>

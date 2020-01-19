@@ -1,0 +1,12 @@
+div.o_group table{
+  .o_group .o_field_date {
+    font-weight: bold !important;
+    color: #0a0a0a !important;
+  }
+}
+
+.o_form_view .o_group.o_inner_group > tbody > tr > td span.o_field_date {
+    font-weight: bold !important;
+    color: #0a0a0a !important;
+  }
+
