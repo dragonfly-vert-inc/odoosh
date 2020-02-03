@@ -127,6 +127,23 @@ class MTOChain(models.Model):
             for child in self.child_ids:
                 child.action_mo_unplan()
 
+    @api.model
+    def action_mo_release(self):
+        if self.res_model == 'mrp.production':
+            self.record_ref.button_release()
+        if self.child_ids:
+            for child in self.child_ids:
+                child.action_mo_release()
+
+    @api.model
+    def action_mo_unrelease(self):
+        if self.res_model == 'mrp.production':
+            self.record_ref.button_unrelease()
+        if self.child_ids:
+            for child in self.child_ids:
+                child.action_mo_unrelease()
+
+
     def get_childs(self):
         current = self
         records = self
