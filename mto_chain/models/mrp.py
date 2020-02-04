@@ -25,9 +25,10 @@ class MrpProduction(models.Model):
 
     @api.multi
     def button_release(self):
-        self.write({
-            'released': True
-        })
+        if self.date_planned_start_wo:
+            self.write({
+                'released': True
+            })
             
     @api.multi
     def button_unrelease(self):
