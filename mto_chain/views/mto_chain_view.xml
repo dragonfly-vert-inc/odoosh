@@ -49,6 +49,8 @@
                     <div class="mto_button_box">
                         <a href="#" class="button_plan" data-function="action_mo_plan">Plan</a>
                         <a href="#" class="button_plan" data-function="action_mo_unplan">Unplan</a>
+                        <a href="#" class="button_plan" data-function="action_mo_release">Release</a>
+                        <a href="#" class="button_plan" data-function="action_mo_unrelease">Unrelease</a>
                     </div>
                     <div id="mto_tree">
                         <t t-call="mto_chain.mto_recursive_node">
@@ -203,6 +205,8 @@
                     <footer>
                         <button name="action_plan" string="Plan" type="object" class="oe_highlight" attrs="{'invisible': [('function','!=','action_mo_plan')]}" />
                         <button name="action_plan" string="Unplan" type="object" class="oe_highlight" attrs="{'invisible': [('function','!=','action_mo_unplan')]}" />
+                        <button name="action_plan" string="Release" type="object" class="oe_highlight" attrs="{'invisible': [('function','!=','action_mo_release')]}" />
+                        <button name="action_plan" string="Unrelease" type="object" class="oe_highlight" attrs="{'invisible': [('function','!=','action_mo_unrelease')]}" />
                         <button string="Cancel" special="cancel" />
                     </footer>
                 </form>
