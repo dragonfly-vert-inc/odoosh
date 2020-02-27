@@ -149,6 +149,25 @@
                 </xpath>
             </field>
         </record>
-        
+        <record id="production_order_server_action_release" model="ir.actions.server">
+            <field name="name">Mrp: Release</field>
+            <field name="model_id" ref="mrp.model_mrp_production"/>
+            <field name="binding_model_id" ref="mrp.model_mrp_production"/>
+            <field name="state">code</field>
+            <field name="code">
+for record in records:
+    record.button_release()
+            </field>
+        </record>
+        <record id="production_order_server_action_unrelease" model="ir.actions.server">
+            <field name="name">Mrp: Unrelease</field>
+            <field name="model_id" ref="mrp.model_mrp_production"/>
+            <field name="binding_model_id" ref="mrp.model_mrp_production"/>
+            <field name="state">code</field>
+            <field name="code">
+for record in records:
+    record.button_unrelease()
+            </field>
+        </record>
     </data>
 </odoo>
