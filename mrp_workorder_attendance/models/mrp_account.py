@@ -22,3 +22,15 @@ class MrpCostStructure(models.AbstractModel):
             product = line['product']
             line['workorders'] = productions.filtered(lambda m: m.product_id == product).mapped('workorder_ids')
         return res
+
+class ProductTemplateCostStructure(models.AbstractModel):
+    _inherit = 'report.mrp_account.product_template_cost_structure'
+
+    @api.model
+    def _get_report_values(self, docids, data=None):
+        productions = self.env['mrp.production'].search([('product_id', 'in', docids), ('state', '=', 'done')])
+        res = self.env['report.mrp_account.mrp_cost_structure'].get_lines(productions)
+        for line in res:
+            product = line['product']
+            line['workorders'] = productions.filtered(lambda m: m.product_id == product).mapped('workorder_ids')
+        return {'lines': res}
