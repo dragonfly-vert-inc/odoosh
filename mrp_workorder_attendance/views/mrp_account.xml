@@ -4,7 +4,7 @@
         <template id="mrp_cost_structure_worker_lines" inherit_id="mrp_account.mrp_cost_structure">
             <xpath expr="//t[@t-foreach='lines']/div[last()]" position="replace">
                 <t t-set="wo_cost" t-value="0.0" />
-                <t t-foreach="line['workorders']" t-as="workorder">
+                <t t-foreach="line.get('workorders', [])" t-as="workorder">
                     <t t-if="workorder.worker_times">
                         <h3>
                             <t t-esc="workorder.name" />
